@@ -5,7 +5,7 @@ The repository for group D07 for the project Test, Analysis &amp; Simulation. Th
 #### Contents
 - [ToA determination](#toa-determination)
 - [Least squares localisation](#least-squares-localisation)
-- [Damage mode- grouping](#damage-mode-grouping)
+- [Damage mode grouping](#damage-mode-grouping)
 
 
 #### ToA determination
