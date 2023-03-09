@@ -21,13 +21,14 @@ def HinkleyToA(signal, SN=1.2):
 
 
 #signal+noise example
-N = 300
-T = np.linspace(0,10, N)
-Signal = -10*np.sin(8*(T-4))*np.exp(-(T-4)**2) + np.random.normal(0,1,N)
+if __name__ == '__main__':
+    N = 300
+    T = np.linspace(0,10, N)
+    Signal = -10*np.sin(8*(T-4))*np.exp(-(T-4)**2) + np.random.normal(0,1,N)
 
-ToA = HinkleyToA(Signal, SN=1.2) *np.max(T)/N
+    ToA = HinkleyToA(Signal, SN=1.2) *np.max(T)/N
 
-plt.plot(T, Signal, label='signal+noise', color='black')
-plt.axvline(x=ToA, color='red', linestyle='--', linewidth=1, label='ToA')
-plt.legend()
-plt.show()
+    plt.plot(T, Signal, label='signal+noise', color='black')
+    plt.axvline(x=ToA, color='red', linestyle='--', linewidth=1, label='ToA')
+    plt.legend()
+    plt.show()
