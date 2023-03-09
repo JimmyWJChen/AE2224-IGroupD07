@@ -5,6 +5,10 @@ import matplotlib.pyplot as plt
 
 #Set PLB curve
 def PLB(F):
+	"""
+	F is the frequency in [Hz]
+	"""
+
 	return 0.20/(1+np.exp(1/12*(15-F)))	#PLB plot [m/s]
 
 
