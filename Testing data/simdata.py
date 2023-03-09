@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 
 
 #Set PLB curve
@@ -63,19 +62,4 @@ def simulateData(N, tmax, w, d, PLB, S=None):
 	return pandas_Fmax, pandas_ToAs
 
 
-a, b = simulateData(N=100, tmax=60*15, w=0.20, d=0.05, PLB=PLB)
-
-
-"""
-counts = np.diff([np.sum(T <= i) for i in t_range])
-plt.plot(t_range[:-1], counts)
-plt.show()
-"""
-
-
-"""
-plt.scatter(AEs[0], AEs[1], c=T, marker='.', label='AEs', cmap='RdYlGn')
-plt.scatter(S[:,0], S[:,1], marker='x', color='red', label='Sensors')
-plt.legend(), plt.show()
-"""
-
+#Fmax, ToA = simulateData(N=100, tmax=60*15, w=0.20, d=0.05, PLB=PLB)
