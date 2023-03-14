@@ -4,6 +4,10 @@ import pandas as pd
 
 #Set PLB curve
 def PLB(F):
+	"""
+	F is the frequency in [Hz]
+	"""
+
 	return 0.20/(1+np.exp(1/12*(15-F)))	#PLB plot [m/s]
 
 
@@ -59,3 +63,5 @@ def simulateData(N, tmax, w, d, PLB, S=None):
 
 
 #Fmax, ToA = simulateData(N=100, tmax=60*15, w=0.20, d=0.05, PLB=PLB)
+#print(f'frequency is \n {Fmax}')
+#print(f'time of analysis is \n {ToA}')
