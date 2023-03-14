@@ -51,7 +51,8 @@ def leastSquares(S, ToA, v, X_init=np.random.rand(2), iterations=10):
 
 
 #example
-loc = leastSquares(S = np.array([[0.2,0.2],[0.8,0.2],[0.2,0.8],[0.8,0.8]]), 
-				   ToA = [0.0279405959, 0.06532234, 0.09113600, 0.107406569], 
-				   v = 8)
-print(loc)
+if __name__ == '__main__':
+	loc = leastSquares(S = np.array([[0.2,0.2],[0.8,0.2],[0.2,0.8],[0.8,0.8]]), 
+					   ToA = [0.0279405959, 0.06532234, 0.09113600, 0.107406569], 
+					   v = 8)
+	print(loc)
