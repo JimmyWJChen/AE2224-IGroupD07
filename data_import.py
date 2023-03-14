@@ -1,6 +1,8 @@
 import os
 import matplotlib.pyplot as plt
 import vallenae as vae
+from scipy.fft import fft, fftfreq
+import numpy as np
 
 
 def getPrimaryDatabase(label, testno=1):
@@ -29,9 +31,17 @@ def getWaveform(label, testno=1, trai=1):
         y, t = tradb.read_wave(trai)
     return y, t
 
+
 if __name__ == "__main__":
     pridb = getPrimaryDatabase("TEST")
     print(pridb.read_hits())
-    y, t = getWaveform("TEST", 1, 5)
-    plt.plot(t, y)
-    plt.show()
+    for i in range (1,30):
+        y, t = getWaveform("TEST", 1, i)
+        N = len(y)
+        T = t[1] - t[0]
+        yf = fft(y)
+        xf = fftfreq(N, T)
+        peakfreq = xf[np.argmax(yf)]
+        plt.plot(t, y)
+        plt.show()
+    pridb.read_hits().to_csv('data.csv')
