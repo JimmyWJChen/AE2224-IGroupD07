@@ -27,11 +27,17 @@ def getWaveform(label, testno=1, trai=1):
     TRADB = os.path.join(HERE, path)
     with vae.io.TraDatabase(TRADB) as tradb:
         y, t = tradb.read_wave(trai)
+
+    # unit conversion
+    t *= 1e6  # convert to µs
+    y *= 1e3  # convert to mV
     return y, t
 
 if __name__ == "__main__":
     pridb = getPrimaryDatabase("TEST")
     print(pridb.read_hits())
-    y, t = getWaveform("TEST", 1, 5)
-    plt.plot(t, y)
-    plt.show()
+    for i in range (1,pridb.rows()):
+        y, t = getWaveform("TEST", 1, i)
+#        plt.plot(t, y)
+#        plt.show()
+    pridb.read_hits().to_csv('data.csv')
