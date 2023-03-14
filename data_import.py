@@ -1,6 +1,8 @@
 import os
 import matplotlib.pyplot as plt
 import vallenae as vae
+from scipy.fft import fft, fftfreq
+import numpy as np
 
 
 def getPrimaryDatabase(label, testno=1):
@@ -27,17 +29,19 @@ def getWaveform(label, testno=1, trai=1):
     TRADB = os.path.join(HERE, path)
     with vae.io.TraDatabase(TRADB) as tradb:
         y, t = tradb.read_wave(trai)
-
-    # unit conversion
-    t *= 1e6  # convert to µs
-    y *= 1e3  # convert to mV
     return y, t
+
 
 if __name__ == "__main__":
     pridb = getPrimaryDatabase("TEST")
     print(pridb.read_hits())
-    for i in range (1,pridb.rows()):
+    for i in range (1,30):
         y, t = getWaveform("TEST", 1, i)
-#        plt.plot(t, y)
-#        plt.show()
+        N = len(y)
+        T = t[1] - t[0]
+        yf = fft(y)
+        xf = fftfreq(N, T)
+        peakfreq = xf[np.argmax(yf)]
+        plt.plot(t, y)
+        plt.show()
     pridb.read_hits().to_csv('data.csv')

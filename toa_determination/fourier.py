@@ -1,4 +1,4 @@
-#test code to get used to FFT
+# test code to get used to FFT
 import scipy.fft as fft
 import numpy as np
 import matplotlib.pyplot as plt
