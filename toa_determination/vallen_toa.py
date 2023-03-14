@@ -11,11 +11,11 @@ SAMPLES = 1000
 # crop first samples
 t = t[:SAMPLES]
 y = y[:SAMPLES]
-# unit conversion
-t *= 1e6  # convert to µs
-y *= 1e3  # convert to mV
     
 def compare_criteria(y, t):
+    """ 
+    
+    """
     hc_index = vae.timepicker.hinkley(y, alpha=5)[1]
     aic_index = vae.timepicker.aic(y)[1]
     er_index = vae.timepicker.energy_ratio(y)[1]
@@ -36,12 +36,12 @@ def timeit(func, loops=100):
     return 1e6 * (time.perf_counter() - time_start) / loops  # elapsed time in µs
 
 
-def performance_comparison():
+def performance_comparison(y,t):
     run_time_hc = timeit(lambda: vae.timepicker.hinkley(y, 5))
     run_time_aic = timeit(lambda: vae.timepicker.aic(y))
     run_time_er = timeit(lambda: vae.timepicker.energy_ratio(y))
     run_time_mer = timeit(lambda: vae.timepicker.modified_energy_ratio(y))
-    return reun_time_hc
+    return run_time_hc, run_time_aic, run_time_er, run_time_mer
 
 print(compare_criteria(y,t))
     
