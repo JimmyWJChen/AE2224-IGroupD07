@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def HinkleyToA(signal, SN=1.2):
     """
     Determines the difference between the signal wave energy and the white noise wave energy
@@ -11,7 +12,7 @@ def HinkleyToA(signal, SN=1.2):
     """
     N = len(Signal)
 
-    #find Hinkley function and local minimum above threshold
+    # find Hinkley function and local minimum above threshold
     H = [np.sum((Signal[0:n])**2) - SN*(n+1) for n in range(1,N)]
     ToA = np.argmin(H)
 
