@@ -2,6 +2,7 @@ import os
 import matplotlib.pyplot as plt
 import vallenae as vae
 
+
 def getPrimaryDatabase(label, testno=1):
     if label == "PCLO" or label == "PCLS":
         path = "Testing data/PLB-4-channels/PLBS4_CP090_" + label + str(testno) + ".pridb"
