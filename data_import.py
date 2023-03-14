@@ -32,8 +32,8 @@ def getWaveform(label, testno=1, trai=1):
 if __name__ == "__main__":
     pridb = getPrimaryDatabase("TEST")
     print(pridb.read_hits())
-    for i in range (1,30):
+    for i in range (1,pridb.rows()):
         y, t = getWaveform("TEST", 1, i)
-        plt.plot(t, y)
-        plt.show()
+#        plt.plot(t, y)
+#        plt.show()
     pridb.read_hits().to_csv('data.csv')
