@@ -27,6 +27,10 @@ def getWaveform(label, testno=1, trai=1):
     TRADB = os.path.join(HERE, path)
     with vae.io.TraDatabase(TRADB) as tradb:
         y, t = tradb.read_wave(trai)
+
+    # unit conversion
+    t *= 1e6  # convert to µs
+    y *= 1e3  # convert to mV
     return y, t
 
 if __name__ == "__main__":

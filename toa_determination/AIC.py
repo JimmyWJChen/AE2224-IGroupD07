@@ -1,10 +1,12 @@
-import data_import
-import matplotlib as plt
+from data_import import getWaveform
+import os
+import matplotlib.pyplot as plt
+import vallenae as vae
 
-y,t = data_import.getWaveform('TEST', testno=2, trai=3)
-# unit conversion
-t *= 1e6  # convert to µs
-y *= 1e3  # convert to mV
+y, t = getWaveform("TEST")
+
+
+
 
 def plot(t_wave, y_wave, y_picker, index_picker, name_picker):
     _, ax1 = plt.subplots(figsize=(8, 4), tight_layout=True)
@@ -21,6 +23,7 @@ def plot(t_wave, y_wave, y_picker, index_picker, name_picker):
     plt.axvline(t_wave[index_picker], color="k", linestyle=":")
     plt.show()
 
-#Hinkley Criterion
+
+# Akaike Information Criterion
 aic_arr, aic_index = vae.timepicker.aic(y)
 plot(t, y, aic_arr, aic_index, "Akaike Information Criterion")
