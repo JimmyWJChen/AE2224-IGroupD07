@@ -9,3 +9,5 @@ pridb = vae.io.PriDatabase(PRIDB)
 print("Tables in database: ", pridb.tables())
 print("Number of rows in data table (ae_data): ", pridb.rows())
 print("Set of all channels: ", pridb.channel())
+
+g
