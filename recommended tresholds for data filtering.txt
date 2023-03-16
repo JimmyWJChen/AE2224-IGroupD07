@@ -1,0 +1,15 @@
+TEST ST1:
+epsilon = 0.1
+['amplitude'] >= 0.005
+['duration'] >= 0.002
+['energy'] >= 1e5
+['signal_strength'] >= 1500
+['counts'] >= 70
+
+ALL OTHER TESTS:
+epsilon - 0.2
+['amplitude'] >= 0.005
+['duration'] >= 0.002
+['energy'] >= 1e5
+['signal_strength'] >= 2800
+['counts'] >= 50]

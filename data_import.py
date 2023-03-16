@@ -32,7 +32,7 @@ def getWaveform(label, testno=1, trai=1):
         y, t = tradb.read_wave(trai)
     return y, t
 
-def filterPrimaryDatabase(pridb, sortby="energy", epsilon=0.1, ampTh=0.005, durTh=0.002, energyTh=1e5, strengthTh=2000, countTh=50):
+def filterPrimaryDatabase(pridb, label, testno, sortby="energy", epsilon=0.1, ampTh=0.005, durTh=0.002, energyTh=1e5, strengthTh=2000, countTh=50):
     pridb = pridb.read_hits()
     pridb = pridb[pridb['amplitude'] >= ampTh]
     pridb = pridb[pridb['duration'] >= durTh]
@@ -60,6 +60,12 @@ def filterPrimaryDatabase(pridb, sortby="energy", epsilon=0.1, ampTh=0.005, durT
         pridb_channels.append(pridb_chan)
     # print(pridb_channels)
     pridb_output = pd.concat(pridb_channels, ignore_index=True)
+    if label == "ST" and testno == 1:
+        for channel in range(1, 8 + 1):
+            while len(pridb_output.loc[pridb_output['channel'] == channel]) > 18:
+                idx_to_drop = pridb_output.loc[pridb_output['channel'] == channel]['energy'].idxmin()
+                pridb_output.drop(idx_to_drop, inplace=True)
+
     return pridb_output
     # hitsno = [len(pridb_output.loc[pridb_output['channel'] == i]) for i in range(1, 8+1)]
     # print(hitsno)
