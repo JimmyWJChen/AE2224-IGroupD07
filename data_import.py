@@ -27,6 +27,7 @@ def getWaveform(label, testno=1, trai=1):
         path = "Testing_data/PLB-8-channels/PLBS8_QI090_" + label + str(testno) + ".tradb"
     HERE = os.path.dirname(__file__)
     TRADB = os.path.join(HERE, path)
+    print(TRADB)
     with vae.io.TraDatabase(TRADB) as tradb:
         y, t = tradb.read_wave(trai)
     return y, t
