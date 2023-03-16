@@ -32,7 +32,6 @@ def getWaveform(label, testno=1, trai=1):
         y, t = tradb.read_wave(trai)
     return y, t
 
-
 def filterPrimaryDatabase(pridb, sortby="energy", epsilon=0.1, ampTh=0.005, durTh=0.002, energyTh=1e5, strengthTh=2000, countTh=50):
     pridb = pridb.read_hits()
     pridb = pridb[pridb['amplitude'] >= ampTh]
@@ -65,12 +64,16 @@ def filterPrimaryDatabase(pridb, sortby="energy", epsilon=0.1, ampTh=0.005, durT
     # hitsno = [len(pridb_output.loc[pridb_output['channel'] == i]) for i in range(1, 8+1)]
     # print(hitsno)
 
-
+def getHitsPerSensor(pridb):
+    hitsno = [len(pridb.loc[pridb['channel'] == i]) for i in range(1, int(pridb.max()['channel'])+1)]
+    return hitsno
 
 if __name__ == "__main__":
-    pridb = getPrimaryDatabase("TEST")
-    print(pridb.read_hits())
-    print(filterPrimaryDatabase(pridb))
+    pridb = getPrimaryDatabase("PST", 3)
+    print(getHitsPerSensor(pridb.read_hits()))
+    # print(pridb.read_hits())
+    # print(filterPrimaryDatabase(pridb))
+    print(getHitsPerSensor(filterPrimaryDatabase(pridb)))
     # for i in range (1,30):
     #     y, t = getWaveform("TEST", 1, i)
     #     N = len(y)
