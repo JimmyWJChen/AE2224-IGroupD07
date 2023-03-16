@@ -46,14 +46,15 @@ print(test_pridb_output)
 hitsno = [len(test_pridb_output.loc[test_pridb_output['channel'] == i]) for i in range(1, 8+1)]
 print(hitsno)
 
-chan_to_plot = 2
+# chan_to_plot = 2
 
 # print(test_pridb_output[test_pridb_output['channel'] == chan_to_plot])
 
-x = test_pridb_channels[chan_to_plot-1].sort_values(sortby, axis=0, ascending=False)['time'].to_numpy()
-y = test_pridb_channels[chan_to_plot-1].sort_values(sortby, axis=0, ascending=False)[sortby].to_numpy()
-# yp = [y[i+1]-y[i] for i in range(len(y)-1)]
-plt.scatter(x, y)
+for chan_to_plot in range(1, 8+1):
+    x = test_pridb_channels[chan_to_plot-1].sort_values(sortby, axis=0, ascending=False)['time'].to_numpy()
+    y = test_pridb_channels[chan_to_plot-1].sort_values(sortby, axis=0, ascending=False)[sortby].to_numpy()
+    # yp = [y[i+1]-y[i] for i in range(len(y)-1)]
+    plt.scatter(x, y)
 plt.yscale('linear')
 plt.grid()
 # plt.plot(x[:-1], yp)
