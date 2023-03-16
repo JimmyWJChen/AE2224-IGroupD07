@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 # standard threshold for AE 34dB, we have at 45dB -> thus missing IDs in first column -> ignore it
 
 sortby = "counts"
-epsilon = 0.01
+epsilon = 0.09
 
 test_pridb = di.getPrimaryDatabase("TEST").read_hits()
 test_pridb = test_pridb[test_pridb['amplitude'] >= 0.005]
@@ -29,7 +29,7 @@ for channel in range(1, 8+1):
     i = 0
     while i < len(test_pridb_chan)-1:
         if test_pridb_chan.loc[i+1, 'time'] - test_pridb_chan.loc[i, 'time'] < epsilon:
-            if test_pridb_chan.loc[i+1, 'energy'] > test_pridb_chan.loc[i, 'energy']:
+            if test_pridb_chan.loc[i+1, sortby] > test_pridb_chan.loc[i, sortby]:
                 test_pridb_chan.drop(i, inplace=True)
                 test_pridb_chan.reset_index(drop=True, inplace=True)
             else:
@@ -46,14 +46,15 @@ print(test_pridb_output)
 hitsno = [len(test_pridb_output.loc[test_pridb_output['channel'] == i]) for i in range(1, 8+1)]
 print(hitsno)
 
-# chan_to_plot = 1
-# chan_to_plot -=1
+chan_to_plot = 4
 
-# x = np.arange(1, len(test_pridb_channels[chan_to_plot])+1, 1)
-# y = test_pridb_channels[chan_to_plot].sort_values(sortby, axis=0, ascending=False)[sortby].to_numpy()
-# # yp = [y[i+1]-y[i] for i in range(len(y)-1)]
-# plt.plot(x, y)
-# plt.yscale('linear')
-# # plt.plot(x[:-1], yp)
-# plt.plot([36, 36], [0, max(y)], '--')
-# plt.show()
+print(test_pridb_output[test_pridb_output['channel'] == chan_to_plot])
+
+x = np.arange(1, len(test_pridb_channels[chan_to_plot-1])+1, 1)
+y = test_pridb_channels[chan_to_plot-1].sort_values(sortby, axis=0, ascending=False)[sortby].to_numpy()
+# yp = [y[i+1]-y[i] for i in range(len(y)-1)]
+plt.plot(x, y)
+plt.yscale('linear')
+# plt.plot(x[:-1], yp)
+plt.plot([36, 36], [0, max(y)], '--')
+plt.show()
