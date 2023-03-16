@@ -39,7 +39,7 @@ if __name__ == "__main__":
     for i in range (1,30):
         y, t = getWaveform("TEST", 1, i)
         N = len(y)
-        T = t[1] - t[0]
+        T = t[1] -  t[0]
         yf = fft(y)
         xf = fftfreq(N, T)
         peakfreq = xf[np.argmax(yf)]
