@@ -12,7 +12,7 @@ def getPrimaryDatabase(label, testno=1):
         path = "Testing_data/PLB-8-channels/PLBS8_QI090_" + label + ".pridb"
     else:
         path = "Testing_data/PLB-8-channels/PLBS8_QI090_" + label + str(testno) + ".pridb"
-    HERE = os.path.dirname(__file__) if "__file__" in locals() else os.getcwd()
+    HERE = os.path.dirname(__file__)
     PRIDB = os.path.join(HERE, path)
     # print(PRIDB)
     pridb = vae.io.PriDatabase(PRIDB)
@@ -25,7 +25,7 @@ def getWaveform(label, testno=1, trai=1):
         path = "Testing_data/PLB-8-channels/PLBS8_QI090_" + label + ".tradb"
     else:
         path = "Testing_data/PLB-8-channels/PLBS8_QI090_" + label + str(testno) + ".tradb"
-    HERE = os.path.dirname(__file__) if "__file__" in locals() else os.getcwd()
+    HERE = os.path.dirname(__file__)
     TRADB = os.path.join(HERE, path)
     with vae.io.TraDatabase(TRADB) as tradb:
         y, t = tradb.read_wave(trai)
