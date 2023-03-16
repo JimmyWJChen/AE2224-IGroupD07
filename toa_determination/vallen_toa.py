@@ -1,10 +1,25 @@
 import vallenae as vae
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import data_import as di
 import matplotlib.pyplot as plt
 
-y,t = di.getWaveform("TEST")
+def getWaveform(label, testno=1, trai=1):
+    if label == "PCLO" or label == "PCLS":
+        path = "Testing_data/PLB-4-channels/PLBS4_CP090_" + label + str(testno) + ".tradb"
+    elif label == "TEST":
+        path = "Testing_data/PLB-8-channels/PLBS8_QI090_" + label + ".tradb"
+    else:
+        path = "Testing_data/PLB-8-channels/PLBS8_QI090_" + label + str(testno) + ".tradb"
+    HERE = os.path.dirname(__file__) if "__file__" in locals() else os.getcwd()
+    TRADB = os.path.join(HERE, path)
+    print(TRADB)
+    with vae.io.TraDatabase(TRADB) as tradb:
+        y, t = tradb.read_wave(trai)
+    return y, t
+
+y,t = getWaveform("TEST")
 
 SAMPLES = 1000
 
