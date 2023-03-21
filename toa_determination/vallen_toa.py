@@ -31,6 +31,7 @@ def compare_criteria(y, t):
 
 
 def timeit(func, loops=100):
+    import time
     time_start = time.perf_counter()
     for _ in range(loops):
         func()
@@ -44,10 +45,10 @@ def performance_comparison(y,t):
     run_time_mer = timeit(lambda: vae.timepicker.modified_energy_ratio(y))
     return run_time_hc, run_time_aic, run_time_er, run_time_mer
 
-print("Rood: Hinkley")
-print("Geel: AIC")
-print("Groen: Energy Ratio")
-print("Blauw: Modified Energy Ratio")
+print("Red: Hinkley")
+print("Yellow: AIC")
+print("Green: Energy Ratio")
+print("Blue: Modified Energy Ratio")
 
 
 
