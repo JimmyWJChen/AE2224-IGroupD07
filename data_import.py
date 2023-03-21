@@ -1,9 +1,8 @@
 import os
-import matplotlib.pyplot as plt
+
 import vallenae as vae
 import pandas as pd
-from scipy.fft import fft, fftfreq
-import numpy as np
+
 
 
 def getPrimaryDatabase(label, testno=1):
@@ -32,13 +31,21 @@ def getWaveform(label, testno=1, trai=1):
         y, t = tradb.read_wave(trai)
     return y, t
 
-def filterPrimaryDatabase(pridb, label, testno, sortby="energy", epsilon=0.1, ampTh=0.005, durTh=0.002, energyTh=1e5, strengthTh=2000, countTh=50):
+def filterPrimaryDatabase(pridb, label, testno, sortby="energy", epsilon=0.2):
     pridb = pridb.read_hits()
-    pridb = pridb[pridb['amplitude'] >= ampTh]
-    pridb = pridb[pridb['duration'] >= durTh]
-    pridb = pridb[pridb['energy'] >= energyTh]
-    pridb = pridb[pridb['signal_strength'] >= strengthTh]
-    pridb = pridb[pridb['counts'] >= countTh]
+    if label == "ST" and testno == 1:
+        epsilon = 0.1
+        pridb = pridb[pridb['amplitude'] >= 0.005]
+        pridb = pridb[pridb['duration'] >= 0.002]
+        pridb = pridb[pridb['energy'] >= 1e5]
+        pridb = pridb[pridb['signal_strength'] >= 1500]
+        pridb = pridb[pridb['counts'] >= 70]
+    else:
+        pridb = pridb[pridb['amplitude'] >= 0.009]
+        pridb = pridb[pridb['duration'] >= 0.002]
+        pridb = pridb[pridb['energy'] >= 1e5]
+        pridb = pridb[pridb['signal_strength'] >= 2500]
+        pridb = pridb[pridb['counts'] >= 70]
     # hitsno = [len(pridb.loc[pridb['channel'] == i]) for i in range(1, 8+1)]
     # print(hitsno)
     pridb_channels = []

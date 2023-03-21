@@ -2,7 +2,6 @@ import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import data_import as di
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 # import vallenae as ae
 
@@ -12,8 +11,8 @@ import matplotlib.pyplot as plt
 
 sortby = "counts"
 epsilon = 0.2
-label = "ST"
-testno = 1
+label = "PST"
+testno = 3
 
 test_pridb = di.getPrimaryDatabase(label, testno).read_hits()
 
@@ -25,11 +24,11 @@ if label == "ST" and testno == 1:
     test_pridb = test_pridb[test_pridb['signal_strength'] >= 1500]
     test_pridb = test_pridb[test_pridb['counts'] >= 70]
 else:
-    test_pridb = test_pridb[test_pridb['amplitude'] >= 0.005]
+    test_pridb = test_pridb[test_pridb['amplitude'] >= 0.009]
     test_pridb = test_pridb[test_pridb['duration'] >= 0.002]
     test_pridb = test_pridb[test_pridb['energy'] >= 1e5]
-    test_pridb = test_pridb[test_pridb['signal_strength'] >= 2800]
-    test_pridb = test_pridb[test_pridb['counts'] >= 50]
+    test_pridb = test_pridb[test_pridb['signal_strength'] >= 2500]
+    test_pridb = test_pridb[test_pridb['counts'] >= 70]
 
 hitsno = [len(test_pridb.loc[test_pridb['channel'] == i]) for i in range(1, 8+1)]
 print(hitsno)
@@ -65,7 +64,7 @@ hitsno = [len(test_pridb_output.loc[test_pridb_output['channel'] == i]) for i in
 print(hitsno)
 
 
-chan_to_plot = 3
+chan_to_plot =5
 
 print(test_pridb_output[test_pridb_output['channel'] == chan_to_plot]['amplitude'])
 
