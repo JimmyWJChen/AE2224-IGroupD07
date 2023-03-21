@@ -3,8 +3,10 @@ import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import data_import as di
 import matplotlib.pyplot as plt
+import time
 
 y,t = di.getWaveform("TEST",1,1)
+print(type(di.getPrimaryDatabase("TEST",1)))
 
 SAMPLES = 1000
 
@@ -13,7 +15,7 @@ t = t[:SAMPLES]
 y = y[:SAMPLES]
     
 def compare_criteria(y, t):
-    #compare the hinkley, akaike, energy ratio and 
+    #compare the time of the hinkley, akaike, energy ratio and modified energy ratio
 
     hc_index = vae.timepicker.hinkley(y, alpha=5)[1]
     aic_index = vae.timepicker.aic(y)[1]
@@ -28,7 +30,7 @@ def compare_criteria(y, t):
     return hc_time, aic_time, er_time, mer_time
 
 
-def timeit(func, loops=100):
+def timeit(func, loops=1):
     time_start = time.perf_counter()
     for _ in range(loops):
         func()
@@ -36,12 +38,16 @@ def timeit(func, loops=100):
 
 
 def performance_comparison(y,t):
+    #compare the runtime of the hinkley, akaike, energy ratio and modified energy ratio
+    
     run_time_hc = timeit(lambda: vae.timepicker.hinkley(y, 5))
     run_time_aic = timeit(lambda: vae.timepicker.aic(y))
     run_time_er = timeit(lambda: vae.timepicker.energy_ratio(y))
     run_time_mer = timeit(lambda: vae.timepicker.modified_energy_ratio(y))
     return run_time_hc, run_time_aic, run_time_er, run_time_mer
 
-print(compare_criteria(y,t))
+print(performance_comparison(y,t))
+
+
     
     
