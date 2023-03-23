@@ -141,6 +141,7 @@ def findVelocityIso_alt(x, S, tau, relax_factor, vT_init=np.random.rand(2), iter
 	x = AE location (2-vector)
 	S = array of sensor locations  (m*2 matrix)
 	tau = Time-of-arrival difference w.r.t. the first sensor (m-vector)
+	relax_factor = factor of relaxation (scalar) 
 	vT_init = Initial condition guess of velocity and T (2-vector)
 	iterations = Nr. of iterations (scalar)
 	returns: wave velocity (scalar)
