@@ -6,7 +6,9 @@ D = np.random.rand(2) #[0.5, 0.62] #crack location (0,0) < D < (1,1)
 v = 8 #wave velocity
 
 #np.array([[0.05,0.05],[0.95,0.05],[0.05,0.95],[0.95,0.95]])
-S_loc = np.array([[0.2,0.2],[0.8,0.2],[0.2,0.8],[0.8,0.8]]) #matrix of sensor locations
+#np.array([[0.2,0.2],[0.8,0.2],[0.2,0.8],[0.8,0.8]])
+#np.array([[0.04, 0.04], [0.110, 0.04], [0.05, 0.120], [0.120, 0.120]])
+S_loc = 6.25 * np.array([[0.04, 0.04], [0.110, 0.04], [0.05, 0.120], [0.120, 0.120]]) #matrix of sensor locations
 
 ToA = [np.linalg.norm(s-D)/v + np.random.normal(0,0.0055) for s in S_loc] 	#vector of time of arrivals (noisy)
 radii = [v*t for t in ToA]

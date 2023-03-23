@@ -38,6 +38,8 @@ def timeit(func, loops=100):
 
 
 def performance_comparison(y,t):
+    #compare the runtime of the hinkley, akaike, energy ratio and modified energy ratio
+
     run_time_hc = timeit(lambda: vae.timepicker.hinkley(y, 5))
     run_time_aic = timeit(lambda: vae.timepicker.aic(y))
     run_time_er = timeit(lambda: vae.timepicker.energy_ratio(y))
