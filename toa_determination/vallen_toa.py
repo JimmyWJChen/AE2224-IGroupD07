@@ -51,7 +51,7 @@ print("Geel: AIC")
 print("Groen: Energy Ratio")
 print("Blauw: Modified Energy Ratio")
 
-print(compare_criteria(y,t))
+criteria_time = compare_criteria(y,t)
 
 N = len(y)
 T = t[1] - t[0]
@@ -59,6 +59,6 @@ yf = fft(y)
 xf = fftfreq(N, T)
 peakfreq = xf[np.argmax(yf)]
 plt.plot(t, y)
-plt.vlines((compare_criteria(y,t)[0],compare_criteria(y,t)[1],compare_criteria(y,t)[2],compare_criteria(y,t)[3]),-1,1,("r","y","g","b"))
-plt.axis([t[0]/50, max(compare_criteria(y,t)[0],compare_criteria(y,t)[1],compare_criteria(y,t)[2],compare_criteria(y,t)[3])*2,-0.001,0.001])
+plt.vlines(criteria_time,-1,1,("r","y","g","b"))
+plt.axis([t[0]/50, max(criteria_time)*2,-0.001,0.001])
 plt.show()
