@@ -6,7 +6,7 @@ import csv
 Frequency = []
 Velocity = []
 
-Data = csv.reader(csvfile, delimiter=' ', quotechar='|')
+Data = csv.reader('A0.csv', delimiter=' ')
 Size = len(Data)
 Frequency= np.zero(Size)
 Velocity = np.zero(Size)
