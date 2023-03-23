@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from scipy.fft import fft, fftfreq
 import numpy as np
 
-y,t = di.getWaveform("PCLO",2,21)
+y,t = di.getWaveform("PCLO",2,20)
 
 SAMPLES = 1000
 
