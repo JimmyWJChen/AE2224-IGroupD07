@@ -6,8 +6,6 @@ import vallenae as vae
 y, t = getWaveform("TEST")
 
 
-
-
 def plot(t_wave, y_wave, y_picker, index_picker, name_picker):
     _, ax1 = plt.subplots(figsize=(8, 4), tight_layout=True)
     ax1.set_xlabel("Time [µs]")
@@ -27,3 +25,4 @@ def plot(t_wave, y_wave, y_picker, index_picker, name_picker):
 # Akaike Information Criterion
 aic_arr, aic_index = vae.timepicker.aic(y)
 plot(t, y, aic_arr, aic_index, "Akaike Information Criterion")
+print(aic_index)

@@ -3,10 +3,8 @@ import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import data_import as di
 import matplotlib.pyplot as plt
-import time
 
 y,t = di.getWaveform("TEST",1,1)
-print(type(di.getPrimaryDatabase("TEST",1)))
 
 SAMPLES = 1000
 
@@ -30,7 +28,7 @@ def compare_criteria(y, t):
     return hc_time, aic_time, er_time, mer_time
 
 
-def timeit(func, loops=1):
+def timeit(func, loops=100):
     time_start = time.perf_counter()
     for _ in range(loops):
         func()
@@ -46,8 +44,6 @@ def performance_comparison(y,t):
     run_time_mer = timeit(lambda: vae.timepicker.modified_energy_ratio(y))
     return run_time_hc, run_time_aic, run_time_er, run_time_mer
 
-print(performance_comparison(y,t))
-
-
+print(compare_criteria(y,t))
     
     
