@@ -163,11 +163,12 @@ if __name__ == '__main__':
 	"""
 
 	v, t = findVelocityIso(x =np.array([0.42, 0.41]),
-						   S = np.array([[0.4,0.4],[0.8,0.2],[0.2,0.8],[0.8,0.8]]),
-						   tau = np.array([0, 0.0162534675509, 0.0300475011359, 0.0179542671287]))
+						   S = 6.25 * np.array([[0.04, 0.04], [0.110, 0.04], [0.05, 0.120], [0.120, 0.120]]),
+						   tau = np.array([0, 0.0162534675509, 0.0300475011359, 0.0179542671287]),
+						   vT_init=[5.0, 0.0380172658144])
 	print(v,t)
 
-	"""
+
 	N = 20
 	V = T = np.zeros((N,N))
 	for i,x in enumerate(np.linspace(0.001,10,N)):
@@ -185,7 +186,6 @@ if __name__ == '__main__':
 	plt.xlabel('v_init')
 	plt.ylabel('T_init')
 	plt.show()
-	"""
 
 
 	

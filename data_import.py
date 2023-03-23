@@ -1,9 +1,8 @@
 import os
-import matplotlib.pyplot as plt
+
 import vallenae as vae
 import pandas as pd
-from scipy.fft import fft, fftfreq
-import numpy as np
+
 
 
 def getPrimaryDatabase(label, testno=1):
@@ -32,13 +31,21 @@ def getWaveform(label, testno=1, trai=1):
         y, t = tradb.read_wave(trai)
     return y, t
 
-def filterPrimaryDatabase(pridb, sortby="energy", epsilon=0.1, ampTh=0.005, durTh=0.002, energyTh=1e5, strengthTh=2000, countTh=50):
+def filterPrimaryDatabase(pridb, label, testno, sortby="energy", epsilon=0.2, thamp=0.009, thdur = 0.002, thenergy=1e5, thstrength=2500, thcounts=70):
     pridb = pridb.read_hits()
-    pridb = pridb[pridb['amplitude'] >= ampTh]
-    pridb = pridb[pridb['duration'] >= durTh]
-    pridb = pridb[pridb['energy'] >= energyTh]
-    pridb = pridb[pridb['signal_strength'] >= strengthTh]
-    pridb = pridb[pridb['counts'] >= countTh]
+    if label == "ST" and testno == 1:
+        epsilon = 0.1
+        pridb = pridb[pridb['amplitude'] >= 0.005]
+        pridb = pridb[pridb['duration'] >= 0.002]
+        pridb = pridb[pridb['energy'] >= 1e5]
+        pridb = pridb[pridb['signal_strength'] >= 1500]
+        pridb = pridb[pridb['counts'] >= 70]
+    else:
+        pridb = pridb[pridb['amplitude'] >= thamp]
+        pridb = pridb[pridb['duration'] >= thdur]
+        pridb = pridb[pridb['energy'] >= thenergy]
+        pridb = pridb[pridb['signal_strength'] >= thstrength]
+        pridb = pridb[pridb['counts'] >= thcounts]
     # hitsno = [len(pridb.loc[pridb['channel'] == i]) for i in range(1, 8+1)]
     # print(hitsno)
     pridb_channels = []
@@ -60,6 +67,12 @@ def filterPrimaryDatabase(pridb, sortby="energy", epsilon=0.1, ampTh=0.005, durT
         pridb_channels.append(pridb_chan)
     # print(pridb_channels)
     pridb_output = pd.concat(pridb_channels, ignore_index=True)
+    if label == "ST" and testno == 1:
+        for channel in range(1, 8 + 1):
+            while len(pridb_output.loc[pridb_output['channel'] == channel]) > 18:
+                idx_to_drop = pridb_output.loc[pridb_output['channel'] == channel]['energy'].idxmin()
+                pridb_output.drop(idx_to_drop, inplace=True)
+
     return pridb_output
     # hitsno = [len(pridb_output.loc[pridb_output['channel'] == i]) for i in range(1, 8+1)]
     # print(hitsno)
@@ -69,11 +82,14 @@ def getHitsPerSensor(pridb):
     return hitsno
 
 if __name__ == "__main__":
-    pridb = getPrimaryDatabase("PST", 3)
+    testlabel = "PST"
+    testno = 3
+    pridb = getPrimaryDatabase(testlabel, testno)
+    print(type(pridb))
     print(getHitsPerSensor(pridb.read_hits()))
     # print(pridb.read_hits())
     # print(filterPrimaryDatabase(pridb))
-    print(getHitsPerSensor(filterPrimaryDatabase(pridb)))
+    print(getHitsPerSensor(filterPrimaryDatabase(pridb, testlabel, testno)))
     # for i in range (1,30):
     #     y, t = getWaveform("TEST", 1, i)
     #     N = len(y)
