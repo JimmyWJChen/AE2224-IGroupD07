@@ -53,7 +53,7 @@ def localise(S, ToA, v, X_init=np.random.rand(2), iterations=10):
 def f2(x, S, tau, v, T):
 	"""
 	Finds the vector result of the overdefined system where every element:
-	T + tau_i - |X-S_i|/v
+	(X-S_xi)^2 + (Y-S_yi)^2 - (v*(T+tau_i))^2
 	Is the distance traveled by the wave to each sensor.
 
 	x = AE location (2-vector)
@@ -65,22 +65,23 @@ def f2(x, S, tau, v, T):
 	"""
 	F = np.zeros(len(S[:,0]))
 	for i in range(len(F)):
-		F[i] = 	T + tau[i] - np.linalg.norm(x-S[i])/v
+		F[i] = (x[0] - S[i,0])**2 + (x[1] - S[i,1])**2 - (v*(T + tau[i]))**2
 	return F
 
-def J2(x, S, v):
+def J2(tau, v, T):
 	"""
 	Finds the Moore-Penrose inverse of the Jacobian matrix of the overdefined system f2.
-
-	x = AE location guess (2-vector)
-	S = array of sensor locations  (m*2 matrix)
+	tau = Time-of-arrival difference w.r.t. the first sensor (m-vector)
+	v = Guess of wave velocity (scalar)
+	T = Guess of time-of-arrival from first sensor (m-vector)
 	returns: Moore-Penrose inverse of Jacobian matrix (2*m matrix)
 	"""
-	sensors = len(S[:,0])
-	J = np.column_stack((np.repeat([np.linalg.norm(x-S)/v**2], sensors), np.ones(sensors)))
+	J = np.column_stack(([-2*v*(T+t)**2 for t in tau], [-2*(v**2)*(T+t) for t in tau]))
+	print(J)
+
 	return np.linalg.pinv(J)
 
-def findVelocityIso(x, S, tau, vT_init=np.random.rand(2), iterations=100):
+def findVelocityIso(x, S, tau, vT_init=np.random.rand(2), iterations=10):
 	"""
 	Itveratively finds the least-squares solution X of the overdefined system f2.
 	
@@ -94,7 +95,7 @@ def findVelocityIso(x, S, tau, vT_init=np.random.rand(2), iterations=100):
 	"""
 	vT = vT_init
 	for i in range(iterations):
-		vT -= J2(x, S, vT[0]) @ f2(x, S, tau, vT[0], vT[1])
+		vT -= J2(tau, vT[0], vT[1]) @ f2(x, S, tau, vT[0], vT[1])
 
 	return vT[0], vT[1]
 
@@ -193,13 +194,13 @@ if __name__ == '__main__':
 	print(loc)
 	"""
 
-	v, t = findVelocityIso(x =np.array([0.42, 0.41]),
-						   S = 6.25 * np.array([[0.04, 0.04], [0.110, 0.04], [0.05, 0.120], [0.120, 0.120]]),
-						   tau = np.array([0, 0.0162534675509, 0.0300475011359, 0.0179542671287]),
-						   vT_init=[5.0, 0.0380172658144])
+	v, t = findVelocityIso(x =np.array([0.42, 0.48]),
+						   S = np.array([[0.05, 0.05], [0.95, 0.05], [0.05, 0.95], [0.95, 0.95]]),
+						   tau = np.array([0, 0.0096017697569, 0.00257413941685, 0.0117586871491]))
+						   #vT_init=[5.0, 0.0380172658144])
 	print(v,t)
 
-
+	"""
 	N = 20
 	V = T = np.zeros((N,N))
 	for i,x in enumerate(np.linspace(0.001,10,N)):
@@ -217,6 +218,6 @@ if __name__ == '__main__':
 	plt.xlabel('v_init')
 	plt.ylabel('T_init')
 	plt.show()
-
+	"""
 
 	
