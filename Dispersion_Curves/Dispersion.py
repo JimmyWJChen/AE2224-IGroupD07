@@ -35,11 +35,10 @@ with open('S0.csv', newline='') as S0:
 for i in range(0, len(Frequency1)):
         Frequency1[i], Velocity1[i] = float(Frequency1[i]), float(Velocity1[i])
 
-fA0 = sp.interpolate.interp1d(Frequency1, Velocity1, kind="linear", fill_value="extrapolate")
+fS0 = sp.interpolate.interp1d(Frequency1, Velocity1, kind="linear", fill_value="extrapolate")
 
 plt.title('Asymmetric')
-plt.plot(Frequency, Velocity)
-plt.show()
-plt.title('Symmetric')
-plt.plot(Frequency1, Velocity1)
+plt.plot(Frequency, Velocity,label = 'Asymmetric')
+plt.plot(Frequency1, Velocity1, label = 'Symmetric')
+plt.legend()
 plt.show()
