@@ -82,11 +82,14 @@ def getHitsPerSensor(pridb):
     return hitsno
 
 if __name__ == "__main__":
-    pridb = getPrimaryDatabase("PST", 3)
+    testlabel = "PST"
+    testno = 3
+    pridb = getPrimaryDatabase(testlabel, testno)
+    print(type(pridb))
     print(getHitsPerSensor(pridb.read_hits()))
     # print(pridb.read_hits())
     # print(filterPrimaryDatabase(pridb))
-    print(getHitsPerSensor(filterPrimaryDatabase(pridb)))
+    print(getHitsPerSensor(filterPrimaryDatabase(pridb, testlabel, testno)))
     # for i in range (1,30):
     #     y, t = getWaveform("TEST", 1, i)
     #     N = len(y)
