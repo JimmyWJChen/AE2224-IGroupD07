@@ -119,18 +119,39 @@ def f2_alt(x, S, tau, v, T):
 
 	return F
 
-def J2_alt(x, S, v):
+def J2_alt(tau, T, v):
 	"""
 	Finds the Moore-Penrose inverse of the Jacobian matrix of the overdefined system f2.
 
-	x = AE location guess (2-vector)
-	S = array of sensor locations  (m*2 matrix)
+	tau = Time-of-arrival difference w.r.t. the first sensor (m-vector)
+	v = Guess of wave velocity (scalar)
+	T = Guess of time-of-arrival from first sensor (m-vector)
 	returns: Moore-Penrose inverse of Jacobian matrix (2*m matrix)
 	"""
-	sensors = len(S[:,0])
-
-	J = np.column_stack((np.repeat([np.linalg.norm(x-S)/v**2], sensors), np.ones(sensors)))
+	J = np.column_stack(([-(T + t) for t in tau], [-v for t in tau]))
+	print(J)
+	print(f'pseudo inverse of J is: \n {np.linalg.pinv(J)}')
 	return np.linalg.pinv(J)
+
+
+def findVelocityIso_alt(x, S, tau, relax_factor, vT_init=np.random.rand(2), iterations=10):
+	"""
+	Itveratively finds the least-squares solution X of the overdefined system f2.
+
+	x = AE location (2-vector)
+	S = array of sensor locations  (m*2 matrix)
+	tau = Time-of-arrival difference w.r.t. the first sensor (m-vector)
+	relax_factor = factor of relaxation (scalar) 
+	vT_init = Initial condition guess of velocity and T (2-vector)
+	iterations = Nr. of iterations (scalar)
+	returns: wave velocity (scalar)
+
+	"""
+	vT = vT_init
+	for i in range(iterations):
+		vT -= relax_factor * J2_alt(tau, vT[1], vT[0]) @ f2_alt(x, S, tau, vT[0], vT[1])
+
+	return vT[0], vT[1]
 
 #PLB velocity determination functions (anisotropic)
 def f3(x, S, tau, vx, vy, T):
@@ -199,6 +220,15 @@ if __name__ == '__main__':
 						   tau = np.array([0, 0.0096017697569, 0.00257413941685, 0.0117586871491]))
 						   #vT_init=[5.0, 0.0380172658144])
 	print(v,t)
+
+	v, t = findVelocityIso_alt(x=np.array([0.594, 0.588]),
+						   S=np.array([[0.05, 0.05], [0.95, 0.05], [0.05, 0.95], [0.95, 0.95]]),
+						   tau=np.array([0, -0.0000119981156633, -0.0000111664233888, -0.0000257380904989]), relax_factor=1.)
+	# vT_init=[5.0, 0.0380172658144])
+	# x=np.array([0.594, 0.588]),
+	# 						   S=np.array([[0.05, 0.05], [0.95, 0.05], [0.05, 0.95], [0.95, 0.95]]),
+	# 						   tau=np.array([0, -0.00999842971944, -0.00930535282398, -0.0214484087491]), relax_factor=1.
+	print(v, t)
 
 	"""
 	N = 20
