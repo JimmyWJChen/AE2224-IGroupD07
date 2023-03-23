@@ -98,7 +98,38 @@ def findVelocityIso(x, S, tau, vT_init=np.random.rand(2), iterations=100):
 
 	return vT[0], vT[1]
 
+#PLB velocity determination (isotropic) using different FPI
+def f2_alt(x, S, tau, v, T):
+	"""
+		Finds the vector result of the overdefined system where every element:
+		|X - S_i| - v * (T + tau_i) = 0
+		Is the distance traveled by the wave to each sensor.
 
+		x = AE location (2-vector)
+		S = array of sensor locations  (m*2 matrix)
+		tau = Time-of-arrival difference w.r.t. the first sensor (m-vector)
+		v = Guess of wave velocity (scalar)
+		T = Guess of time-of-arrival from first sensor (m-vector)
+		returns: m-vector of function values
+		"""
+	F = np.zeros(len(S[:, 0]))
+	for i in range(len(F)):
+		F[i] = np.linalg.norm(x - S[i, :]) - v * (T + tau[i])
+
+	return F
+
+def J2_alt(x, S, v):
+	"""
+	Finds the Moore-Penrose inverse of the Jacobian matrix of the overdefined system f2.
+
+	x = AE location guess (2-vector)
+	S = array of sensor locations  (m*2 matrix)
+	returns: Moore-Penrose inverse of Jacobian matrix (2*m matrix)
+	"""
+	sensors = len(S[:,0])
+
+	J = np.column_stack((np.repeat([np.linalg.norm(x-S)/v**2], sensors), np.ones(sensors)))
+	return np.linalg.pinv(J)
 
 #PLB velocity determination functions (anisotropic)
 def f3(x, S, tau, vx, vy, T):
