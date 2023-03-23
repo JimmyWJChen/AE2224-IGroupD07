@@ -141,7 +141,7 @@ def findVelocityIso_alt(x, S, tau, relax_factor, vT_init=np.random.rand(2), iter
 	x = AE location (2-vector)
 	S = array of sensor locations  (m*2 matrix)
 	tau = Time-of-arrival difference w.r.t. the first sensor (m-vector)
-	relax_factor = factor of relaxation (scalar) 
+	relax_factor = factor of relaxation (scalar)
 	vT_init = Initial condition guess of velocity and T (2-vector)
 	iterations = Nr. of iterations (scalar)
 	returns: wave velocity (scalar)
@@ -203,6 +203,63 @@ def findVelocityAniso(x, S, tau, vx_vy_T_init=np.random.rand(3), iterations=10):
 	return vT[0], vT[1], vT[2]
 
 
+# PLB velocity determination functions (anisotropic) alternative method
+def f3_alt(x, S, tau, vx, vy, T):
+	"""
+	Finds the vector result of the overdefined system where every element:
+	|X - S| - |v| * (T + tau)
+	Is the distance traveled by the wave to each sensor.
+
+	x = AE location (2-vector)
+	S = array of sensor locations  (m*2 matrix)
+	tau = Time-of-arrival difference w.r.t. the first sensor (m-vector)
+	vx = Guess of wave velocity in x (scalar)
+	vy = Guess of wave velocity in y (scalar)
+	T = Guess of time-of-arrival from first sensor (m-vector)
+	returns: m-vector of function values
+	"""
+	F = np.zeros(len(S[:, 0]))
+	for i in range(len(F)):
+		F[i] = np.linalg.norm(x - S[i, :]) - np.sqrt(vx**2 + vy**2) * (T + tau[i])
+	return F
+
+
+def J3_alt(tau, T, vx, vy):
+	"""
+	Finds the Moore-Penrose inverse of the Jacobian matrix of the overdefined system f3.
+
+	tau = Time-of-arrival difference w.r.t. the first sensor (m-vector)
+	vx = Guess of wave velocity in x (scalar)
+	vy = guess of wave velocity in y (scalar)
+	T = Guess of time-of-arrival from first sensor (m-vector)
+	returns: Moore-Penrose inverse of Jacobian matrix (2*m matrix)
+	"""
+	v = np.sqrt(vx**2 + vy**2)
+	J = np.column_stack(([-2*vx/(2*v) * (T + t) for t in tau],[-2*vy/(2*v) * (T + t) for t in tau], [-v for t in tau]))
+	print(J)
+	print(f'pseudo inverse of J is: \n {np.linalg.pinv(J)}')
+	return np.linalg.pinv(J)
+
+
+def findVelocityAniso_alt(x, S, tau, relax_factor, vx_vy_T_init=np.random.rand(3), iterations=10):
+	"""
+	Itveratively finds the least-squares solution X of the overdefined system f3.
+
+	x = AE location (2-vector)
+	S = array of sensor locations  (m*2 matrix)
+	tau = Time-of-arrival difference w.r.t. the first sensor (m-vector)
+	relax_factor = relaxation factor (scalar)
+	vx_vy_T_init = Initial condition guess of velocity in x, velocity in y and T (3-vector)
+	iterations = Nr. of iterations (scalar)
+	returns: wave velocity (scalar)
+
+	"""
+	vx_vy_T = vx_vy_T_init
+	for i in range(iterations):
+		vx_vy_T -= relax_factor * J3_alt(tau, vx_vy_T[2], vx_vy_T[0], vx_vy_T[1]) @ f3_alt(x, S, tau, vx_vy_T[0], vx_vy_T[1], vx_vy_T[2])
+
+	return vx_vy_T[0], vx_vy_T[1], vx_vy_T[2]
+
 
 #example localisation
 if __name__ == '__main__':
@@ -229,6 +286,12 @@ if __name__ == '__main__':
 	# 						   S=np.array([[0.05, 0.05], [0.95, 0.05], [0.05, 0.95], [0.95, 0.95]]),
 	# 						   tau=np.array([0, -0.00999842971944, -0.00930535282398, -0.0214484087491]), relax_factor=1.
 	print(v, t)
+
+	vx, vy, T = findVelocityAniso_alt(x=np.array([0.594, 0.588]),
+						   S=np.array([[0.05, 0.05], [0.95, 0.05], [0.05, 0.95], [0.95, 0.95]]),
+						   tau=np.array([0, -0.0000119981156633, -0.0000111664233888, -0.0000257380904989]), relax_factor=1.)
+
+	print(f'results of anisotropic optimisation: \n {vx, vy, T, np.sqrt(vx**2 + vy**2)}')
 
 	"""
 	N = 20
