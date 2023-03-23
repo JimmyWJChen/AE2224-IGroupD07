@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from scipy.fft import fft, fftfreq
 import numpy as np
 
-y,t = di.getWaveform("PCLO",2,20)
+y,t = di.getWaveform("PCLO",2,4)
 
 SAMPLES = 1000
 
@@ -60,5 +60,5 @@ xf = fftfreq(N, T)
 peakfreq = xf[np.argmax(yf)]
 plt.plot(t, y)
 plt.vlines(criteria_time,-1,1,("r","y","g","b"))
-plt.axis([t[0]/50, max(criteria_time)*2,-0.001,0.001])
+plt.axis([min([-0.000003,min(criteria_time)*1.2]), max([max(criteria_time)*1.5,0.00002]),min(y),max(y)])
 plt.show()
