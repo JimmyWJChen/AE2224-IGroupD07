@@ -119,7 +119,7 @@ def f2_alt(x, S, tau, v, T):
 
 	return F
 
-def J2_alt(tau, T, v):
+def J2_alt(tau, T, v, printing=False):
 	"""
 	Finds the Moore-Penrose inverse of the Jacobian matrix of the overdefined system f2.
 
@@ -129,8 +129,9 @@ def J2_alt(tau, T, v):
 	returns: Moore-Penrose inverse of Jacobian matrix (2*m matrix)
 	"""
 	J = np.column_stack(([-(T + t) for t in tau], [-v for t in tau]))
-	print(J)
-	print(f'pseudo inverse of J is: \n {np.linalg.pinv(J)}')
+	if printing:
+		print(J)
+		print(f'pseudo inverse of J is: \n {np.linalg.pinv(J)}')
 	return np.linalg.pinv(J)
 
 
@@ -152,6 +153,21 @@ def findVelocityIso_alt(x, S, tau, relax_factor, vT_init=np.random.rand(2), iter
 		vT -= relax_factor * J2_alt(tau, vT[1], vT[0]) @ f2_alt(x, S, tau, vT[0], vT[1])
 
 	return vT[0], vT[1]
+
+def random_guess_velocity(n_guesses, x, S, tau, v_guess_max, T_guess_max, relax_factor, iterations=10):
+	v, t = np.zeros(2)
+	#flag = False
+
+	for n in range(n_guesses):
+		VT_guess = np.array([np.random.uniform(0., float(v_guess_max)), np.random.uniform(0., float(T_guess_max))])
+		#print(VT_guess)
+		v, t = findVelocityIso_alt(x, S, tau,
+								   relax_factor,
+								   vT_init=np.copy(VT_guess), iterations=iterations)
+
+		print(VT_guess)
+		print(v, t)
+	return
 
 #PLB velocity determination functions (anisotropic)
 def f3(x, S, tau, vx, vy, T):
@@ -266,32 +282,52 @@ if __name__ == '__main__':
 	import matplotlib.pyplot as plt
 
 	"""
+	Define the state first 
+	"""
+	x = np.array([0.594, 0.588])
+	S = np.array([[0.05, 0.05], [0.95, 0.05], [0.05, 0.95], [0.95, 0.95]])
+	tau = np.array([0, -0.0000119981156633, -0.0000111664233888, -0.0000257380904989])
+	relax_factor = 1.
+
+
+	"""
 	loc = localise(S = np.array([[0.2,0.2],[0.8,0.2],[0.2,0.8],[0.8,0.8]]), 
 				   ToA = [0.0279405959, 0.06532234, 0.09113600, 0.107406569], 
 				   v = 8)
 	print(loc)
 	"""
-
+	"""
 	v, t = findVelocityIso(x =np.array([0.42, 0.48]),
 						   S = np.array([[0.05, 0.05], [0.95, 0.05], [0.05, 0.95], [0.95, 0.95]]),
 						   tau = np.array([0, 0.0096017697569, 0.00257413941685, 0.0117586871491]))
 						   #vT_init=[5.0, 0.0380172658144])
 	print(v,t)
+	"""
+
 
 	v, t = findVelocityIso_alt(x=np.array([0.594, 0.588]),
 						   S=np.array([[0.05, 0.05], [0.95, 0.05], [0.05, 0.95], [0.95, 0.95]]),
-						   tau=np.array([0, -0.0000119981156633, -0.0000111664233888, -0.0000257380904989]), relax_factor=1.)
+						   tau=np.array([0, -0.0000119981156633, -0.0000111664233888, -0.0000257380904989]), relax_factor=1.,
+							   vT_init=np.array([np.random.uniform(0.,100000.), np.random.uniform(0.,100000.)]))
 	# vT_init=[5.0, 0.0380172658144])
 	# x=np.array([0.594, 0.588]),
 	# 						   S=np.array([[0.05, 0.05], [0.95, 0.05], [0.05, 0.95], [0.95, 0.95]]),
 	# 						   tau=np.array([0, -0.00999842971944, -0.00930535282398, -0.0214484087491]), relax_factor=1.
+	print(np.array([np.random.uniform(0.,100000.), np.random.uniform(0.,100000.)]))
 	print(v, t)
+
+	random_guess_velocity(500, x, S, tau, 1, 1, relax_factor, iterations=10)
+
+
+
+	"""
 
 	vx, vy, T = findVelocityAniso_alt(x=np.array([0.594, 0.588]),
 						   S=np.array([[0.05, 0.05], [0.95, 0.05], [0.05, 0.95], [0.95, 0.95]]),
 						   tau=np.array([0, -0.0000119981156633, -0.0000111664233888, -0.0000257380904989]), relax_factor=1.)
 
 	print(f'results of anisotropic optimisation: \n {vx, vy, T, np.sqrt(vx**2 + vy**2)}')
+	"""
 
 	"""
 	N = 20
