@@ -6,7 +6,7 @@ import csv
 
 DamageCoordinates = np.array([[60, 100], [100, 100], [80, 90], [70, 80], [90, 80], [80, 70], [60, 60], [100, 60]])
 SensorCoordinates = np.array([[50, 120], [120, 120], [40, 40], [110, 40]])
-
+PeakFrequencies = np.array([])
 
 # Asymmetric Assumption
 Frequency = []
@@ -48,17 +48,19 @@ def get_distance(x, y):
     return distance
 
 
-
 SensorDistances = np.zeros((8, 4))
 
 for i in range(len(DamageCoordinates)):
     for j in range(len(SensorCoordinates)):
         SensorDistances[i, j] = get_distance(DamageCoordinates[i], SensorCoordinates[j])
 
-CalculatedTOA = np.zeros((8,4))
+CalculatedTOAS = np.zeros((8,4))
+CalculatedTOAA = np.zeros((8,4))
 
 for i in range(7):
     for j in range(3):
+        TOFS = SensorDistances[i, j]/fS0(PeakFrequencies[])
+        TOFA = SensorDistances[i, j]/fA0()
 
 
 

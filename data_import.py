@@ -68,9 +68,11 @@ def filterPrimaryDatabase(pridb, label, testno, sortby="energy", epsilon=0.2, th
 
     return pridb_output
 
+
 def getHitsPerSensor(pridb):
     hitsno = [len(pridb.loc[pridb['channel'] == i]) for i in range(1, int(pridb.max()['channel'])+1)]
     return hitsno
+
 
 if __name__ == "__main__":
     testlabel = "PST"
