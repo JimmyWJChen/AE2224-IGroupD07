@@ -318,7 +318,7 @@ if __name__ == '__main__':
 	# x=np.array([0.594, 0.588]),
 	# 						   S=np.array([[0.05, 0.05], [0.95, 0.05], [0.05, 0.95], [0.95, 0.95]]),
 	# 						   tau=np.array([0, -0.00999842971944, -0.00930535282398, -0.0214484087491]), relax_factor=1.
-	print(np.array([np.random.uniform(0.,100000.), np.random.uniform(0.,100000.)]))
+	#print(np.array([np.random.uniform(0.,100000.), np.random.uniform(0.,100000.)]))
 	print(v, t)
 
 	random_guess_velocity(500, x, S, tau, 10000, 100, relax_factor, iterations=10)
