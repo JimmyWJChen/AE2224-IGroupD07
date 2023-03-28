@@ -55,17 +55,24 @@ def filterPrimaryDatabase(pridb, label, testno, sortby="energy", epsilon=0.2, th
                 i+=1
         pridb_channels.append(pridb_chan)
     pridb_output = pd.concat(pridb_channels, ignore_index=True)
-    # if label == "ST" and testno == 1:
-    #     for channel in range(1, 8 + 1):
-    #         while len(pridb_output.loc[pridb_output['channel'] == channel]) > 18:
-    #             idx_to_drop = pridb_output.loc[pridb_output['channel'] == channel]['energy'].idxmin()
-    #             pridb_output.drop(idx_to_drop, inplace=True)
+    if label == "ST" and testno == 1:
+        for channel in range(1, 8 + 1):
+             while len(pridb_output.loc[pridb_output['channel'] == channel]) > 18:
+                 idx_to_drop = pridb_output.loc[pridb_output['channel'] == channel]['energy'].idxmin()
+                 pridb_output.drop(idx_to_drop, inplace=True)
+    elif label == "PST" and testno == 3:
+        for channel in range(1, 8 + 1):
+            while len(pridb_output.loc[pridb_output['channel'] == channel]) > 9:
+                idx_to_drop = pridb_output.loc[pridb_output['channel'] == channel]['energy'].idxmin()
+                pridb_output.drop(idx_to_drop, inplace=True)
 
     return pridb_output
+
 
 def getHitsPerSensor(pridb):
     hitsno = [len(pridb.loc[pridb['channel'] == i]) for i in range(1, int(pridb.max()['channel'])+1)]
     return hitsno
+
 
 if __name__ == "__main__":
     testlabel = "PST"
