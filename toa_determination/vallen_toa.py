@@ -6,18 +6,12 @@ import matplotlib.pyplot as plt
 from scipy.fft import fft, fftfreq
 import numpy as np
 
-y,t = di.getWaveform("PCLO",2,4)
 
-SAMPLES = 1000
-
-# crop first samples
-t = t[:SAMPLES]
-y = y[:SAMPLES]
     
 def compare_criteria(y, t):
     #compare the hinkley, akaike, energy ratio and 
 
-    hc_index = vae.timepicker.hinkley(y, alpha=5)[1]
+    hc_index = vae.timepicker.hinkley(y, alpha=2)[1]
     aic_index = vae.timepicker.aic(y)[1]
     er_index = vae.timepicker.energy_ratio(y)[1]
     mer_index = vae.timepicker.modified_energy_ratio(y)[1]
@@ -46,19 +40,29 @@ def performance_comparison(y,t):
     run_time_mer = timeit(lambda: vae.timepicker.modified_energy_ratio(y))
     return run_time_hc, run_time_aic, run_time_er, run_time_mer
 
-print("Rood: Hinkley")
-print("Geel: AIC")
-print("Groen: Energy Ratio")
-print("Blauw: Modified Energy Ratio")
+def plot_waveform_criteria():
 
-criteria_time = compare_criteria(y,t)
+    y,t = di.getWaveform("PCLO",2,20)
 
-N = len(y)
-T = t[1] - t[0]
-yf = fft(y)
-xf = fftfreq(N, T)
-peakfreq = xf[np.argmax(yf)]
-plt.plot(t, y)
-plt.vlines(criteria_time,-1,1,("r","y","g","b"))
-plt.axis([min([-0.000003,min(criteria_time)*1.2]), max([max(criteria_time)*1.5,0.00002]),min(y),max(y)])
-plt.show()
+    SAMPLES = 1000
+
+    # crop first samples
+    t = t[:SAMPLES]
+    y = y[:SAMPLES]
+
+    print("Rood: Hinkley")
+    print("Geel: AIC")
+    print("Groen: Energy Ratio")
+    print("Blauw: Modified Energy Ratio")
+
+    criteria_time = compare_criteria(y,t)
+
+    N = len(y)
+    T = t[1] - t[0]
+    yf = fft(y)
+    xf = fftfreq(N, T)
+    peakfreq = xf[np.argmax(yf)]
+    plt.plot(t, y)
+    plt.vlines(criteria_time,-1,1,("r","y","g","b"))
+    plt.axis([t[0]/50, max(criteria_time)*2,min(y),max(y)])
+    plt.show()
