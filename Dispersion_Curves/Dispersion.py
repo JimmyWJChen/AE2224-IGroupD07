@@ -7,6 +7,7 @@ import csv
 DamageCoordinates = np.array([[60, 100], [100, 100], [80, 90], [70, 80], [90, 80], [80, 70], [60, 60], [100, 60]])
 SensorCoordinates = np.array([[50, 120], [120, 120], [40, 40], [110, 40]])
 
+
 # Asymmetric Assumption
 Frequency = []
 Velocity = []
@@ -26,7 +27,7 @@ fA0 = sp.interpolate.interp1d(Frequency, Velocity, kind="linear", fill_value="ex
 
 # Symmetric Below
 Velocity1 = []
-Frequency1=[]
+Frequency1 = []
 with open('S0.csv', newline='') as S0:
     Data1 = csv.reader(S0)
 # Size = len(Data)
@@ -46,11 +47,19 @@ def get_distance(x, y):
     distance = sqrt((y[0]-x[0])**2 + (y[1]-x[1])**2)
     return distance
 
+
+
 SensorDistances = np.zeros((8, 4))
 
 for i in range(len(DamageCoordinates)):
     for j in range(len(SensorCoordinates)):
         SensorDistances[i, j] = get_distance(DamageCoordinates[i], SensorCoordinates[j])
+
+CalculatedTOA = np.zeros((8,4))
+
+for i in range(7):
+    for j in range(3):
+
 
 
 
