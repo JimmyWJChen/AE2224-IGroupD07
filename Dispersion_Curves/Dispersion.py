@@ -3,7 +3,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import csv
 
-#Asymmetric Assumption
+DamageCoordinates = np.array([[60, 100], [100, 100], [80, 90], [70, 80], [90, 80], [80, 70], [60, 60], [100, 60]])
+SensorCoordinates = np.array([[50, 120], [120, 120], [40, 40], [110, 40]])
+
+# Asymmetric Assumption
 Frequency = []
 Velocity = []
 with open('A0.csv', newline='') as A0:
