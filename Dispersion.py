@@ -103,7 +103,7 @@ xf = fftfreq(N, T)[:N//2]
 peakfreq1 = xf[np.argmax(yf[:N//2])]
 print(peakfreq1)
 
-plt.plot(t, y)
+plt.plot(xf, yf[:N//2])
 
 y, t = getWaveform("PCLS", 1, 70)
 N = len(y)
@@ -113,4 +113,16 @@ xf = fftfreq(N, T)[:N//2]
 peakfreq2 = xf[np.argmax(yf[:N//2])]
 print(peakfreq2)
 
-plt.plot(t, y)
+plt.plot(xf, yf[:N//2])
+
+y, t = getWaveform("PCLS", 1, 73)
+N = len(y)
+T = t[1] - t[0]
+yf = fft(y)
+xf = fftfreq(N, T)[:N//2]
+peakfreq3 = xf[np.argmax(yf[:N//2])]
+print(peakfreq3)
+
+plt.plot(xf, yf[:N//2])
+plt.show()
+
