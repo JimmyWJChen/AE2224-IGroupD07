@@ -16,22 +16,23 @@ TOA = np.zeros((8, 4))
 
 j = 0
 
-for i in range(31):
+for i in range(32):
     y, t = getWaveform("PCLS", 1, pridb.iloc[i, -1])
     N = len(y)
     T = t[1] - t[0]
     yf = fft(y)
-    xf = fftfreq(N, T)
-    peakfreq = xf[np.argmax(yf)]
-    if i+1 % 8 == 0 and i != 0:
+    xf = fftfreq(N, T)[:N//2]
+    peakfreq = xf[np.argmax(yf[:N//2])]
+    if i % 8 == 0 and i != 0:
         j += 1
     PeakFrequencies[i%8, j] = peakfreq
+    print(pridb.iloc[i, -1])
     TOA[i%8, j] = pridb.iloc[i, 1]
 
 # Asymmetric Assumption
 Frequency = []
 Velocity = []
-with open('/dispersion_curves/A0.csv', newline='') as A0:
+with open("A0.csv", newline='') as A0:
     Data = csv.reader(A0)
 # Size = len(Data)
 # Frequency= np.zero(Size)
@@ -48,7 +49,7 @@ fA0 = sp.interpolate.interp1d(Frequency, Velocity, kind="linear", fill_value="ex
 # Symmetric Below
 Velocity1 = []
 Frequency1 = []
-with open('dispersion_curves/S0.csv', newline='') as S0:
+with open('S0.csv', newline='') as S0:
     Data1 = csv.reader(S0)
 # Size = len(Data)
 # Frequency= np.zero(Size)
@@ -77,7 +78,7 @@ for i in range(len(DamageCoordinates)):
 CalculatedTOAS = np.zeros((8,4))
 CalculatedTOAA = np.zeros((8,4))
 
-
+'''
 for i in range(7):
     TOFS = []
     TOFA = []
@@ -89,15 +90,27 @@ for i in range(7):
 
 DiffTOAS = CalculatedTOAS - TOA
 DiffTOAA = CalculatedTOAA - TOA
-
-
-
-
-
 '''
-plt.title('Asymmetric')
-plt.plot(Frequency, Velocity,label = 'Asymmetric')
-plt.plot(Frequency1, Velocity1, label = 'Symmetric')
-plt.legend()
-plt.show()
-'''
+
+
+print(PeakFrequencies)
+
+y, t = getWaveform("PCLS", 1, 56)
+N = len(y)
+T = t[1] - t[0]
+yf = fft(y)
+xf = fftfreq(N, T)[:N//2]
+peakfreq1 = xf[np.argmax(yf[:N//2])]
+print(peakfreq1)
+
+plt.plot(t, y)
+
+y, t = getWaveform("PCLS", 1, 70)
+N = len(y)
+T = t[1] - t[0]
+yf = fft(y)
+xf = fftfreq(N, T)[:N//2]
+peakfreq2 = xf[np.argmax(yf[:N//2])]
+print(peakfreq2)
+
+plt.plot(t, y)
