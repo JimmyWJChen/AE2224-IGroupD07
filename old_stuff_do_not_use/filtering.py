@@ -11,8 +11,8 @@ import matplotlib.pyplot as plt
 
 sortby = "counts"
 epsilon = 0.2
-label = "PST"
-testno = 3
+label = "PCLS"
+testno = 1
 
 test_pridb = di.getPrimaryDatabase(label, testno).read_hits()
 
@@ -54,19 +54,26 @@ for channel in range(1, 8+1):
 test_pridb_output = pd.concat(test_pridb_channels, ignore_index=True)
 
 print(test_pridb_output)
+#MANUAL FILTERING:
 if label == "ST" and testno == 1:
     for channel in range(1, 8+1):
         while len(test_pridb_output.loc[test_pridb_output['channel'] == channel]) > 18:
             idx_to_drop = test_pridb_output.loc[test_pridb_output['channel'] == channel]['energy'].idxmin()
             test_pridb_output.drop(idx_to_drop, inplace=True)
+if label == "PST" and testno == 3:
+    for channel in range(1, 8+1):
+        while len(test_pridb_output.loc[test_pridb_output['channel'] == channel]) > 9:
+            idx_to_drop = test_pridb_output.loc[test_pridb_output['channel'] == channel]['energy'].idxmin()
+            test_pridb_output.drop(idx_to_drop, inplace=True)
+
 
 hitsno = [len(test_pridb_output.loc[test_pridb_output['channel'] == i]) for i in range(1, 8+1)]
 print(hitsno)
 
 
-chan_to_plot =5
-
-print(test_pridb_output[test_pridb_output['channel'] == chan_to_plot]['amplitude'])
+chan_to_plot = 3
+filtereddata = test_pridb_output.loc[test_pridb_output['channel'] == chan_to_plot]
+print(filtereddata.loc[:, ['time', 'energy','counts']])
 
 
 x = test_pridb_channels[chan_to_plot-1].sort_values(sortby, axis=0, ascending=False)['time'].to_numpy()
