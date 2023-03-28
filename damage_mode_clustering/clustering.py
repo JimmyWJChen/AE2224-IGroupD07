@@ -4,6 +4,9 @@ import data_import as di
 import pandas
 import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
 # import vallenae as ae
 
 # standard threshold for AE 34dB, we have at 45dB -> thus missing IDs
@@ -33,8 +36,21 @@ if __name__=="__main__":
     datapoints = di.filterPrimaryDatabase(di.getPrimaryDatabase("PCLO", 3), "PCLO", 3)
     datapoints = datapoints[datapoints['channel'] == 2]
     print(datapoints)
-    data_compressed, var = PCA(datapoints, 2)
+    data_compressed, var = PCA(datapoints, 4)
     plt.scatter(data_compressed[0], data_compressed[1])
     plt.show()
     print(data_compressed)
     print(var)
+    # normalize data
+    scaler = StandardScaler()
+    features_norm = scaler.fit_transform(datapoints)
+
+    # perform clustering
+    kmeans = KMeans(n_clusters=4, random_state=42)
+    kmeans.fit(features_norm)
+
+    # add cluster labels to original dataframe
+    datapoints['cluster'] = kmeans.labels_
+
+    # save results to new file
+    data.to_csv('your_results.csv', index=False)
