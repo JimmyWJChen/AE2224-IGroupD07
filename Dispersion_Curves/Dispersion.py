@@ -28,11 +28,11 @@ fA0 = sp.interpolate.interp1d(Frequency, Velocity, kind="linear", fill_value="ex
 Velocity1 = []
 Frequency1=[]
 with open('S0.csv', newline='') as S0:
-    Data1 = csv.reader(A0)
+    Data1 = csv.reader(S0)
 # Size = len(Data)
 # Frequency= np.zero(Size)
 # Velocity = np.zero(Size)
-    for row in Data:
+    for row in Data1:
         Frequency1.append(row[0])
         Velocity1.append(row[1])
 
@@ -43,22 +43,23 @@ fS0 = sp.interpolate.interp1d(Frequency1, Velocity1, kind="linear", fill_value="
 
 
 def get_distance(x, y):
-    distance = sqrt(x**2 + y**2)
+    distance = sqrt((y[0]-x[0])**2 + (y[1]-x[1])**2)
     return distance
 
-SensorDistances = np.zeros(8, 4)
+SensorDistances = np.zeros((8, 4))
 
-for i in len(DamageCoordinates):
-    for j in (SensorCoordinates):
-        SensorDistances[i][j] = get_distance(DamageCoordinates[i], SensorCoordinates[j])
-
-print
+for i in range(len(DamageCoordinates)):
+    for j in range(len(SensorCoordinates)):
+        SensorDistances[i, j] = get_distance(DamageCoordinates[i], SensorCoordinates[j])
 
 
 
 
+
+'''
 plt.title('Asymmetric')
 plt.plot(Frequency, Velocity,label = 'Asymmetric')
 plt.plot(Frequency1, Velocity1, label = 'Symmetric')
 plt.legend()
 plt.show()
+'''
