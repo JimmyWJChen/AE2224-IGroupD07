@@ -76,21 +76,12 @@ def getHitsPerSensor(pridb):
 
 
 if __name__ == "__main__":
-    testlabel = "PST"
+    testlabel = "PTS"
     testno = 3
     pridb = getPrimaryDatabase(testlabel, testno)
+
     # print(getHitsPerSensor(pridb.read_hits()))
     print(pridb.read_hits())
     # print(filterPrimaryDatabase(pridb))
     print(filterPrimaryDatabase(pridb, testlabel, testno))
-    # print(pridb)
-    # for i in range (1,30):
-    #      y, t = getWaveform("TEST", 1, i)
-    #      N = len(y)
-    #      T = t[1] -  t[0]
-    #      yf = fft(y)
-    #      xf = fftfreq(N, T)
-    #      peakfreq = xf[np.argmax(yf)]
-    #      plt.plot(t, y)
-    #      plt.show()
     # pridb.read_hits().to_csv('data.csv')

@@ -3,16 +3,20 @@ import numpy as np
 from math import *
 import matplotlib.pyplot as plt
 import csv
-from data_import import getWaveform
+from data_import import getWaveform, getPrimaryDatabase, filterPrimaryDatabase
 
 DamageCoordinates = np.array([[60, 100], [100, 100], [80, 90], [70, 80], [90, 80], [80, 70], [60, 60], [100, 60]])
 SensorCoordinates = np.array([[50, 120], [120, 120], [40, 40], [110, 40]])
+
+pridb = filterPrimaryDatabase(getPrimaryDatabase("PCLS", 1), "PCLS", 1)
+
 PeakFrequencies = np.zeros((8, 4))
+TOA = np.zeros((8, 4))
 
 j = 0
 
 for i in len(31):
-    y, t = getWaveform("PCLS", 1, i)
+    y, t = getWaveform("PCLS", 1, pridb.iloc(i, -1))
     N = len(y)
     T = t[1] - t[0]
     yf = fft(y)
@@ -21,6 +25,7 @@ for i in len(31):
     if i+1 % 8 == 0 and i != 0:
         j += 1
     PeakFrequencies[i%8, j] = peakfreq
+    TOA[i%8, j] = pridb.iloc[i, 1]
 
 # Asymmetric Assumption
 Frequency = []
