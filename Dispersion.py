@@ -11,7 +11,7 @@ PeakFrequencies = np.array([])
 # Asymmetric Assumption
 Frequency = []
 Velocity = []
-with open('A0.csv', newline='') as A0:
+with open('Dispersion_Curves/A0.csv', newline='') as A0:
     Data = csv.reader(A0)
 # Size = len(Data)
 # Frequency= np.zero(Size)
@@ -28,7 +28,7 @@ fA0 = sp.interpolate.interp1d(Frequency, Velocity, kind="linear", fill_value="ex
 # Symmetric Below
 Velocity1 = []
 Frequency1 = []
-with open('S0.csv', newline='') as S0:
+with open('Dispersion_Curves/S0.csv', newline='') as S0:
     Data1 = csv.reader(S0)
 # Size = len(Data)
 # Frequency= np.zero(Size)
@@ -57,11 +57,18 @@ for i in range(len(DamageCoordinates)):
 CalculatedTOAS = np.zeros((8,4))
 CalculatedTOAA = np.zeros((8,4))
 
-for i in range(7):
-    for j in range(3):
-        TOFS = SensorDistances[i, j]/fS0(PeakFrequencies[])
-        TOFA = SensorDistances[i, j]/fA0()
 
+for i in range(7):
+    TOFS = []
+    TOFA = []
+    for j in range(3):
+        TOFS.append(SensorDistances[i, j]/fS0())
+        TOFA.append(SensorDistances[i, j]/fA0())
+        CalculatedTOAS[i, j] = TOFS[j] - TOFS[0]
+        CalculatedTOAA[i, j] = TOFA[j] - TOFA[0]
+
+DiffTOAS = CalculatedTOAS - TOA
+DiffTOAA = CalculatedTOAA - TOA
 
 
 

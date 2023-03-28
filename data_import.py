@@ -4,7 +4,6 @@ import vallenae as vae
 import pandas as pd
 
 
-
 def getPrimaryDatabase(label, testno=1):
     if label == "PCLO" or label == "PCLS":
         path = "testing_data/PLB-4-channels/PLBS4_CP090_" + label + str(testno) + ".pridb"
@@ -18,6 +17,7 @@ def getPrimaryDatabase(label, testno=1):
     pridb = vae.io.PriDatabase(PRIDB)
     return pridb
 
+
 def getWaveform(label, testno=1, trai=1):
     if label == "PCLO" or label == "PCLS":
         path = "testing_data/PLB-4-channels/PLBS4_CP090_" + label + str(testno) + ".tradb"
@@ -30,6 +30,7 @@ def getWaveform(label, testno=1, trai=1):
     with vae.io.TraDatabase(TRADB) as tradb:
         y, t = tradb.read_wave(trai)
     return y, t
+
 
 def filterPrimaryDatabase(pridb, label, testno, sortby="energy", epsilon=0.2, thamp=0.009, thdur = 0.002, thenergy=1e5, thstrength=2500, thcounts=70):
     pridb = pridb.read_hits()
@@ -78,7 +79,6 @@ if __name__ == "__main__":
     testlabel = "PST"
     testno = 3
     pridb = getPrimaryDatabase(testlabel, testno)
-    # print(type(pridb))
     # print(getHitsPerSensor(pridb.read_hits()))
     print(pridb.read_hits())
     # print(filterPrimaryDatabase(pridb))
