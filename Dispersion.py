@@ -1,6 +1,7 @@
 import scipy as sp
 import numpy as np
 from math import *
+from scipy.fft import fft, fftfreq
 import matplotlib.pyplot as plt
 import csv
 from data_import import getWaveform, getPrimaryDatabase, filterPrimaryDatabase
@@ -15,8 +16,8 @@ TOA = np.zeros((8, 4))
 
 j = 0
 
-for i in len(31):
-    y, t = getWaveform("PCLS", 1, pridb.iloc(i, -1))
+for i in range(31):
+    y, t = getWaveform("PCLS", 1, pridb.iloc[i, -1])
     N = len(y)
     T = t[1] - t[0]
     yf = fft(y)
@@ -30,7 +31,7 @@ for i in len(31):
 # Asymmetric Assumption
 Frequency = []
 Velocity = []
-with open('Dispersion_Curves/A0.csv', newline='') as A0:
+with open('/dispersion_curves/A0.csv', newline='') as A0:
     Data = csv.reader(A0)
 # Size = len(Data)
 # Frequency= np.zero(Size)
@@ -47,7 +48,7 @@ fA0 = sp.interpolate.interp1d(Frequency, Velocity, kind="linear", fill_value="ex
 # Symmetric Below
 Velocity1 = []
 Frequency1 = []
-with open('Dispersion_Curves/S0.csv', newline='') as S0:
+with open('dispersion_curves/S0.csv', newline='') as S0:
     Data1 = csv.reader(S0)
 # Size = len(Data)
 # Frequency= np.zero(Size)
