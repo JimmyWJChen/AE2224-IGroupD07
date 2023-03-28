@@ -1,17 +1,37 @@
 import scipy as sp
 import numpy as np
 from math import *
+from scipy.fft import fft, fftfreq
 import matplotlib.pyplot as plt
 import csv
+from data_import import getWaveform, getPrimaryDatabase, filterPrimaryDatabase
 
 DamageCoordinates = np.array([[60, 100], [100, 100], [80, 90], [70, 80], [90, 80], [80, 70], [60, 60], [100, 60]])
 SensorCoordinates = np.array([[50, 120], [120, 120], [40, 40], [110, 40]])
-PeakFrequencies = np.array([])
+
+pridb = filterPrimaryDatabase(getPrimaryDatabase("PCLS", 1), "PCLS", 1)
+
+PeakFrequencies = np.zeros((8, 4))
+TOA = np.zeros((8, 4))
+
+j = 0
+
+for i in range(31):
+    y, t = getWaveform("PCLS", 1, pridb.iloc[i, -1])
+    N = len(y)
+    T = t[1] - t[0]
+    yf = fft(y)
+    xf = fftfreq(N, T)
+    peakfreq = xf[np.argmax(yf)]
+    if i+1 % 8 == 0 and i != 0:
+        j += 1
+    PeakFrequencies[i%8, j] = peakfreq
+    TOA[i%8, j] = pridb.iloc[i, 1]
 
 # Asymmetric Assumption
 Frequency = []
 Velocity = []
-with open('A0.csv', newline='') as A0:
+with open('/dispersion_curves/A0.csv', newline='') as A0:
     Data = csv.reader(A0)
 # Size = len(Data)
 # Frequency= np.zero(Size)
@@ -28,7 +48,7 @@ fA0 = sp.interpolate.interp1d(Frequency, Velocity, kind="linear", fill_value="ex
 # Symmetric Below
 Velocity1 = []
 Frequency1 = []
-with open('S0.csv', newline='') as S0:
+with open('dispersion_curves/S0.csv', newline='') as S0:
     Data1 = csv.reader(S0)
 # Size = len(Data)
 # Frequency= np.zero(Size)
@@ -57,11 +77,18 @@ for i in range(len(DamageCoordinates)):
 CalculatedTOAS = np.zeros((8,4))
 CalculatedTOAA = np.zeros((8,4))
 
-for i in range(7):
-    for j in range(3):
-        TOFS = SensorDistances[i, j]/fS0(PeakFrequencies[])
-        TOFA = SensorDistances[i, j]/fA0()
 
+for i in range(7):
+    TOFS = []
+    TOFA = []
+    for j in range(3):
+        TOFS.append(SensorDistances[i, j]/fS0())
+        TOFA.append(SensorDistances[i, j]/fA0())
+        CalculatedTOAS[i, j] = TOFS[j] - TOFS[0]
+        CalculatedTOAA[i, j] = TOFA[j] - TOFA[0]
+
+DiffTOAS = CalculatedTOAS - TOA
+DiffTOAA = CalculatedTOAA - TOA
 
 
 
