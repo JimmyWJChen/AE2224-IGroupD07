@@ -435,11 +435,18 @@ if __name__ == '__main__':
 """
     relax_factor = 1.
     vT_init = np.array([np.random.uniform(0.,100000.), np.random.uniform(0.,100000.)])
+    print(f'initial guess is: \n {vT_init}')
     iterations = 10
 
     # define object
     PLB = PLB_velo()
-    # get velocity
+    # get velocity of one experiment
+    v, v_avg = PLB.find_PLB_velo_all_tests("PCLO", relax_factor, vT_init, iterations)
+    print(f'v array is: \n {v}')
+    print(f'average v of PCLS is: \n {v_avg}')
+
+    """
+    # get velocity of all experiments 
     v1, v2, v3, v4, v5, v6, v_avg = PLB.PLB_velo_all_labels(relax_factor, vT_init, iterations)
     print(f'v_list of PCLS: \n {v1}')
     print(f'v_list of PCLO is: \n {v2}')
@@ -448,4 +455,4 @@ if __name__ == '__main__':
     print(f'v_list of ST is: \n {v5}')
     print(f'v_list of T is: \n {v6}')
     print(f'average velocity of all experiments is: \n {v_avg}')
-
+"""
