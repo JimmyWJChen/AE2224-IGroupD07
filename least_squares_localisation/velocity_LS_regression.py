@@ -1,6 +1,7 @@
 import least_squares as ls
 import numpy as np
 import os, sys
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import data_import as di
 
@@ -8,14 +9,32 @@ import data_import as di
 This script will find the PLB velocities for a given sensor set-up and PLB tests.
 """
 
+
 class PLB_velo():
     """
     PLB_velo class will include everything needed to find the optimal PLB wavespeed
     for all settings
 
+    Attributes:
+    testlabels (list)
+    x = AE coordinates (n*2 array, per label)
+    S = sensor coordinates (m*2 array, per label)
+    testlabel (string, per label)
+    testno (list)
+    channels (int, per label)
+    events (int, per label)
+
+    methods:
+    tau_sorter() -> tau_array (events * channels array)
+    find_PLB_velo_iso_one_test() -> v (n vector), v_avg (scalar)
+    find_PLB_velo_all_tests() -> v (number of tests * events array), v_avg (scalar)
+    PLB_velo_average() - > v_avg (scalar)
+    PLB_velo_all_labels() -> number of labels * list of v (number of tests * events array), v_avg (scalar)
+
 
     """
 
+    # initialise the class variables
     def __init__(self):
         """
         initialise object with specific setting
@@ -30,7 +49,7 @@ class PLB_velo():
         self.testlabels = ["PCLS", "PCLO", "PST", "PT", "ST", "T"]
 
         self.x1 = np.array([[0.060, 0.100], [0.100, 0.100], [0.080, 0.090], [0.070, 0.080],
-                   [0.090, 0.080], [0.080, 0.070], [0.060, 0.060], [0.100, 0.060]])
+                            [0.090, 0.080], [0.080, 0.070], [0.060, 0.060], [0.100, 0.060]])
         self.S1 = np.array([[0.050, 0.120], [0.120, 0.120], [0.040, 0.040], [0.110, 0.040]])
         self.testlabel1 = "PCLS"
         self.testno = [1, 2, 3]
@@ -38,7 +57,7 @@ class PLB_velo():
         self.events1 = 8
 
         self.x2 = np.array([[0.060, 0.100], [0.100, 0.100], [0.080, 0.090], [0.070, 0.080],
-                      [0.080, 0.080], [0.090, 0.080], [0.080, 0.070], [0.060, 0.060], [0.100, 0.060]])
+                            [0.080, 0.080], [0.090, 0.080], [0.080, 0.070], [0.060, 0.060], [0.100, 0.060]])
         self.S2 = np.array([[0.050, 0.120], [0.120, 0.120], [0.040, 0.040], [0.110, 0.040]])
         self.testlabel2 = "PCLO"
         self.testno = [1, 2, 3]
@@ -46,51 +65,50 @@ class PLB_velo():
         self.events2 = 9
 
         self.x3 = np.array([[0.175, 0.225], [0.200, 0.225],
-                      [0.225, 0.225], [0.175, 0.200], [0.200, 0.200], [0.225, 0.200],
-                      [0.175, 0.175], [0.200, 0.175], [0.225, 0.175]])
+                            [0.225, 0.225], [0.175, 0.200], [0.200, 0.200], [0.225, 0.200],
+                            [0.175, 0.175], [0.200, 0.175], [0.225, 0.175]])
         self.S3 = np.array([[0.100, 0.275], [0.300, 0.275], [0.200, 0.250], [0.250, 0.150],
-                      [0.150, 0.125], [0.350, 0.125], [0.100, 0.075], [0.300, 0.075]])
+                            [0.150, 0.125], [0.350, 0.125], [0.100, 0.075], [0.300, 0.075]])
         self.testlabel3 = "PST"
         self.testno = [1, 2, 3]
         self.channels3 = 8
         self.events3 = 9
 
         self.x4 = np.array([[0.175, 0.225], [0.200, 0.225],
-                      [0.225, 0.225], [0.175, 0.200], [0.200, 0.200], [0.225, 0.200],
-                      [0.175, 0.175], [0.200, 0.175], [0.225, 0.175]])
+                            [0.225, 0.225], [0.175, 0.200], [0.200, 0.200], [0.225, 0.200],
+                            [0.175, 0.175], [0.200, 0.175], [0.225, 0.175]])
         self.S4 = np.array([[0.100, 0.275], [0.300, 0.275], [0.200, 0.250], [0.250, 0.150],
-                           [0.150, 0.125], [0.350, 0.125], [0.100, 0.075], [0.300, 0.075]])
+                            [0.150, 0.125], [0.350, 0.125], [0.100, 0.075], [0.300, 0.075]])
         self.testlabel4 = "PT"
         self.testno = [1, 2, 3]
         self.channels4 = 8
         self.events4 = 9
 
         self.x5 = np.array([[0.150, 0.250], [0.250, 0.250], [0.175, 0.225], [0.200, 0.225],
-                           [0.225, 0.225], [0.175, 0.200], [0.200, 0.200], [0.225, 0.200],
-                           [0.175, 0.175], [0.200, 0.175], [0.225, 0.175], [0.150, 0.150],
-                           [0.100, 0.100], [0.150, 0.100], [0.250, 0.100], [0.300, 0.100],
-                           [0.100, 0.300], [0.300, 0.300]])
+                            [0.225, 0.225], [0.175, 0.200], [0.200, 0.200], [0.225, 0.200],
+                            [0.175, 0.175], [0.200, 0.175], [0.225, 0.175], [0.150, 0.150],
+                            [0.100, 0.100], [0.150, 0.100], [0.250, 0.100], [0.300, 0.100],
+                            [0.100, 0.300], [0.300, 0.300]])
         self.S5 = np.array([[0.100, 0.275], [0.300, 0.275], [0.200, 0.250], [0.250, 0.150],
-                           [0.150, 0.125], [0.350, 0.125], [0.100, 0.075], [0.300, 0.075]])
+                            [0.150, 0.125], [0.350, 0.125], [0.100, 0.075], [0.300, 0.075]])
         self.testlabel5 = "ST"
         self.testno = [1, 2, 3]
         self.channels5 = 8
         self.events5 = 18
 
         self.x6 = np.array([[0.150, 0.250], [0.250, 0.250], [0.175, 0.225], [0.200, 0.225],
-                           [0.225, 0.225], [0.175, 0.200], [0.200, 0.200], [0.225, 0.200],
-                           [0.175, 0.175], [0.200, 0.175], [0.225, 0.175], [0.150, 0.150],
-                           [0.100, 0.100], [0.150, 0.100], [0.250, 0.100], [0.300, 0.100],
-                           [0.100, 0.300], [0.300, 0.300]])
+                            [0.225, 0.225], [0.175, 0.200], [0.200, 0.200], [0.225, 0.200],
+                            [0.175, 0.175], [0.200, 0.175], [0.225, 0.175], [0.150, 0.150],
+                            [0.100, 0.100], [0.150, 0.100], [0.250, 0.100], [0.300, 0.100],
+                            [0.100, 0.300], [0.300, 0.300]])
         self.S6 = np.array([[0.100, 0.275], [0.300, 0.275], [0.200, 0.250], [0.250, 0.150],
-                           [0.150, 0.125], [0.350, 0.125], [0.100, 0.075], [0.300, 0.075]])
+                            [0.150, 0.125], [0.350, 0.125], [0.100, 0.075], [0.300, 0.075]])
         self.testlabel6 = "T"
         self.testno = [1, 2, 3]
         self.channels6 = 8
         self.events6 = 18
 
-
-
+    # get the arrays of time differences
     def tau_sorter(self, testlabel: str, testno: int):
         """
         For a testlabel and testno, give the differences in ToA as an (n * m) array.
@@ -109,7 +127,6 @@ class PLB_velo():
         use method .iloc[:, 1:3] to get the times and channel numbers only
 
         """
-
 
         # set number of channels
         if testlabel == "PCLS":
@@ -134,37 +151,51 @@ class PLB_velo():
             raise Exception('Choose a valid test label.')
 
 
-        tau_array = np.zeros(events, channels)
 
         # get pridb of testlabel and testno
         pridb = di.getPrimaryDatabase(testlabel, testno)
+        print(f'dataset label and test number are: \n {testlabel}, {testno}')
         # get the sensor times from tradb
-        sensor_times = di.filterPrimaryDatabase(pridb, testlabel, testno).iloc[:, 1:3].to_numpy()
+        sensor_times = di.filterPrimaryDatabase(pridb, testlabel, testno).iloc[:, 1].to_numpy()
+        print(f'sensor times are: \n {sensor_times}')
+        channel_tags = di.filterPrimaryDatabase(pridb, testlabel, testno).iloc[:, 2].to_numpy()
+        print(f'channel tags are: \n {channel_tags}')
+        number_of_events = np.count_nonzero(channel_tags == 1)
+        print(f'number of events is: \n {number_of_events}')
+
         # separate sensor times into times per sensor
         # set the times of channel 1 as the reference value
-        times_channel_1 = sensor_times[0:events, 0]
+        if events != number_of_events:
+            events = number_of_events
+        tau_array = np.zeros((events, channels))
+        times_channel_1 = sensor_times[0:events]
         # calculate time differences for all the other channels
         for i in range(1, channels):
-            times_channel_i = sensor_times[i*events:(i+1)*events, 0]
+            times_channel_i = sensor_times[i * events:(i + 1) * events]
             tau_channel_i = times_channel_i - times_channel_1
-            tau_array[:, 1] = tau_channel_i
+            tau_array[:, i] = tau_channel_i
+            # each row in tau_array is equal to the tau_vector
 
         return tau_array
 
-
+    # find PLB velocities for one test
     def find_PLB_velo_iso_one_test(self, testlabel, testno, relax_factor, vT_init, iterations):
         """
         For a given array of emission locations and one test label and number,
         find the wave speed iteratively for each event.
 
-        setting = the setting of the data (PCLS, PCLO or full panel)
+        n = number of events
+        testlabel = label of the test (either PCLS, PCLO, PST, PT, ST, T)
+        testno = number of the test (either 1, 2 or 3)
         x = AE location (n * 2) matrix
         S = array of sensor locations  (m*2 matrix)
         tau = Time-of-arrival difference w.r.t. the first sensor (n * m-vector)
         relax_factor = factor of relaxation (scalar)
         vT_init = Initial condition guess of velocity and T (2-vector)
         iterations = Nr. of iterations (scalar)
-        returns: wave velocity (n vector)
+        returns: wave velocity (n vector), average velocity (scalar)
+
+
 
         """
         # set x and S
@@ -189,22 +220,121 @@ class PLB_velo():
         else:
             raise Exception('Choose a valid test label.')
 
-
         tau_array = self.tau_sorter(testlabel, testno)
 
-        v = np.zeros(len(x[:,0]))
+        v = np.zeros(len(x[:, 0]))
         for i in range(len(v)):
-            v[i] = ls.findVelocityIso_alt(x[i,:], S, tau_array[i, :],
+            v[i] = ls.findVelocityIso_alt(x[i, :], S, tau_array[i, :],
                                           relax_factor, vT_init, iterations)[0]
 
-        return v
+        return v, np.average(v)
 
-
-
-
-
-    def set_state(self, setting):
+    # get PLB velocities from all tests
+    def find_PLB_velo_all_tests(self, testlabel, relax_factor, vT_init, iterations):
         """
+        For a given testlabel, calculate the wave speeds from all test numbers
+
+        n = number of events
+        k = number of tests
+
+        testlabel = label of the test (either PCLS, PCLO, PST, PT, ST, T)
+        relax_factor = factor of relaxation (scalar)
+        vT_init = Initial condition guess of velocity and T (2-vector)
+        iterations = Nr. of iterations (scalar)
+        returns: wave velocity (k*n vector), average velocity (scalar)
+
+        """
+
+        # set number of events
+        if testlabel == "PCLS":
+            channels = self.channels1
+            events = self.events1
+        elif testlabel == "PCLO":
+            channels = self.channels2
+            events = self.events2
+        elif testlabel == "PST":
+            channels = self.channels3
+            events = self.events3
+        elif testlabel == "PT":
+            channels = self.channels4
+            events = self.events4
+        elif testlabel == "ST":
+            channels = self.channels5
+            events = self.events5
+        elif testlabel == "T":
+            channels = self.channels6
+            events = self.events6
+        else:
+            raise Exception('Choose a valid test label.')
+
+        v_array = np.zeros((len(self.testno), events))
+        v_averages = np.zeros(len(self.testno))
+        for i in range(len(self.testno)):
+            v, v_avg = self.find_PLB_velo_iso_one_test(testlabel, self.testno[i], relax_factor,
+                                                       vT_init, iterations)
+            v_array[i, :] = v
+            # v becomes a row in v_array
+            v_averages[i] = v_avg
+
+        return v_array, np.average(v_averages)
+
+    # get average velocity
+    def PLB_velo_average(self, v):
+        """
+        For a given v, calculate the average v
+
+        v = array of wavespeeds (n vector)
+        returns: average v (scalar)
+
+        """
+        v_avg = np.average(v)
+        return v_avg
+
+    # get PLB velocities from all labels
+    def PLB_velo_all_labels(self, relax_factor, vT_init, iterations):
+        """
+        Finds the velocities and the average velocity for all test labels
+
+        n = number of events
+        k = number of tests
+        l = number of labels
+
+        relax_factor = factor of relaxation (scalar)
+        vT_init = Initial condition guess of velocity and T (2-vector)
+        iterations = Nr. of iterations (scalar)
+        returns: wave velocities l times (k*n array), average velocity (scalar)
+
+        My deepest apologies for using lists here. I didn't want to bother with 3D arrays.
+        """
+        v_list_1 = []
+        v_list_2 = []
+        v_list_3 = []
+        v_list_4 = []
+        v_list_5 = []
+        v_list_6 = []
+        v_avg_array = np.zeros(len(self.testlabels))
+        for i in range(len(self.testlabels)):
+            v_array, v_avg = self.find_PLB_velo_all_tests(self.testlabels[i], relax_factor,
+                                                          vT_init, iterations)
+            v_avg_array[i] = v_avg
+            if i == 0:
+                v_list_1.append(v_array)
+            elif i == 1:
+                v_list_2.append(v_array)
+            elif i == 2:
+                v_list_3.append(v_array)
+            elif i == 3:
+                v_list_4.append(v_array)
+            elif i == 4:
+                v_list_5.append(v_array)
+            elif i == 5:
+                v_list_6.append(v_array)
+        return v_list_1, v_list_2, v_list_3, v_list_4, v_list_5, v_list_6, np.average(v_avg_array)
+
+
+"""    
+    def set_state(self, setting):
+        "
         For a setting, give the state.
 
         x = AE location (n * 2) matrix
@@ -215,7 +345,7 @@ class PLB_velo():
         setting == 2 gives PCLO setting
         setting == 3 gives full panel setting
 
-        """
+        "
 
         if setting == 1:
             x = np.array([[0.060, 0.100], [0.100, 0.100], [0.080, 0.090], [0.070, 0.080],
@@ -276,11 +406,14 @@ class PLB_velo():
             raise Exception('You have to choose either 1, 2 or 3')
 
         return x, S, tau
+"""
 
 if __name__ == '__main__':
     """
     	Define the state first 
     	"""
+
+    """
     # PCLS locations
     x1 = np.array([[0.060, 0.100], [0.100, 0.100], [0.080, 0.090], [0.070, 0.080],
                    [0.090, 0.080], [0.080, 0.070], [0.060, 0.060], [0.100, 0.060]])
@@ -299,5 +432,20 @@ if __name__ == '__main__':
                    [0.150, 0.125], [0.350, 0.125], [0.100, 0.075], [0.300, 0.075]])
     # ToA differences per AE location
     tau = np.array([0, -0.0000033361194415, 0.00000395852087374, 0.00000820232866552])
-
+"""
     relax_factor = 1.
+    vT_init = np.array([np.random.uniform(0.,100000.), np.random.uniform(0.,100000.)])
+    iterations = 10
+
+    # define object
+    PLB = PLB_velo()
+    # get velocity
+    v1, v2, v3, v4, v5, v6, v_avg = PLB.PLB_velo_all_labels(relax_factor, vT_init, iterations)
+    print(f'v_list of PCLS: \n {v1}')
+    print(f'v_list of PCLO is: \n {v2}')
+    print(f'v_list of PST is: \n {v3}')
+    print(f'v_list of PT is: \n {v4}')
+    print(f'v_list of ST is: \n {v5}')
+    print(f'v_list of T is: \n {v6}')
+    print(f'average velocity of all experiments is: \n {v_avg}')
+
