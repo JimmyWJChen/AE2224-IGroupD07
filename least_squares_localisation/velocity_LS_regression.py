@@ -226,7 +226,7 @@ class PLB_velo():
         for i in range(len(v)):
             v[i] = ls.findVelocityIso_alt(x[i, :], S, tau_array[i, :],
                                           relax_factor, vT_init, iterations)[0]
-
+        print(f'v of this test are: \n {v}')
         return v, np.average(v)
 
     # get PLB velocities from all tests
@@ -241,7 +241,8 @@ class PLB_velo():
         relax_factor = factor of relaxation (scalar)
         vT_init = Initial condition guess of velocity and T (2-vector)
         iterations = Nr. of iterations (scalar)
-        returns: wave velocity (k*n vector), average velocity (scalar)
+        returns: wave velocity (k*n array), velocity blob (k*n vector),
+        average velocity of event average velocities (scalar)
 
         """
 
@@ -268,26 +269,29 @@ class PLB_velo():
             raise Exception('Choose a valid test label.')
 
         v_array = np.zeros((len(self.testno), events))
+        v_blob = []
         v_averages = np.zeros(len(self.testno))
         for i in range(len(self.testno)):
             v, v_avg = self.find_PLB_velo_iso_one_test(testlabel, self.testno[i], relax_factor,
                                                        vT_init, iterations)
             v_array[i, :] = v
             # v becomes a row in v_array
+            for j in range(len(v)):
+                v_blob.append(v[j])
             v_averages[i] = v_avg
 
-        return v_array, np.average(v_averages)
+        return v_array, np.array(v_blob), np.average(v_averages)
 
     # get average velocity
-    def PLB_velo_average(self, v):
+    def PLB_velo_average(self, v_blob):
         """
-        For a given v, calculate the average v
+        For a given v blob, calculate the average v
 
-        v = array of wavespeeds (n vector)
+        v = array of wavespeeds ( vector)
         returns: average v (scalar)
 
         """
-        v_avg = np.average(v)
+        v_avg = np.average(v_blob)
         return v_avg
 
     # get PLB velocities from all labels
@@ -302,7 +306,8 @@ class PLB_velo():
         relax_factor = factor of relaxation (scalar)
         vT_init = Initial condition guess of velocity and T (2-vector)
         iterations = Nr. of iterations (scalar)
-        returns: wave velocities l times (k*n array), average velocity (scalar)
+        returns: wave velocities l times (k*n array), v_mega_blob (l*k*n vector),
+         average velocity (scalar)
 
         My deepest apologies for using lists here. I didn't want to bother with 3D arrays.
         """
@@ -313,10 +318,13 @@ class PLB_velo():
         v_list_5 = []
         v_list_6 = []
         v_avg_array = np.zeros(len(self.testlabels))
+        v_mega_blob = []
         for i in range(len(self.testlabels)):
-            v_array, v_avg = self.find_PLB_velo_all_tests(self.testlabels[i], relax_factor,
+            v_array, v_blob, v_avg = self.find_PLB_velo_all_tests(self.testlabels[i], relax_factor,
                                                           vT_init, iterations)
             v_avg_array[i] = v_avg
+            for j in range(len(v_blob)):
+                v_mega_blob.append(v_blob[j])
             if i == 0:
                 v_list_1.append(v_array)
             elif i == 1:
@@ -329,7 +337,8 @@ class PLB_velo():
                 v_list_5.append(v_array)
             elif i == 5:
                 v_list_6.append(v_array)
-        return v_list_1, v_list_2, v_list_3, v_list_4, v_list_5, v_list_6, np.average(v_avg_array)
+        return v_list_1, v_list_2, v_list_3, v_list_4, v_list_5, v_list_6,\
+               np.array(v_mega_blob), np.average(v_avg_array)
 
 
 """    
@@ -441,9 +450,13 @@ if __name__ == '__main__':
     # define object
     PLB = PLB_velo()
     # get velocity of one experiment
-    v, v_avg = PLB.find_PLB_velo_all_tests("PCLO", relax_factor, vT_init, iterations)
+    v, v_blob, v_avg = PLB.find_PLB_velo_all_tests("PCLO", relax_factor, vT_init, iterations)
     print(f'v array is: \n {v}')
+    print(f'v blob is: \n {v_blob}')
     print(f'average v of PCLS is: \n {v_avg}')
+    v_blob_average = PLB.PLB_velo_average(v_blob)
+    print(f'average v blob velocity is: \n {v_blob_average}')
+
 
     """
     # get velocity of all experiments 
