@@ -486,7 +486,7 @@ if __name__ == '__main__':
     # define object
     PLB = PLB_velo()
     # get velocity of one experiment
-    v, v_blob, v_avg = PLB.find_PLB_velo_all_tests("PST", relax_factor, vT_init, iterations)
+    v, v_blob, v_avg = PLB.find_PLB_velo_all_tests("PST", relax_factor, np.copy(vT_init), iterations)
     print(f'v array is: \n {v}')
     print(f'v blob is: \n {v_blob}')
     print(f'average v of PCLS is: \n {v_avg}')
