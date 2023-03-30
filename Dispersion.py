@@ -38,7 +38,7 @@ with open('testing_data/toa/PLB-4-channels/PLBS4_CP090_' + TestType + str(TestNo
     toa = csv.reader(TOAData)
     i = 0
     for row in toa:
-        TOA[t, :] = row
+        TOA[i, :] = row
         i += 1
 
 # Asymmetric Assumption
