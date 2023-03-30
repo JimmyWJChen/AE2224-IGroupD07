@@ -16,25 +16,30 @@ pridb = filterPrimaryDatabase(getPrimaryDatabase(TestType, TestNo), TestType, Te
 
 PeakFrequencies = np.zeros((8, 4))
 
+def getPeakFrequency(t, y):
+    N = len(y)
+    T = t[1] - t[0]
+    yf = fft(y)
+    xf = fftfreq(N, T)[:N // 2]
+    PeakFreq = xf[np.argmax(yf[:N // 2])]
+    return PeakFreq
+
 j = 0
 
 for i in range(32):
     y, t = getWaveform(TestType, TestNo, pridb.iloc[i, -1])
-    N = len(y)
-    T = t[1] - t[0]
-    yf = fft(y)
-    xf = fftfreq(N, T)[:N//2]
-    PeakFreq = xf[np.argmax(yf[:N//2])]
+    PeakFreq = getPeakFrequency(t, y)
     if i % 8 == 0 and i != 0:
         j += 1
     PeakFrequencies[i%8, j] = PeakFreq
     # TOA[i % 8, j] = pridb.iloc[i, 1]
-TimeOfArrival = np.array(8,4)
+TOA = np.zeros(8, 4)
 with open('testing_data/toa/PLB-4-channels/PLBS4_CP090_' + TestType + str(TestNo) + '.csv', newline = '') as TOAData:
     toa = csv.reader(TOAData)
+    i = 0
     for row in toa:
-
-    print(toa)
+        TOA[t, :] = row
+        i += 1
 
 # Asymmetric Assumption
 Frequency = []
