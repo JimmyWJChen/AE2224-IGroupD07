@@ -96,15 +96,14 @@ CalculatedTOAS = np.zeros((8, 4))
 CalculatedTOAA = np.zeros((8, 4))
 
 
-for i in range(7):
+for i in range(8):
     TOFS = []
     TOFA = []
-    for j in range(3):
+    for j in range(4):
         TOFS.append(SensorDistances[i, j]/fS0(np.median(PeakFrequencies[i, :])))
         TOFA.append(SensorDistances[i, j]/fA0(np.median(PeakFrequencies[j, :])))
         CalculatedTOAS[i, j] = TOFS[j] - TOFS[0]
         CalculatedTOAA[i, j] = TOFA[j] - TOFA[0]
-
 
 # DiffTOAS = CalculatedTOAS - TOA
 # DiffTOAA = CalculatedTOAA - TOA
