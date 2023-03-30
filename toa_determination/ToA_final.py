@@ -36,16 +36,19 @@ def get_toa_filtered(file_name, n_sensors):
         print("In file: " + file_name + " the number of signals is not divisble by 4")
         return None
     
+    channel_lst = np.zeros((n_values, 1))
     for i, trai in enumerate(trai_lst):
         y,t = di.getWaveform(label, testno, int(trai))
         hc_index = vae.timepicker.hinkley(y, alpha=5)[1]
         time_difference = t[hc_index]
         time_lst[i][0] = time_lst[i][0] + time_difference
+        channel_lst[i] = time_lst[i][1]
         
     check_channels(file_name, time_lst, n_sensors)
+    
 
     new_times = np.reshape(time_lst[:,0], (n_sensors, int(n_values/n_sensors)))
-    new_times = np.sort(new_times, axis=0) 
+    new_channels = np.reshape(channel_lst, (n_sensors, int(n_values/n_sensors)))
     
     return np.transpose(new_times)
 
@@ -54,14 +57,14 @@ def get_toa_filtered(file_name, n_sensors):
     
 def get_toa_plb(n_sensors):
     plb_files = os.listdir(f"AE2224-IGroupD07\Testing_data\PLB-{n_sensors}-channels")
-    unsorted = ["PTS3","ST2","ST3","T1","T2","T3","TEST"]
+    #unsorted = ["PTS3","ST2","ST3","T1","T2","T3","TEST"]
     
     for file in plb_files:
         if file[-3:] == "idb":
-            if file == "PLBS8_QI090_ST1.pridb":
+            if file != "PLBS8_QI090_ST1.pridb":
                 toa_array = get_toa_filtered(file, n_sensors)
-                np.savetxt(f"AE2224-IGroupD07\\testing_data\\toa\PLB-{n_sensors}-channels\{file[:-5]}csv", toa_array, delimiter=",")
+                np.savetxt(f"AE2224-IGroupD07\\testing_data\\toa_improved\PLB-{n_sensors}-channels\{file[:-5]}csv", toa_array, delimiter=",")
             
-get_toa_plb(8)
+get_toa_plb(4)
     
     
