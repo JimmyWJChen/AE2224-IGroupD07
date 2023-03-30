@@ -4,7 +4,7 @@ from math import *
 from scipy.fft import fft, fftfreq
 import matplotlib.pyplot as plt
 import csv
-from data_import import getWaveform, getPrimaryDatabase, filterPrimaryDatabase
+from data_import import getWaveform, getPrimaryDatabase, filterPrimaryDatabase, getPeakFrequency
 
 TestType = 'PCLS'
 TestNo = 2
@@ -15,6 +15,7 @@ SensorCoordinates = np.array([[50, 120], [120, 120], [40, 40], [110, 40]])
 pridb = filterPrimaryDatabase(getPrimaryDatabase(TestType, TestNo), TestType, TestNo)
 
 PeakFrequencies = np.zeros((8, 4))
+
 
 def getPeakFrequency(t, y):
     N = len(y)
@@ -100,12 +101,11 @@ for i in range(7):
         TOFA.append(SensorDistances[i, j]/fA0(np.median(PeakFrequencies[j, :])))
         CalculatedTOAS[i, j] = TOFS[j] - TOFS[0]
         CalculatedTOAA[i, j] = TOFA[j] - TOFA[0]
-'''
-DiffTOAS = CalculatedTOAS - TOA
-DiffTOAA = CalculatedTOAA - TOA
+
+
+# DiffTOAS = CalculatedTOAS - TOA
+# DiffTOAA = CalculatedTOAA - TOA
 
 print(PeakFrequencies)
 print(CalculatedTOAS)
 print(TOA)
-
-'''
