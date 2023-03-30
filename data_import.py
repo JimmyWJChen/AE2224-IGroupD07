@@ -2,6 +2,8 @@ import os
 
 import vallenae as vae
 import pandas as pd
+from scipy.fft import fft, fftfreq
+import numpy as np
 
 
 def getPrimaryDatabase(label, testno=1):
@@ -32,7 +34,38 @@ def getWaveform(label, testno=1, trai=1):
     return y, t
 
 
+def getPeakFrequency(y, t):
+    N = len(y)
+    T = t[1] - t[0]
+    yf = fft(y)
+    xf = fftfreq(N, T)[:N // 2]
+    PeakFreq = xf[np.argmax(yf[:N // 2])]
+    return PeakFreq
+
+def addPeakFreq(pridb, label, testno=1):
+    try:
+        pridb = pridb.read_hits()
+    except AttributeError:
+        pass
+    trais = pridb['trai']
+    frequencies = []
+    for trai in trais:
+        y, t = getWaveform(label, testno, trai)
+        frequencies.append(getPeakFrequency(y, t))
+    pridb.insert(4, "frequency", frequencies, True)
+    return pridb
+
+
 def filterPrimaryDatabase(pridb, label, testno, sortby="energy", epsilon=0.2, thamp=0.009, thdur = 0.002, thenergy=1e5, thstrength=2500, thcounts=70):
+
+    if label == "ST" and testno == 1:
+        epsilon = 0.1
+        thamp = 0.005
+        thdur = 0.002
+        thenergy = 1e5
+        thstrength = 1500
+        thcounts = 70
+
     pridb = pridb.read_hits()
     pridb = pridb[pridb['amplitude'] >= thamp]
     pridb = pridb[pridb['duration'] >= thdur]
@@ -61,17 +94,18 @@ def filterPrimaryDatabase(pridb, label, testno, sortby="energy", epsilon=0.2, th
              while len(pridb_output.loc[pridb_output['channel'] == channel]) > 18:
                  idx_to_drop = pridb_output.loc[pridb_output['channel'] == channel]['energy'].idxmin()
                  pridb_output.drop(idx_to_drop, inplace=True)
-    elif label == "PST" and testno == 3:
-        for channel in range(1, 8 + 1):
-            while len(pridb_output.loc[pridb_output['channel'] == channel]) > 9:
-                idx_to_drop = pridb_output.loc[pridb_output['channel'] == channel]['energy'].idxmin()
-                pridb_output.drop(idx_to_drop, inplace=True)
-    elif label == "PST" and testno == 2:
+    elif label == "PST" and testno == 2 or testno == 3:
         for channel in range(1, 8 + 1):
             while len(pridb_output.loc[pridb_output['channel'] == channel]) > 9:
                 idx_to_drop = pridb_output.loc[pridb_output['channel'] == channel]['time'].idxmin()
                 pridb_output.drop(idx_to_drop, inplace=True)
-
+    elif label == "T" and testno == 3:
+        for channel in range(1, 8 + 1):
+            channel_data = pridb_output.loc[pridb_output['channel'] == channel]
+            rows_to_drop = [13, 15]
+            for row in rows_to_drop:
+                idx_to_drop = channel_data.index[row - 1]
+                pridb_output.drop(idx_to_drop, inplace=True)
     return pridb_output
 
 
@@ -81,12 +115,16 @@ def getHitsPerSensor(pridb):
 
 
 if __name__ == "__main__":
-    testlabel = "ST"
-    testno = 1
+    testlabel = "PST"
+    testno = 3
     pridb = getPrimaryDatabase(testlabel, testno)
+    
 
-    print(getHitsPerSensor(pridb.read_hits()))
-    # print(pridb.read_hits())
+    # print(getHitsPerSensor(pridb.read_hits()))
+    print(pridb.read_hits())
     # print(filterPrimaryDatabase(pridb))
-    print(getHitsPerSensor(filterPrimaryDatabase(pridb, testlabel, testno)))
+    filtereddata = filterPrimaryDatabase(pridb, testlabel, testno)
+    filtereddata = addPeakFreq(filtereddata, testlabel, testno)
+    print(filtereddata.loc[filtereddata['channel'] == 1 ])
+    print(filtereddata.loc[filtereddata['channel'] == 2])
     # pridb.read_hits().to_csv('data.csv')
