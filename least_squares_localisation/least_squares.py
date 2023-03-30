@@ -319,9 +319,18 @@ if __name__ == '__main__':
 	# 						   S=np.array([[0.05, 0.05], [0.95, 0.05], [0.05, 0.95], [0.95, 0.95]]),
 	# 						   tau=np.array([0, -0.00999842971944, -0.00930535282398, -0.0214484087491]), relax_factor=1.
 	#print(np.array([np.random.uniform(0.,100000.), np.random.uniform(0.,100000.)]))
+	#print(v, t)
+	v, t = findVelocityIso_alt(x=np.array([0.300, 0.300]),
+							   S=np.array([[0.100, 0.275], [0.300, 0.275], [0.200, 0.250], [0.250, 0.150],
+                            [0.150, 0.125], [0.350, 0.125], [0.100, 0.075], [0.300, 0.075]]),
+							   tau=np.array([0.00000000e+00, - 2.79000000e-05, - 1.43000000e-05, - 6.89999999e-06,
+	 4.80000000e-06, - 1.90000000e-06,  1.79000000e-05,  3.09999999e-06]),
+							   relax_factor=1.,
+							   vT_init=np.array([np.random.uniform(0., 100000.), np.random.uniform(0., 100000.)]))
 	print(v, t)
 
-	random_guess_velocity(500, x, S, tau, 10000, 100, relax_factor, iterations=10)
+
+	#random_guess_velocity(500, x, S, tau, 10000, 100, relax_factor, iterations=10)
 
 
 
