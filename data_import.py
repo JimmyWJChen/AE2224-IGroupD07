@@ -35,6 +35,15 @@ def getWaveform(label, testno=1, trai=1):
 
 
 def filterPrimaryDatabase(pridb, label, testno, sortby="energy", epsilon=0.2, thamp=0.009, thdur = 0.002, thenergy=1e5, thstrength=2500, thcounts=70):
+
+    if label == "ST" and testno == 1:
+        epsilon = 0.1
+        thamp = 0.005
+        thdur = 0.002
+        thenergy = 1e5
+        thstrength = 1500
+        thcounts = 70
+
     pridb = pridb.read_hits()
     pridb = pridb[pridb['amplitude'] >= thamp]
     pridb = pridb[pridb['duration'] >= thdur]
