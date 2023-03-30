@@ -5,9 +5,7 @@ import pandas
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans, AgglomerativeClustering
-# import vallenae as ae
 
-# standard threshold for AE 34dB, we have at 45dB -> thus missing IDs
 
 def standarize(datapoints):
     X_norm = datapoints - datapoints.mean()
@@ -16,7 +14,7 @@ def standarize(datapoints):
     return X_norm
 
 def PCA(datapoints, n):
-    datapoints = standarize(datapoints[["amplitude", "duration", "energy", "signal_strength", "counts"]])
+    datapoints = standarize(datapoints[["amplitude", "duration", "energy", "signal_strength", "counts", "frequency"]])
     print(datapoints)
     C = np.cov(datapoints.astype(float), rowvar=False)
     evalues, evectors = np.linalg.eigh(C)
@@ -30,26 +28,23 @@ def PCA(datapoints, n):
     var = usedValues/totalVariance
     return X_pca, var
 
-def clustering_kmeans(x_train, n_clusters):
-    cluster_model = KMeans(n_clusters=n_clusters, n_init=10).fit(x_train)
-    x_train['cluster'] = cluster_model.predict(x_train)
-    return x_train
+def clustering_kmeans(datapoints, n_clusters, params=['amplitude', 'frequency']):
+    cluster_model = KMeans(n_clusters=n_clusters, n_init=10).fit(datapoints[params])
+    datapoints['cluster'] = cluster_model.predict(datapoints[params])
+    return datapoints
 
-def clustering_hierarchical(x_train, n_clusters, linkage='ward'):
-    cluster_model = AgglomerativeClustering(n_clusters=n_clusters, linkage=linkage).fit(x_train)
-    x_train['cluster'] = cluster_model.labels_
-    return x_train
+def clustering_hierarchical(datapoints, n_clusters, linkage='ward', params=['amplitude', 'frequency']):
+    cluster_model = AgglomerativeClustering(n_clusters=n_clusters, linkage=linkage).fit(datapoints[params])
+    datapoints['cluster'] = cluster_model.labels_
+    return datapoints
 
 if __name__=="__main__":
     datapoints = di.filterPrimaryDatabase(di.getPrimaryDatabase("PCLO", 3), "PCLO", 3)
     datapoints = di.addPeakFreq(datapoints, "PCLO", 3)
     datapoints = datapoints[datapoints['channel'] == 2]
-    X_cluster = datapoints[['amplitude', 'frequency']]
-    print(X_cluster)
-    print(clustering_hierarchical(X_cluster, 4))
-    # clusters = predict(cluster_model, lookup_labels, 0, 'kmeans')
-    # data_compressed, var = PCA(datapoints, 2)
-    # plt.scatter(data_compressed[0], data_compressed[1])
-    # plt.show()
-    # print(data_compressed)
-    # print(var)
+    n_clusters = 3
+    datapoints = clustering_kmeans(datapoints, n_clusters)
+    for i in range(n_clusters):
+        pridb_cluster = datapoints.loc[datapoints['cluster'] == i].copy()
+        plt.scatter(pridb_cluster['frequency'], pridb_cluster['amplitude'])
+    plt.show()
