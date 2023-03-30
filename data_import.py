@@ -70,12 +70,7 @@ def filterPrimaryDatabase(pridb, label, testno, sortby="energy", epsilon=0.2, th
              while len(pridb_output.loc[pridb_output['channel'] == channel]) > 18:
                  idx_to_drop = pridb_output.loc[pridb_output['channel'] == channel]['energy'].idxmin()
                  pridb_output.drop(idx_to_drop, inplace=True)
-    elif label == "PST" and testno == 3:
-        for channel in range(1, 8 + 1):
-            while len(pridb_output.loc[pridb_output['channel'] == channel]) > 9:
-                idx_to_drop = pridb_output.loc[pridb_output['channel'] == channel]['energy'].idxmin()
-                pridb_output.drop(idx_to_drop, inplace=True)
-    elif label == "PST" and testno == 2:
+    elif label == "PST" and testno == 2 or testno == 3:
         for channel in range(1, 8 + 1):
             while len(pridb_output.loc[pridb_output['channel'] == channel]) > 9:
                 idx_to_drop = pridb_output.loc[pridb_output['channel'] == channel]['time'].idxmin()
@@ -96,7 +91,7 @@ def getHitsPerSensor(pridb):
 
 
 if __name__ == "__main__":
-    testlabel = "T"
+    testlabel = "PST"
     testno = 3
     pridb = getPrimaryDatabase(testlabel, testno)
 
