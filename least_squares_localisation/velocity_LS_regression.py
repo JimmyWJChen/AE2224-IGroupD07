@@ -175,6 +175,11 @@ class PLB_velo():
             tau_channel_i = times_channel_i - times_channel_1
             tau_array[:, i] = tau_channel_i
             # each row in tau_array is equal to the tau_vector
+            #print(np.shape(times_channel_i))
+            print(f'times of 1st channel are: \n {times_channel_1}')
+            print(f'times of channel i are: \n {times_channel_i}')
+            print(f'time differences per channel are: \n {tau_channel_i}')
+        print(f'array of time differences: \n {tau_array}')
 
         return tau_array
 
