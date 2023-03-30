@@ -12,4 +12,4 @@ epsilon - 0.2
 ['duration'] >= 0.002
 ['energy'] >= 1e5
 ['signal_strength'] >= 2800
-['counts'] >= 50]
+['counts'] >= 50

@@ -6,12 +6,12 @@ import matplotlib.pyplot as plt
 import csv
 from data_import import getWaveform, getPrimaryDatabase, filterPrimaryDatabase
 
+testno = 2
+
 DamageCoordinates = np.array([[60, 100], [100, 100], [80, 90], [70, 80], [90, 80], [80, 70], [60, 60], [100, 60]])
 SensorCoordinates = np.array([[50, 120], [120, 120], [40, 40], [110, 40]])
 
-TestType = 'PCLS'
-TestNo = 3
-pridb = filterPrimaryDatabase(getPrimaryDatabase(TestType, TestNo), TestType, TestNo)
+pridb = filterPrimaryDatabase(getPrimaryDatabase("PCLS", testno), "PCLS", testno)
 
 PeakFrequencies = np.zeros((8, 4))
 TOA = np.zeros((8, 4))
@@ -19,17 +19,16 @@ TOA = np.zeros((8, 4))
 j = 0
 
 for i in range(32):
-    y, t = getWaveform(TestType, TestNo, pridb.iloc[i, -1])
+    y, t = getWaveform("PCLS", testno, pridb.iloc[i, -1])
     N = len(y)
     T = t[1] - t[0]
     yf = fft(y)
     xf = fftfreq(N, T)[:N//2]
-    peakfreq = xf[np.argmax(yf[:N//2])]
+    PeakFreq = xf[np.argmax(yf[:N//2])]
     if i % 8 == 0 and i != 0:
         j += 1
-    PeakFrequencies[i%8, j] = peakfreq
-    print(pridb.iloc[i, -1])
-    TOA[i%8, j] = pridb.iloc[i, 1]
+    PeakFrequencies[i%8, j] = PeakFreq
+    TOA[i % 8, j] = pridb.iloc[i, 1]
 
 # Asymmetric Assumption
 Frequency = []
@@ -77,8 +76,8 @@ for i in range(len(DamageCoordinates)):
     for j in range(len(SensorCoordinates)):
         SensorDistances[i, j] = get_distance(DamageCoordinates[i], SensorCoordinates[j])
 
-CalculatedTOAS = np.zeros((8,4))
-CalculatedTOAA = np.zeros((8,4))
+CalculatedTOAS = np.zeros((8, 4))
+CalculatedTOAA = np.zeros((8, 4))
 
 '''
 for i in range(7):
@@ -97,9 +96,34 @@ DiffTOAA = CalculatedTOAA - TOA
 
 print(PeakFrequencies)
 
+y, t = getWaveform("PCLS", 1, 56)
+N = len(y)
+T = t[1] - t[0]
+yf = fft(y)
+xf = fftfreq(N, T)[:N//2]
+peakfreq1 = xf[np.argmax(yf[:N//2])]
+print(peakfreq1)
 
-'''
+plt.plot(xf, yf[:N//2])
+
+y, t = getWaveform("PCLS", 1, 70)
+N = len(y)
+T = t[1] - t[0]
+yf = fft(y)
+xf = fftfreq(N, T)[:N//2]
+peakfreq2 = xf[np.argmax(yf[:N//2])]
+print(peakfreq2)
+
+plt.plot(xf, yf[:N//2])
+
+y, t = getWaveform("PCLS", 1, 73)
+N = len(y)
+T = t[1] - t[0]
+yf = fft(y)
+xf = fftfreq(N, T)[:N//2]
+peakfreq3 = xf[np.argmax(yf[:N//2])]
+print(peakfreq3)
+
 plt.plot(xf, yf[:N//2])
 plt.show()
 
-'''

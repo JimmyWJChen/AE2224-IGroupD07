@@ -3,6 +3,8 @@ import os
 import vallenae as vae
 import pandas as pd
 
+import matplotlib.pyplot as plt
+
 
 def getPrimaryDatabase(label, testno=1):
     if label == "PCLO" or label == "PCLS":
@@ -33,6 +35,15 @@ def getWaveform(label, testno=1, trai=1):
 
 
 def filterPrimaryDatabase(pridb, label, testno, sortby="energy", epsilon=0.2, thamp=0.009, thdur = 0.002, thenergy=1e5, thstrength=2500, thcounts=70):
+
+    if label == "ST" and testno == 1:
+        epsilon = 0.1
+        thamp = 0.005
+        thdur = 0.002
+        thenergy = 1e5
+        thstrength = 1500
+        thcounts = 70
+
     pridb = pridb.read_hits()
     pridb = pridb[pridb['amplitude'] >= thamp]
     pridb = pridb[pridb['duration'] >= thdur]
@@ -85,8 +96,12 @@ if __name__ == "__main__":
     testno = 1
     pridb = getPrimaryDatabase(testlabel, testno)
 
-    print(getHitsPerSensor(pridb.read_hits()))
+    # print(getHitsPerSensor(pridb.read_hits()))
     # print(pridb.read_hits())
-    # print(filterPrimaryDatabase(pridb))
-    print(getHitsPerSensor(filterPrimaryDatabase(pridb, testlabel, testno)))
+    db = filterPrimaryDatabase(pridb, testlabel, testno, epsilon=0.01, thstrength=1000, thcounts=40, thamp=0.002)
+    print(getHitsPerSensor(db))
+    # for i in range(1, 9):
+    # plt.scatter(db['time'], db['energy'])
+    # plt.show()
+    # print(getHitsPerSensor(filterPrimaryDatabase(pridb, testlabel, testno)))
     # pridb.read_hits().to_csv('data.csv')
