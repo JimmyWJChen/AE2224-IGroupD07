@@ -355,6 +355,31 @@ class PLB_velo():
         IQR_rel = IQR/v_range
         return IQR, IQR_rel, q3, q1
 
+    # drop nonsense velocities
+    def velo_post_processing(self, v_blob, tolerance):
+        """
+        For a given v blob and tolerance,
+         drop all velocities which are nonsense
+
+        v_blob = array of velocities (vector)
+        v_std = standard deviation of all velocities (scalar)
+        tolerance = how many standard deviations off-set do you tolerate
+        returns: v_blob with removed velocities
+
+        """
+        # get the mean velo (scalar)
+        v_mean = self.PLB_velo_average(v_blob)
+        # get the std (scalar)
+        v_std = self.PLB_velo_std(v_blob)
+
+        # loop over v_blob
+        for i in range(len(v_blob)):
+            if np.abs(v_mean - v_blob[i]) > tolerance * v_std:
+                v_blob[i] = 0
+        # now get rid of all 0s
+        v_blob_new = np.delete(v_blob, np.where(v_blob == 0))
+        return v_blob_new
+
     # get PLB velocities from all labels
     def PLB_velo_all_labels(self, relax_factor, vT_init, iterations):
         """
@@ -544,6 +569,16 @@ if __name__ == '__main__':
     print(f'std of mega blob v: \n {v_mega_blob_std}')
     print(f'IQR of mega blob v: \n {v_mega_blob_iqr}, {v_mega_blob_iqr_rel}, {v_mega_blob_q3},'
           f'{v_mega_blob_q1}')
+    v_post = PLB.velo_post_processing(v_mega_blob, 2)
+    v_avg_post = PLB.PLB_velo_average(v_post)
+    v_median_post = PLB.PLB_velo_median(v_post)
+    v_post_iqr, v_post_iqr_rel, v_post_q3, v_post_q1 = PLB.PLB_velo_IQR(v_post)
+    print(f'post processing velos are: \n {v_post}')
+    print(f'average post velo is: \n {v_avg_post}')
+    print(f'median post velo is: \n {v_median_post}')
+    print(f'post velo IQR is: \n {v_post_iqr}, {v_post_iqr_rel}, {v_post_q3}, {v_post_q1}')
+
+
 
 
 
