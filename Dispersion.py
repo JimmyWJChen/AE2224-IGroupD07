@@ -6,28 +6,30 @@ import matplotlib.pyplot as plt
 import csv
 from data_import import getWaveform, getPrimaryDatabase, filterPrimaryDatabase, getPeakFrequency
 
-TestType = 'PCLS'
-TestNo = 2
+TestType = 'PCLO'
+TestNo = 3
+NoOfRows = 9
+NoOfSens = 4
 
-DamageCoordinates = np.array([[60, 100], [100, 100], [80, 90], [70, 80], [90, 80], [80, 70], [60, 60], [100, 60]])
+DamageCoordinates = np.array([[60, 100], [100, 100], [80, 90], [70, 80], [60,60], [90, 80], [80, 70], [60, 60], [100, 60]])
 DamageCoordinates = DamageCoordinates/1000
 SensorCoordinates = np.array([[50, 120], [120, 120], [40, 40], [110, 40]])
 SensorCoordinates = SensorCoordinates/1000
 
 pridb = filterPrimaryDatabase(getPrimaryDatabase(TestType, TestNo), TestType, TestNo)
 
-PeakFrequencies = np.zeros((8, 4))
+PeakFrequencies = np.zeros((NoOfRows, NoOfSens))
 
 j = 0
 
-for i in range(32):
+for i in range(4 * NoOfRows):
     y, t = getWaveform(TestType, TestNo, pridb.iloc[i, -1])
     PeakFreq = getPeakFrequency(y, t)
-    if i % 8 == 0 and i != 0:
+    if i % NoOfRows == 0 and i != 0:
         j += 1
-    PeakFrequencies[i % 8, j] = PeakFreq
+    PeakFrequencies[i % NoOfRows, j] = PeakFreq
     # TOA[i % 8, j] = pridb.iloc[i, 1]
-TOA = np.zeros((8, 4))
+TOA = np.zeros((NoOfRows, 4))
 with open('testing_data/toa/PLB-4-channels/PLBS4_CP090_' + TestType + str(TestNo) + '.csv', newline = '') as TOAData:
     Data = csv.reader(TOAData)
     i = 0
@@ -75,27 +77,27 @@ def get_distance(x, y):
     return distance
 
 
-SensorDistances = np.zeros((8, 4))
+SensorDistances = np.zeros((NoOfRows, NoOfSens))
 
 for i in range(len(DamageCoordinates)):
     for j in range(len(SensorCoordinates)):
         SensorDistances[i, j] = get_distance(DamageCoordinates[i], SensorCoordinates[j])
 
-TOAR = np.zeros((8, 4))
+TOAR = np.zeros((NoOfRows, NoOfSens))
 
-for i in range(8):
+for i in range(NoOfRows):
     TOF = []
-    for j in range(4):
+    for j in range(NoOfSens):
         TOF.append(TOA[i, j])
         TOAR[i, j] = TOF[j] - TOF[0]
 
-CalculatedTOAS = np.zeros((8, 4))
-CalculatedTOAA = np.zeros((8, 4))
+CalculatedTOAS = np.zeros((NoOfRows, NoOfSens))
+CalculatedTOAA = np.zeros((NoOfRows, NoOfSens))
 
-for i in range(8):
+for i in range(NoOfRows):
     TOFS = []
     TOFA = []
-    for j in range(4):
+    for j in range(NoOfSens):
         TOFS.append(SensorDistances[i, j]/fS0(np.median(PeakFrequencies[i, :])))
         TOFA.append(SensorDistances[i, j]/fA0(np.median(PeakFrequencies[j, :])))
         CalculatedTOAS[i, j] = TOFS[j] - TOFS[0]
@@ -104,8 +106,17 @@ for i in range(8):
 DiffTOAS = CalculatedTOAS - TOAR
 DiffTOAA = CalculatedTOAA - TOAR
 
+PtS = abs(DiffTOAS/CalculatedTOAS)
+PtA = abs(DiffTOAA/CalculatedTOAA)
 #print(PeakFrequencies)
-print(DiffTOAS/CalculatedTOAS)
-print(DiffTOAA/CalculatedTOAA)
-Discrepency = np.sum()
-print(PeakFrequencies)
+#print(DiffTOAS/CalculatedTOAS)
+#print(DiffTOAS/CalculatedTOAA)
+print(DiffTOAS)
+print(CalculatedTOAS)
+Discrepency = []
+Discrepency1 = []
+'''for i in range (NoOfSens -1):
+    Discrepency.append(np.sum(PtS[:, i+1]))
+    Discrepency1.append(np.sum(PtA[:, i+1]))
+print (Discrepency, Discrepency1)'''
+#print(PeakFrequencies)
