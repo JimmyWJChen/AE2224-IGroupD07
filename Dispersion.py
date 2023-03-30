@@ -6,19 +6,20 @@ import matplotlib.pyplot as plt
 import csv
 from data_import import getWaveform, getPrimaryDatabase, filterPrimaryDatabase
 
-testno = 2
+TestType = 'PCLS'
+TestNo = 2
 
 DamageCoordinates = np.array([[60, 100], [100, 100], [80, 90], [70, 80], [90, 80], [80, 70], [60, 60], [100, 60]])
 SensorCoordinates = np.array([[50, 120], [120, 120], [40, 40], [110, 40]])
 
-pridb = filterPrimaryDatabase(getPrimaryDatabase("PCLS", testno), "PCLS", testno)
+pridb = filterPrimaryDatabase(getPrimaryDatabase(TestType, TestNo), TestType, TestNo)
 
 PeakFrequencies = np.zeros((8, 4))
 
 j = 0
 
 for i in range(32):
-    y, t = getWaveform("PCLS", testno, pridb.iloc[i, -1])
+    y, t = getWaveform(TestType, TestNo, pridb.iloc[i, -1])
     N = len(y)
     T = t[1] - t[0]
     yf = fft(y)
@@ -28,6 +29,10 @@ for i in range(32):
         j += 1
     PeakFrequencies[i%8, j] = PeakFreq
     # TOA[i % 8, j] = pridb.iloc[i, 1]
+
+with open('testing_data/toa/PLB-4-channels/PLBS4_CP090_' + TestType + TestNo + '.csv', newline = '') as TOAData:
+    toa = csv.reader(TOAData)
+    for row in toa:
 
 # Asymmetric Assumption
 Frequency = []
