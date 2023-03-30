@@ -5,9 +5,7 @@ import pandas
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans, AgglomerativeClustering
-# import vallenae as ae
 
-# standard threshold for AE 34dB, we have at 45dB -> thus missing IDs
 
 def standarize(datapoints):
     X_norm = datapoints - datapoints.mean()
@@ -50,9 +48,3 @@ if __name__=="__main__":
         pridb_cluster = datapoints.loc[datapoints['cluster'] == i].copy()
         plt.scatter(pridb_cluster['frequency'], pridb_cluster['amplitude'])
     plt.show()
-    # clusters = predict(cluster_model, lookup_labels, 0, 'kmeans')
-    # data_compressed, var = PCA(datapoints, 2)
-    # plt.scatter(data_compressed[0], data_compressed[1])
-    # plt.show()
-    # print(data_compressed)
-    # print(var)
