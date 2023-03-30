@@ -16,28 +16,36 @@ pridb = filterPrimaryDatabase(getPrimaryDatabase(TestType, TestNo), TestType, Te
 
 PeakFrequencies = np.zeros((8, 4))
 
+def getPeakFrequency(t, y):
+    N = len(y)
+    T = t[1] - t[0]
+    yf = fft(y)
+    xf = fftfreq(N, T)[:N // 2]
+    PeakFreq = xf[np.argmax(yf[:N // 2])]
+    return PeakFreq
+
 j = 0
 
 for i in range(32):
     y, t = getWaveform(TestType, TestNo, pridb.iloc[i, -1])
-    N = len(y)
-    T = t[1] - t[0]
-    yf = fft(y)
-    xf = fftfreq(N, T)[:N//2]
-    PeakFreq = xf[np.argmax(yf[:N//2])]
+    PeakFreq = getPeakFrequency(t, y)
     if i % 8 == 0 and i != 0:
         j += 1
     PeakFrequencies[i%8, j] = PeakFreq
     # TOA[i % 8, j] = pridb.iloc[i, 1]
+TOA = np.zeros((8, 4))
+with open('testing_data/toa/PLB-4-channels/PLBS4_CP090_' + TestType + str(TestNo) + '.csv', newline = '') as TOAData:
+    toa = csv.reader(TOAData)
+    i = 0
+    for row in toa:
+        TOA[i, :] = row
+        i += 1
 
-with open('testing_data/toa/PLB-4-channels/PLBS4_CP090_' + TestType + TestNo + '.csv', newline = '') as TOAData:
-    TOA = csv.reader(TOAData)
-
-
+print(TOA )
 # Asymmetric Assumption
 Frequency = []
 Velocity = []
-with open("A0.csv", newline='') as A0:
+with open("dispersion_curves/A0.csv", newline='') as A0:
     Data = csv.reader(A0)
 # Size = len(Data)
 # Frequency= np.zero(Size)
@@ -54,7 +62,7 @@ fA0 = sp.interp1d(Frequency, Velocity, kind="linear", fill_value="extrapolate")
 # Symmetric Below
 Velocity1 = []
 Frequency1 = []
-with open('S0.csv', newline='') as S0:
+with open('dispersion_curves/S0.csv', newline='') as S0:
     Data1 = csv.reader(S0)
 # Size = len(Data)
 # Frequency= np.zero(Size)
@@ -92,11 +100,12 @@ for i in range(7):
         TOFA.append(SensorDistances[i, j]/fA0(np.median(PeakFrequencies[j, :])))
         CalculatedTOAS[i, j] = TOFS[j] - TOFS[0]
         CalculatedTOAA[i, j] = TOFA[j] - TOFA[0]
-
+'''
 DiffTOAS = CalculatedTOAS - TOA
 DiffTOAA = CalculatedTOAA - TOA
 
-print(TOA)
 print(PeakFrequencies)
 print(CalculatedTOAS)
+print(TOA)
 
+'''
