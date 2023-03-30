@@ -4,14 +4,17 @@ from math import *
 from scipy.fft import fft, fftfreq
 import matplotlib.pyplot as plt
 import csv
-from data_import import getWaveform, getPrimaryDatabase, filterPrimaryDatabase, getPeakFrequency
+from data_import import getWaveform, getPrimaryDatabase, filterPrimaryDatabase
 
 TestType = 'PCLS'
 TestNo = 2
 
 DamageCoordinates = np.array([[60, 100], [100, 100], [80, 90], [70, 80], [90, 80], [80, 70], [60, 60], [100, 60]])
+DamageCoordinates = DamageCoordinates/1000
 SensorCoordinates = np.array([[50, 120], [120, 120], [40, 40], [110, 40]])
+SensorCoordinates = SensorCoordinates/1000
 
+print(SensorCoordinates)
 pridb = filterPrimaryDatabase(getPrimaryDatabase(TestType, TestNo), TestType, TestNo)
 
 PeakFrequencies = np.zeros((8, 4))
