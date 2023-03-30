@@ -8,7 +8,7 @@ import numpy as np
 import timeit
 
 
-    
+
 def compare_criteria(y, t):
     #compare the hinkley, akaike, energy ratio and 
 
