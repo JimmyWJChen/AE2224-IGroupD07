@@ -123,7 +123,7 @@ if __name__ == "__main__":
     print(pridb.read_hits())
     # print(filterPrimaryDatabase(pridb))
     filtereddata = filterPrimaryDatabase(pridb, testlabel, testno)
-    print(addPeakFreq(filtereddata, testlabel, testno))
+    filtereddata = addPeakFreq(filtereddata, testlabel, testno)
     print(filtereddata.loc[filtereddata['channel'] == 1 ])
     print(filtereddata.loc[filtereddata['channel'] == 2])
     # pridb.read_hits().to_csv('data.csv')
