@@ -29,10 +29,11 @@ for i in range(32):
         j += 1
     PeakFrequencies[i%8, j] = PeakFreq
     # TOA[i % 8, j] = pridb.iloc[i, 1]
-TimeOfArrival = np.array(8,4)
+TimeOfArrival = np.array((8,4))
 with open('testing_data/toa/PLB-4-channels/PLBS4_CP090_' + TestType + str(TestNo) + '.csv', newline = '') as TOAData:
     toa = csv.reader(TOAData)
     for row in toa:
+        print (row)
 
     print(toa)
 
