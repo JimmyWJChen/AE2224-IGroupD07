@@ -33,6 +33,7 @@ def getWaveform(label, testno=1, trai=1):
         y, t = tradb.read_wave(trai)
     return y, t
 
+
 def getPeakFrequency(y, t):
     N = len(y)
     T = t[1] - t[0]

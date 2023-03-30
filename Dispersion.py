@@ -4,7 +4,7 @@ from math import *
 from scipy.fft import fft, fftfreq
 import matplotlib.pyplot as plt
 import csv
-from data_import import getWaveform, getPrimaryDatabase, filterPrimaryDatabase
+from data_import import getWaveform, getPrimaryDatabase, filterPrimaryDatabase, getPeakFrequency
 
 TestType = 'PCLS'
 TestNo = 2
@@ -18,23 +18,14 @@ pridb = filterPrimaryDatabase(getPrimaryDatabase(TestType, TestNo), TestType, Te
 
 PeakFrequencies = np.zeros((8, 4))
 
-
-def getPeakFrequency(t, y):
-    N = len(y)
-    T = t[1] - t[0]
-    yf = fft(y)
-    xf = fftfreq(N, T)[:N // 2]
-    PeakFreq = xf[np.argmax(yf[:N // 2])]
-    return PeakFreq
-
 j = 0
 
 for i in range(32):
     y, t = getWaveform(TestType, TestNo, pridb.iloc[i, -1])
-    PeakFreq = getPeakFrequency(t, y)
+    PeakFreq = getPeakFrequency(y, t)
     if i % 8 == 0 and i != 0:
         j += 1
-    PeakFrequencies[i%8, j] = PeakFreq
+    PeakFrequencies[i % 8, j] = PeakFreq
     # TOA[i % 8, j] = pridb.iloc[i, 1]
 TOA = np.zeros((8, 4))
 with open('testing_data/toa/PLB-4-channels/PLBS4_CP090_' + TestType + str(TestNo) + '.csv', newline = '') as TOAData:
@@ -90,9 +81,16 @@ for i in range(len(DamageCoordinates)):
     for j in range(len(SensorCoordinates)):
         SensorDistances[i, j] = get_distance(DamageCoordinates[i], SensorCoordinates[j])
 
+TOAR = np.zeros((8, 4))
+
+for i in range(8):
+    TOF = []
+    for j in range(4):
+        TOF.append(TOA[i, j])
+        CalculatedTOAA[i, j] = TOFA[j] - TOFA[0]
+
 CalculatedTOAS = np.zeros((8, 4))
 CalculatedTOAA = np.zeros((8, 4))
-
 
 for i in range(8):
     TOFS = []
