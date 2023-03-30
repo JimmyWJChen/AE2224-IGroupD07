@@ -341,7 +341,7 @@ class PLB_velo():
         q3 = np.percentile(v_blob, 75)
         IQR = q3 - q1
         IQR_rel = IQR/v_range
-        return IQR, IQR_rel
+        return IQR, IQR_rel, q3, q1
 
     # get PLB velocities from all labels
     def PLB_velo_all_labels(self, relax_factor, vT_init, iterations):
@@ -499,7 +499,7 @@ if __name__ == '__main__':
     # define object
     PLB = PLB_velo()
     # get velocity of one experiment
-    v, v_blob, v_avg = PLB.find_PLB_velo_all_tests("ST", relax_factor, np.copy(vT_init), iterations)
+    v, v_blob, v_avg = PLB.find_PLB_velo_all_tests("PCLO", relax_factor, np.copy(vT_init), iterations)
     print(f'v array is: \n {v}')
     print(f'v blob is: \n {v_blob}')
     print(f'average v of PCLS is: \n {v_avg}')
@@ -507,10 +507,13 @@ if __name__ == '__main__':
     print(f'average v blob velocity is: \n {v_blob_average}')
     v_blob_std = PLB.PLB_velo_std(v_blob)
     print(f'standard deviation of v_blob is: \n {v_blob_std}')
+    v_iqr, v_iqr_rel, q3, q1 = PLB.PLB_velo_IQR(v_blob)
+    print(f'IQR of v_blob is: \n {v_iqr}, {v_iqr_rel}, {q3}, {q1}')
     v_blob_standardised = PLB.PLB_velo_standiser(v_blob)
     print(f'standardised velo blob is: \n {v_blob_standardised}')
-    v_blob_iqr, v_blob_iqr_rel = PLB.PLB_velo_IQR(v_blob_standardised)
-    print(f'IQR of v_blob is: \n {v_blob_iqr}, {v_blob_iqr_rel}')
+    v_blob_iqr, v_blob_iqr_rel, q3_stand, q1_stand = PLB.PLB_velo_IQR(v_blob_standardised)
+    print(f'IQR of standardised v_blob is: \n {v_blob_iqr}, {v_blob_iqr_rel},'
+          f' {q3_stand}, {q3_stand}')
 
 
     """
