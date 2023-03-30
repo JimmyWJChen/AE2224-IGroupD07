@@ -87,7 +87,7 @@ for i in range(8):
     TOF = []
     for j in range(4):
         TOF.append(TOA[i, j])
-        CalculatedTOAA[i, j] = TOFA[j] - TOFA[0]
+        TOAR[i, j] = TOF[j] - TOF[0]
 
 CalculatedTOAS = np.zeros((8, 4))
 CalculatedTOAA = np.zeros((8, 4))
@@ -101,8 +101,8 @@ for i in range(8):
         CalculatedTOAS[i, j] = TOFS[j] - TOFS[0]
         CalculatedTOAA[i, j] = TOFA[j] - TOFA[0]
 
-DiffTOAS = CalculatedTOAS - TOA
-DiffTOAA = CalculatedTOAA - TOA
+DiffTOAS = CalculatedTOAS - TOAR
+DiffTOAA = CalculatedTOAA - TOAR
 
 #print(PeakFrequencies)
 print(DiffTOAS)
