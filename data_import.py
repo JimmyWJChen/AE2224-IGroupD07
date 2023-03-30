@@ -3,8 +3,6 @@ import os
 import vallenae as vae
 import pandas as pd
 
-import matplotlib.pyplot as plt
-
 
 def getPrimaryDatabase(label, testno=1):
     if label == "PCLO" or label == "PCLS":
@@ -82,7 +80,13 @@ def filterPrimaryDatabase(pridb, label, testno, sortby="energy", epsilon=0.2, th
             while len(pridb_output.loc[pridb_output['channel'] == channel]) > 9:
                 idx_to_drop = pridb_output.loc[pridb_output['channel'] == channel]['time'].idxmin()
                 pridb_output.drop(idx_to_drop, inplace=True)
-
+    elif label == "T" and testno == 3:
+        for channel in range(1, 8 + 1):
+            channel_data = pridb_output.loc[pridb_output['channel'] == channel]
+            rows_to_drop = [13, 15]
+            for row in rows_to_drop:
+                idx_to_drop = channel_data.index[row - 1]
+                pridb_output.drop(idx_to_drop, inplace=True)
     return pridb_output
 
 
@@ -92,16 +96,14 @@ def getHitsPerSensor(pridb):
 
 
 if __name__ == "__main__":
-    testlabel = "ST"
-    testno = 1
+    testlabel = "T"
+    testno = 3
     pridb = getPrimaryDatabase(testlabel, testno)
 
     # print(getHitsPerSensor(pridb.read_hits()))
-    # print(pridb.read_hits())
-    db = filterPrimaryDatabase(pridb, testlabel, testno)
-    print(getHitsPerSensor(db))
-    # for i in range(1, 9):
-    # plt.scatter(db['time'], db['energy'])
-    # plt.show()
-    # print(getHitsPerSensor(filterPrimaryDatabase(pridb, testlabel, testno)))
+    print(pridb.read_hits())
+    # print(filterPrimaryDatabase(pridb))
+    filtereddata = filterPrimaryDatabase(pridb, testlabel, testno)
+    print(filtereddata.loc[filtereddata['channel'] == 1 ])
+    print(filtereddata.loc[filtereddata['channel'] == 2])
     # pridb.read_hits().to_csv('data.csv')
