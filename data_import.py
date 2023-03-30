@@ -96,8 +96,8 @@ def getHitsPerSensor(pridb):
 
 
 if __name__ == "__main__":
-    testlabel = "T"
-    testno = 3
+    testlabel = "ST"
+    testno = 2
     pridb = getPrimaryDatabase(testlabel, testno)
 
     # print(getHitsPerSensor(pridb.read_hits()))

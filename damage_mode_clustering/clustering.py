@@ -68,9 +68,12 @@ def predict(cluster_model, lookup_labels, data_dict, cluster_method):
 if __name__=="__main__":
     datapoints = di.filterPrimaryDatabase(di.getPrimaryDatabase("PCLO", 3), "PCLO", 3)
     datapoints = datapoints[datapoints['channel'] == 2]
-    print(datapoints)
-    data_compressed, var = PCA(datapoints, 2)
-    plt.scatter(data_compressed[0], data_compressed[1])
-    plt.show()
-    print(data_compressed)
-    print(var)
+    X_cluster = datapoints[['amplitude', 'counts']].to_numpy()
+    print(X_cluster)
+    cluster_model, lookup_labels, n_clusters = train_kmeans(X_cluster, 4)
+    clusters = predict(cluster_model, lookup_labels, 0, 'kmeans')
+    # data_compressed, var = PCA(datapoints, 2)
+    # plt.scatter(data_compressed[0], data_compressed[1])
+    # plt.show()
+    # print(data_compressed)
+    # print(var)
