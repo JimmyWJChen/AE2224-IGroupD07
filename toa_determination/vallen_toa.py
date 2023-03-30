@@ -7,7 +7,7 @@ from scipy.fft import fft, fftfreq
 import numpy as np
 
 
-    
+
 def compare_criteria(y, t):
     #compare the hinkley, akaike, energy ratio and 
 
