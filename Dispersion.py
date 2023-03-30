@@ -31,8 +31,8 @@ for i in range(32):
     # TOA[i % 8, j] = pridb.iloc[i, 1]
 
 with open('testing_data/toa/PLB-4-channels/PLBS4_CP090_' + TestType + TestNo + '.csv', newline = '') as TOAData:
-    toa = csv.reader(TOAData)
-    for row in toa:
+    TOA = csv.reader(TOAData)
+
 
 # Asymmetric Assumption
 Frequency = []
@@ -96,7 +96,7 @@ for i in range(7):
 DiffTOAS = CalculatedTOAS - TOA
 DiffTOAA = CalculatedTOAA - TOA
 
+print(TOA)
 print(PeakFrequencies)
 print(CalculatedTOAS)
-print(TOA)
 
