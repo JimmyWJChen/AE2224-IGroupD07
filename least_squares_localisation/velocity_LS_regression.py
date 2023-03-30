@@ -312,6 +312,18 @@ class PLB_velo():
         v_std = np.std(v_blob)
         return v_std
 
+    # get median velocity of velocity blob
+    def PLB_velo_median(self, v_blob):
+        """
+        For a given v blob, calculate the median velocity
+
+        v blob = array of all wave speeds
+        returns: median velocity (scalar)
+
+        """
+        v_median = np.median(v_blob)
+        return v_median
+
     # standardise v blob
     def PLB_velo_standiser(self, v_blob):
         """
@@ -341,7 +353,7 @@ class PLB_velo():
         q3 = np.percentile(v_blob, 75)
         IQR = q3 - q1
         IQR_rel = IQR/v_range
-        return IQR, IQR_rel
+        return IQR, IQR_rel, q3, q1
 
     # get PLB velocities from all labels
     def PLB_velo_all_labels(self, relax_factor, vT_init, iterations):
@@ -505,12 +517,34 @@ if __name__ == '__main__':
     print(f'average v of PCLS is: \n {v_avg}')
     v_blob_average = PLB.PLB_velo_average(v_blob)
     print(f'average v blob velocity is: \n {v_blob_average}')
+    v_blob_median = PLB.PLB_velo_median(v_blob)
+    print(f'median v blob is: \n {v_blob_median}')
     v_blob_std = PLB.PLB_velo_std(v_blob)
     print(f'standard deviation of v_blob is: \n {v_blob_std}')
+    v_iqr, v_iqr_rel, q3, q1 = PLB.PLB_velo_IQR(v_blob)
+    print(f'IQR of v_blob is: \n {v_iqr}, {v_iqr_rel}, {q3}, {q1}')
     v_blob_standardised = PLB.PLB_velo_standiser(v_blob)
     print(f'standardised velo blob is: \n {v_blob_standardised}')
-    v_blob_iqr, v_blob_iqr_rel = PLB.PLB_velo_IQR(v_blob_standardised)
-    print(f'IQR of v_blob is: \n {v_blob_iqr}, {v_blob_iqr_rel}')
+    v_blob_iqr, v_blob_iqr_rel, q3_stand, q1_stand = PLB.PLB_velo_IQR(v_blob_standardised)
+    print(f'IQR of standardised v_blob is: \n {v_blob_iqr}, {v_blob_iqr_rel},'
+          f' {q3_stand}, {q3_stand}')
+
+    # get velo of all experiments
+    v_mega_blob= PLB.PLB_velo_all_labels(relax_factor, np.copy(vT_init),
+                                                            iterations)[6]
+    v_avg_all = PLB.PLB_velo_all_labels(relax_factor, np.copy(vT_init),
+                                                            iterations)[7]
+    v_mega_blob_median = PLB.PLB_velo_median(v_mega_blob)
+    v_mega_blob_avg = PLB.PLB_velo_average(v_mega_blob)
+    v_mega_blob_std = PLB.PLB_velo_std(v_mega_blob)
+    v_mega_blob_iqr, v_mega_blob_iqr_rel, v_mega_blob_q3, v_mega_blob_q1 = PLB.PLB_velo_IQR(v_mega_blob)
+    print(f'mega blob of velos is: \n {v_mega_blob}')
+    print(f'average v: \n {v_avg_all}')
+    print(f'median mega blob v: \n {v_mega_blob_median}')
+    print(f'std of mega blob v: \n {v_mega_blob_std}')
+    print(f'IQR of mega blob v: \n {v_mega_blob_iqr}, {v_mega_blob_iqr_rel}, {v_mega_blob_q3},'
+          f'{v_mega_blob_q1}')
+
 
 
     """
