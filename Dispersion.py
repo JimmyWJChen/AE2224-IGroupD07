@@ -29,9 +29,9 @@ for i in range(32):
     # TOA[i % 8, j] = pridb.iloc[i, 1]
 TOA = np.zeros((8, 4))
 with open('testing_data/toa/PLB-4-channels/PLBS4_CP090_' + TestType + str(TestNo) + '.csv', newline = '') as TOAData:
-    toa = csv.reader(TOAData)
+    Data = csv.reader(TOAData)
     i = 0
-    for row in toa:
+    for row in Data:
         TOA[i, :] = row
         i += 1
 
@@ -105,6 +105,7 @@ DiffTOAS = CalculatedTOAS - TOAR
 DiffTOAA = CalculatedTOAA - TOAR
 
 #print(PeakFrequencies)
-print(DiffTOAS)
-print(CalculatedTOAS)
-print(TOA)
+print(DiffTOAS/CalculatedTOAS)
+print(DiffTOAA/CalculatedTOAA)
+Discrepency = np.sum()
+print(PeakFrequencies)
