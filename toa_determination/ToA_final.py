@@ -5,25 +5,21 @@ import vallenae as vae
 import numpy as np
 
 
-PLB_4_files = os.listdir("AE2224-IGroupD07\Testing_data\PLB-4-channels")
-PLB_8_files = os.listdir("AE2224-IGroupD07\Testing_data\PLB-8-channels")
-
-
-def check_channels(file_name, time_lst, n_signals):
+def check_channels(file_name, time_lst, n_sensors):
     #check if the channel number corresponds correctly to the assigned column of a time
     
     length = len(time_lst)
-    n_hits = int(length / n_signals)
-    if length % n_signals == 0:
+    n_hits = int(length / n_sensors)
+    if length % n_sensors == 0:
         
-        for i in range(n_signals):
+        for i in range(n_sensors):
             for j in range(n_hits):
                 
                 if time_lst[i * n_hits + j, 1] != i+1:
                     print("Channel number of file: " + file_name + " does not match")
 
 
-def get_toa_filtered(file_name, n_signals):
+def get_toa_filtered(file_name, n_sensors):
     #get trai values from pridb, get the tribd file of these trai values and calculate the time difference
     #to add the time difference to the time in the pridb file
     
@@ -36,7 +32,7 @@ def get_toa_filtered(file_name, n_signals):
     n_values = np.shape(trai_lst)[0]
     
     
-    if  n_values % n_signals != 0:
+    if  n_values % n_sensors != 0:
         print("In file: " + file_name + " the number of signals is not divisble by 4")
         return None
     
@@ -46,14 +42,22 @@ def get_toa_filtered(file_name, n_signals):
         time_difference = t[hc_index]
         time_lst[i][0] = time_lst[i][0] + time_difference
         
-    check_channels(file_name, time_lst, n_signals)
+    check_channels(file_name, time_lst, n_sensors)
     
-    new_times = np.reshape(time_lst[:,0], (int(n_values/n_signals), n_signals))
+    new_times = np.reshape(time_lst[:,0], (int(n_values/n_sensors), n_sensors))
     new_times = np.sort(new_times, axis=0) 
     
     return new_times
         
     
-print(get_toa_filtered('AE2224-IGroupD07\Testing_data\PLBS4_CP090_PCLO1.pridb', 4))
+def get_toa_plb(n_sensors):
+    plb_files = os.listdir(f"AE2224-IGroupD07\Testing_data\PLB-{n_sensors}-channels")
     
+    for file in plb_files:
+        if file[-3:] == "idb":
+            if file != "PLBS8_QI090_ST1.pridb":
+                toa_array = get_toa_filtered(file, n_sensors)
+                np.savetxt(f"AE2224-IGroupD07\\testing_data\\toa\PLB-{n_sensors}-channels\{file[:-5]}csv", toa_array, delimiter=",")
     
+get_toa_plb(8)
+
