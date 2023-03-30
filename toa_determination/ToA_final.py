@@ -58,15 +58,10 @@ def get_toa_plb(n_sensors):
     
     for file in plb_files:
         if file[-3:] == "idb":
-            if file != "PLBS8_QI090_ST1.pridb":
-                label = file.split("_")[-1][:-6]
-                
-                if label in unsorted:
-                    toa_array = get_toa_filtered(file, n_sensors)
-                    np.savetxt(f"AE2224-IGroupD07\\testing_data\\toa\PLB-{n_sensors}-channels\{file[:-5]}csv", toa_array, delimiter=",")
+            if file == "PLBS8_QI090_ST1.pridb":
+                toa_array = get_toa_filtered(file, n_sensors)
+                np.savetxt(f"AE2224-IGroupD07\\testing_data\\toa\PLB-{n_sensors}-channels\{file[:-5]}csv", toa_array, delimiter=",")
             
-    
-
 get_toa_plb(8)
     
     

@@ -5,9 +5,10 @@ import data_import as di
 import matplotlib.pyplot as plt
 from scipy.fft import fft, fftfreq
 import numpy as np
+import timeit
 
 
-    
+
 def compare_criteria(y, t):
     #compare the hinkley, akaike, energy ratio and 
 
@@ -24,20 +25,21 @@ def compare_criteria(y, t):
     return hc_time, aic_time, er_time, mer_time
 
 
-def timeit(func, loops=100):
-    time_start = time.perf_counter()
-    for _ in range(loops):
-        func()
-    return 1e6 * (time.perf_counter() - time_start) / loops  # elapsed time in µs
-
-
-def performance_comparison(y,t):
+def performance_comparison():
     #compare the runtime of the hinkley, akaike, energy ratio and modified energy ratio
+    
+    y,t = di.getWaveform("PCLO",2,20)
 
-    run_time_hc = timeit(lambda: vae.timepicker.hinkley(y, 5))
-    run_time_aic = timeit(lambda: vae.timepicker.aic(y))
-    run_time_er = timeit(lambda: vae.timepicker.energy_ratio(y))
-    run_time_mer = timeit(lambda: vae.timepicker.modified_energy_ratio(y))
+    SAMPLES = 1000
+
+    # crop first samples
+    t = t[:SAMPLES]
+    y = y[:SAMPLES]
+
+    run_time_hc = timeit.timeit(lambda: vae.timepicker.hinkley(y, 5), number=10000)
+    run_time_aic = timeit.timeit(lambda: vae.timepicker.aic(y), number=10000)
+    run_time_er = timeit.timeit(lambda: vae.timepicker.energy_ratio(y), number=10000)
+    run_time_mer = timeit.timeit(lambda: vae.timepicker.modified_energy_ratio(y), number=10000)
     return run_time_hc, run_time_aic, run_time_er, run_time_mer
 
 def plot_waveform_criteria():
