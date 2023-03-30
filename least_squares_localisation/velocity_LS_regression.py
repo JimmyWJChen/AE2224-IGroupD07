@@ -312,6 +312,19 @@ class PLB_velo():
         v_std = np.std(v_blob)
         return v_std
 
+    # standardise v blob
+    def PLB_velo_standiser(self, v_blob):
+        """
+        For a given v blob, standardise the velocity blob
+
+        v blob = array of all wave speeds
+        returns: standardised blob of velocities (vector)
+
+        """
+        for i in range(len(v_blob)):
+            v_blob[i] = (v_blob[i] - self.PLB_velo_average(v_blob))/self.PLB_velo_std(v_blob)
+        return v_blob
+
     # get interquartile range
     def PLB_velo_IQR(self, v_blob):
         """
@@ -486,7 +499,7 @@ if __name__ == '__main__':
     # define object
     PLB = PLB_velo()
     # get velocity of one experiment
-    v, v_blob, v_avg = PLB.find_PLB_velo_all_tests("PST", relax_factor, vT_init, iterations)
+    v, v_blob, v_avg = PLB.find_PLB_velo_all_tests("PST", relax_factor, np.copy(vT_init), iterations)
     print(f'v array is: \n {v}')
     print(f'v blob is: \n {v_blob}')
     print(f'average v of PCLS is: \n {v_avg}')
@@ -494,7 +507,9 @@ if __name__ == '__main__':
     print(f'average v blob velocity is: \n {v_blob_average}')
     v_blob_std = PLB.PLB_velo_std(v_blob)
     print(f'standard deviation of v_blob is: \n {v_blob_std}')
-    v_blob_iqr, v_blob_iqr_rel = PLB.PLB_velo_IQR(v_blob)
+    v_blob_standardised = PLB.PLB_velo_standiser(v_blob)
+    print(f'standardised velo blob is: \n {v_blob_standardised}')
+    v_blob_iqr, v_blob_iqr_rel = PLB.PLB_velo_IQR(v_blob_standardised)
     print(f'IQR of v_blob is: \n {v_blob_iqr}, {v_blob_iqr_rel}')
 
 
