@@ -10,11 +10,14 @@ TestType = 'PCLS'
 TestNo = 2
 
 DamageCoordinates = np.array([[60, 100], [100, 100], [80, 90], [70, 80], [90, 80], [80, 70], [60, 60], [100, 60]])
+DamageCoordinates = DamageCoordinates/1000
 SensorCoordinates = np.array([[50, 120], [120, 120], [40, 40], [110, 40]])
+SensorCoordinates = SensorCoordinates/1000
 
 pridb = filterPrimaryDatabase(getPrimaryDatabase(TestType, TestNo), TestType, TestNo)
 
 PeakFrequencies = np.zeros((8, 4))
+
 
 def getPeakFrequency(t, y):
     N = len(y)
@@ -41,7 +44,6 @@ with open('testing_data/toa/PLB-4-channels/PLBS4_CP090_' + TestType + str(TestNo
         TOA[i, :] = row
         i += 1
 
-print(TOA )
 # Asymmetric Assumption
 Frequency = []
 Velocity = []
@@ -92,20 +94,19 @@ CalculatedTOAS = np.zeros((8, 4))
 CalculatedTOAA = np.zeros((8, 4))
 
 
-for i in range(7):
+for i in range(8):
     TOFS = []
     TOFA = []
-    for j in range(3):
+    for j in range(4):
         TOFS.append(SensorDistances[i, j]/fS0(np.median(PeakFrequencies[i, :])))
         TOFA.append(SensorDistances[i, j]/fA0(np.median(PeakFrequencies[j, :])))
         CalculatedTOAS[i, j] = TOFS[j] - TOFS[0]
         CalculatedTOAA[i, j] = TOFA[j] - TOFA[0]
-'''
+
 DiffTOAS = CalculatedTOAS - TOA
 DiffTOAA = CalculatedTOAA - TOA
 
-print(PeakFrequencies)
+#print(PeakFrequencies)
+print(DiffTOAS)
 print(CalculatedTOAS)
 print(TOA)
-
-'''
