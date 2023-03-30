@@ -3,6 +3,8 @@ import os
 import vallenae as vae
 import pandas as pd
 
+import matplotlib.pyplot as plt
+
 
 def getPrimaryDatabase(label, testno=1):
     if label == "PCLO" or label == "PCLS":
@@ -85,8 +87,12 @@ if __name__ == "__main__":
     testno = 1
     pridb = getPrimaryDatabase(testlabel, testno)
 
-    print(getHitsPerSensor(pridb.read_hits()))
+    # print(getHitsPerSensor(pridb.read_hits()))
     # print(pridb.read_hits())
-    # print(filterPrimaryDatabase(pridb))
-    print(getHitsPerSensor(filterPrimaryDatabase(pridb, testlabel, testno)))
+    db = filterPrimaryDatabase(pridb, testlabel, testno, epsilon=0.01, thstrength=1000, thcounts=40, thamp=0.002)
+    print(getHitsPerSensor(db))
+    # for i in range(1, 9):
+    # plt.scatter(db['time'], db['energy'])
+    # plt.show()
+    # print(getHitsPerSensor(filterPrimaryDatabase(pridb, testlabel, testno)))
     # pridb.read_hits().to_csv('data.csv')
