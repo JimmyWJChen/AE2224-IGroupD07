@@ -30,9 +30,10 @@ for i in range(32):
     PeakFrequencies[i%8, j] = PeakFreq
     # TOA[i % 8, j] = pridb.iloc[i, 1]
 
-with open('testing_data/toa/PLB-4-channels/PLBS4_CP090_' + TestType + TestNo + '.csv', newline = '') as TOAData:
+with open('/Users/luukdevine/Library/CloudStorage/OneDrive-Personal/Documents/Aerospace/Projects/D07/AE2224-IGroupD07/testing_data/toa/PLB-4-channels/PLBS4_CP090_' + TestType + str(TestNo) + '.csv', newline = '') as TOAData:
     TOA = csv.reader(TOAData)
 
+print(TOA)
 
 # Asymmetric Assumption
 Frequency = []
@@ -93,8 +94,8 @@ for i in range(7):
         CalculatedTOAS[i, j] = TOFS[j] - TOFS[0]
         CalculatedTOAA[i, j] = TOFA[j] - TOFA[0]
 
-DiffTOAS = CalculatedTOAS - TOA
-DiffTOAA = CalculatedTOAA - TOA
+# DiffTOAS = CalculatedTOAS - TOA
+# DiffTOAA = CalculatedTOAA - TOA
 
 print(TOA)
 print(PeakFrequencies)
