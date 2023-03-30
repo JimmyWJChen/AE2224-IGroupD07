@@ -2,6 +2,8 @@ import os
 
 import vallenae as vae
 import pandas as pd
+from scipy.fft import fft, fftfreq
+import numpy as np
 
 
 def getPrimaryDatabase(label, testno=1):
@@ -30,6 +32,27 @@ def getWaveform(label, testno=1, trai=1):
     with vae.io.TraDatabase(TRADB) as tradb:
         y, t = tradb.read_wave(trai)
     return y, t
+
+def getPeakFrequency(y, t):
+    N = len(y)
+    T = t[1] - t[0]
+    yf = fft(y)
+    xf = fftfreq(N, T)[:N // 2]
+    PeakFreq = xf[np.argmax(yf[:N // 2])]
+    return PeakFreq
+
+def addPeakFreq(pridb, label, testno=1):
+    try:
+        pridb = pridb.read_hits()
+    except AttributeError:
+        pass
+    trais = pridb['trai']
+    frequencies = []
+    for trai in trais:
+        y, t = getWaveform(label, testno, trai)
+        frequencies.append(getPeakFrequency(y, t))
+    pridb.insert(4, "frequency", frequencies, True)
+    return pridb
 
 
 def filterPrimaryDatabase(pridb, label, testno, sortby="energy", epsilon=0.2, thamp=0.009, thdur = 0.002, thenergy=1e5, thstrength=2500, thcounts=70):
@@ -94,11 +117,13 @@ if __name__ == "__main__":
     testlabel = "PST"
     testno = 3
     pridb = getPrimaryDatabase(testlabel, testno)
+    
 
     # print(getHitsPerSensor(pridb.read_hits()))
     print(pridb.read_hits())
     # print(filterPrimaryDatabase(pridb))
     filtereddata = filterPrimaryDatabase(pridb, testlabel, testno)
+    print(addPeakFreq(filtereddata, testlabel, testno))
     print(filtereddata.loc[filtereddata['channel'] == 1 ])
     print(filtereddata.loc[filtereddata['channel'] == 2])
     # pridb.read_hits().to_csv('data.csv')
