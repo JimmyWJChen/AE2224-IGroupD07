@@ -42,8 +42,6 @@ def performance_comparison():
     run_time_mer = timeit.timeit(lambda: vae.timepicker.modified_energy_ratio(y), number=10000)
     return run_time_hc, run_time_aic, run_time_er, run_time_mer
 
-print(performance_comparison())
-
 def plot_waveform_criteria():
 
     y,t = di.getWaveform("PCLO",2,20)
