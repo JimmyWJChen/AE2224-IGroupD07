@@ -98,7 +98,7 @@ if __name__ == "__main__":
 
     # print(getHitsPerSensor(pridb.read_hits()))
     # print(pridb.read_hits())
-    db = filterPrimaryDatabase(pridb, testlabel, testno, epsilon=0.01, thstrength=1000, thcounts=40, thamp=0.002)
+    db = filterPrimaryDatabase(pridb, testlabel, testno)
     print(getHitsPerSensor(db))
     # for i in range(1, 9):
     # plt.scatter(db['time'], db['energy'])
