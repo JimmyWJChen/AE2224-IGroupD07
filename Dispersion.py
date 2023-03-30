@@ -1,4 +1,4 @@
-import scipy as sp
+import scipy.interpolate as sp
 import numpy as np
 from math import *
 from scipy.fft import fft, fftfreq
@@ -32,7 +32,7 @@ for i in range(32):
 # Asymmetric Assumption
 Frequency = []
 Velocity = []
-with open("A0.csv", newline='') as A0:
+with open("dispersion_curves/A0.csv", newline='') as A0:
     Data = csv.reader(A0)
 # Size = len(Data)
 # Frequency= np.zero(Size)
@@ -44,12 +44,12 @@ with open("A0.csv", newline='') as A0:
 for i in range(0, len(Frequency)):
         Frequency[i], Velocity[i] = float(Frequency[i]), float(Velocity[i])
 
-fA0 = sp.interpolate.interp1d(Frequency, Velocity, kind="linear", fill_value="extrapolate")
+fA0 = sp.interp1d(Frequency, Velocity, kind="linear", fill_value="extrapolate")
 
 # Symmetric Below
 Velocity1 = []
 Frequency1 = []
-with open('S0.csv', newline='') as S0:
+with open('dispersion_curves/S0.csv', newline='') as S0:
     Data1 = csv.reader(S0)
 # Size = len(Data)
 # Frequency= np.zero(Size)
@@ -61,7 +61,7 @@ with open('S0.csv', newline='') as S0:
 for i in range(0, len(Frequency1)):
         Frequency1[i], Velocity1[i] = float(Frequency1[i]), float(Velocity1[i])
 
-fS0 = sp.interpolate.interp1d(Frequency1, Velocity1, kind="linear", fill_value="extrapolate")
+fS0 = sp.interp1d(Frequency1, Velocity1, kind="linear", fill_value="extrapolate")
 
 
 def get_distance(x, y):
