@@ -101,8 +101,8 @@ for i in range(8):
         CalculatedTOAS[i, j] = TOFS[j] - TOFS[0]
         CalculatedTOAA[i, j] = TOFA[j] - TOFA[0]
 
-DiffTOAS = CalculatedTOAS - TOA
-DiffTOAA = CalculatedTOAA - TOA
+DiffTOAS = CalculatedTOAS - TOAR
+DiffTOAA = CalculatedTOAA - TOAR
 
 #print(PeakFrequencies)
 print(DiffTOAS)
