@@ -80,8 +80,8 @@ if __name__ == "__main__":
     testno = 1
     pridb = getPrimaryDatabase(testlabel, testno)
 
-    # print(getHitsPerSensor(pridb.read_hits()))
-    print(pridb.read_hits())
+    print(getHitsPerSensor(pridb.read_hits()))
+    # print(pridb.read_hits())
     # print(filterPrimaryDatabase(pridb))
-    print(filterPrimaryDatabase(pridb, testlabel, testno))
+    print(getHitsPerSensor(filterPrimaryDatabase(pridb, testlabel, testno)))
     # pridb.read_hits().to_csv('data.csv')
