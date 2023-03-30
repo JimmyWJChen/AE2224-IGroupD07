@@ -91,10 +91,19 @@ def filterPrimaryDatabase(pridb, label, testno, sortby="energy", epsilon=0.2, th
     pridb_output = pd.concat(pridb_channels, ignore_index=True)
     if label == "ST" and testno == 1:
         for channel in range(1, 8 + 1):
-             while len(pridb_output.loc[pridb_output['channel'] == channel]) > 18:
-                 idx_to_drop = pridb_output.loc[pridb_output['channel'] == channel]['energy'].idxmin()
-                 pridb_output.drop(idx_to_drop, inplace=True)
-    elif label == "PST" and testno == 2 or testno == 3:
+            if channel != 4 and channel != 6 and channel != 8:
+                while len(pridb_output.loc[pridb_output['channel'] == channel]) > 18:
+                    idx_to_drop = pridb_output.loc[pridb_output['channel'] == channel]['energy'].idxmin()
+                    pridb_output.drop(idx_to_drop, inplace=True)
+            else:
+                channel_data = pridb_output.loc[pridb_output['channel'] == channel]
+                rows_to_drop = [17]
+                for row in rows_to_drop:
+                    idx_to_drop = channel_data.index[row - 1]
+                    pridb_output.drop(idx_to_drop, inplace=True)
+
+
+    if label == "PST" and testno == 2 or testno == 3:
         for channel in range(1, 8 + 1):
             while len(pridb_output.loc[pridb_output['channel'] == channel]) > 9:
                 idx_to_drop = pridb_output.loc[pridb_output['channel'] == channel]['time'].idxmin()
@@ -115,16 +124,14 @@ def getHitsPerSensor(pridb):
 
 
 if __name__ == "__main__":
-    testlabel = "PST"
-    testno = 3
+    testlabel = "ST"
+    testno = 1
     pridb = getPrimaryDatabase(testlabel, testno)
-    
 
     # print(getHitsPerSensor(pridb.read_hits()))
-    print(pridb.read_hits())
+    print(pridb.read_hits().loc[pridb.read_hits()['channel'] == 4]['energy'])
     # print(filterPrimaryDatabase(pridb))
     filtereddata = filterPrimaryDatabase(pridb, testlabel, testno)
-    filtereddata = addPeakFreq(filtereddata, testlabel, testno)
-    print(filtereddata.loc[filtereddata['channel'] == 1 ])
-    print(filtereddata.loc[filtereddata['channel'] == 2])
+    print(filtereddata.loc[filtereddata['channel'] == 6])
+    #print(filtereddata.loc[filtereddata['channel'] == 3])
     # pridb.read_hits().to_csv('data.csv')
