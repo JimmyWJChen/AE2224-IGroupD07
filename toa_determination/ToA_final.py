@@ -43,21 +43,30 @@ def get_toa_filtered(file_name, n_sensors):
         time_lst[i][0] = time_lst[i][0] + time_difference
         
     check_channels(file_name, time_lst, n_sensors)
-    
-    new_times = np.reshape(time_lst[:,0], (int(n_values/n_sensors), n_sensors))
+
+    new_times = np.reshape(time_lst[:,0], (n_sensors, int(n_values/n_sensors)))
     new_times = np.sort(new_times, axis=0) 
     
-    return new_times
-        
+    return np.transpose(new_times)
+
+#get_toa_filtered("AE2224-IGroupD07\testing_data\PLB-8-channels\PLBS8_QI090_ST2.pridb", 8)
+
     
 def get_toa_plb(n_sensors):
     plb_files = os.listdir(f"AE2224-IGroupD07\Testing_data\PLB-{n_sensors}-channels")
+    unsorted = ["PTS3","ST2","ST3","T1","T2","T3","TEST"]
     
     for file in plb_files:
         if file[-3:] == "idb":
             if file != "PLBS8_QI090_ST1.pridb":
-                toa_array = get_toa_filtered(file, n_sensors)
-                np.savetxt(f"AE2224-IGroupD07\\testing_data\\toa\PLB-{n_sensors}-channels\{file[:-5]}csv", toa_array, delimiter=",")
+                label = file.split("_")[-1][:-6]
+                
+                if label in unsorted:
+                    toa_array = get_toa_filtered(file, n_sensors)
+                    np.savetxt(f"AE2224-IGroupD07\\testing_data\\toa\PLB-{n_sensors}-channels\{file[:-5]}csv", toa_array, delimiter=",")
+            
     
-get_toa_plb(8)
 
+get_toa_plb(8)
+    
+    
