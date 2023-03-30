@@ -14,7 +14,6 @@ SensorCoordinates = np.array([[50, 120], [120, 120], [40, 40], [110, 40]])
 pridb = filterPrimaryDatabase(getPrimaryDatabase("PCLS", testno), "PCLS", testno)
 
 PeakFrequencies = np.zeros((8, 4))
-TOA = np.zeros((8, 4))
 
 j = 0
 
@@ -28,7 +27,7 @@ for i in range(32):
     if i % 8 == 0 and i != 0:
         j += 1
     PeakFrequencies[i%8, j] = PeakFreq
-    TOA[i % 8, j] = pridb.iloc[i, 1]
+    # TOA[i % 8, j] = pridb.iloc[i, 1]
 
 # Asymmetric Assumption
 Frequency = []
@@ -84,7 +83,7 @@ for i in range(7):
     TOFS = []
     TOFA = []
     for j in range(3):
-        TOFS.append(SensorDistances[i, j]/fS0(np.median(PeakFrequencies[j, :])))
+        TOFS.append(SensorDistances[i, j]/fS0(np.median(PeakFrequencies[i, :])))
         TOFA.append(SensorDistances[i, j]/fA0(np.median(PeakFrequencies[j, :])))
         CalculatedTOAS[i, j] = TOFS[j] - TOFS[0]
         CalculatedTOAA[i, j] = TOFA[j] - TOFA[0]
@@ -92,28 +91,7 @@ for i in range(7):
 DiffTOAS = CalculatedTOAS - TOA
 DiffTOAA = CalculatedTOAA - TOA
 
-
-
 print(PeakFrequencies)
-
-y, t = getWaveform("PCLS", testno, pridb.iloc[8, -1])
-N = len(y)
-T = t[1] - t[0]
-yf = fft(y)
-xf = fftfreq(N, T)[:N//2]
-peakfreq1 = xf[np.argmax(yf[:N//2])]
-print(peakfreq1)
-
-# plt.plot(xf, yf[:N//2])
-# plt.plot(t, y)
-
-y, t = getWaveform("PCLS", testno, pridb.iloc[0, -1])
-
-plt.plot(t, y)
-
-y, t = getWaveform("PCLS", testno, pridb.iloc[15, -1])
-
-plt.plot(t, y)
-
-plt.show()
+print(CalculatedTOAS)
+print(TOA)
 
