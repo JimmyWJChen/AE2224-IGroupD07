@@ -9,14 +9,15 @@ import toa_determination.ToA_final as ToA
 
 
 """
-This script will find the PLB velocities for a given sensor set-up and PLB tests.
+This script will find the PLB velocities for a given sensor set-up and PLB tests. 
+We will use the median PLB velocity as our wavespeed for the localisation.
 """
 
 
 class PLB_velo():
     """
     PLB_velo class will include everything needed to find the optimal PLB wavespeed
-    for all settings
+    for all settings and test it with the PLB locations
 
     Attributes:
     testlabels (list)
@@ -510,6 +511,13 @@ class PLB_velo():
 
         return x, S, tau
 """
+
+class PLB_tester(PLB_velo):
+    """
+    PLB_tester() class will test the velocities from PLB_velo() to determine the optimal
+    wave speed using MSE and R².
+
+    """
 
 if __name__ == '__main__':
     """
