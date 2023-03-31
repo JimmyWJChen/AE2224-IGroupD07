@@ -4,6 +4,9 @@ import os, sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import data_import as di
+import toa_determination.ToA_final as ToA
+
+
 
 """
 This script will find the PLB velocities for a given sensor set-up and PLB tests.
@@ -29,6 +32,11 @@ class PLB_velo():
     find_PLB_velo_iso_one_test() -> v (n vector), v_avg (scalar)
     find_PLB_velo_all_tests() -> v (number of tests * events array), v_avg (scalar)
     PLB_velo_average() - > v_avg (scalar)
+    PLB_velo_std() -> std (scalar)
+    PLB_velo_median() -> v_median (scalar) note that we prefer the median
+    PLB_velo_standardiser() -> v (vector) standardised
+    PLB_velo_IQR() -> IQR (scalar), relative IQR (scalar), Q1 (scalar), Q3 (scalar)
+    velo_post_processing() -> v (vector) with all nonsensical velocities removed
     PLB_velo_all_labels() -> number of labels * list of v (number of tests * events array), v_avg (scalar)
 
 
@@ -578,6 +586,7 @@ if __name__ == '__main__':
     print(f'median post velo is: \n {v_median_post}')
     print(f'post velo IQR is: \n {v_post_iqr}, {v_post_iqr_rel}, {v_post_q3}, {v_post_q1}')
 
+    #toa = ToA.get_toa_filtered("T", 1)
 
 
 
