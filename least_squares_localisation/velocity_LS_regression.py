@@ -4,8 +4,8 @@ import os, sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import data_import as di
-#import toa_determination.ToA_final as ToA
 
+# import toa_determination.ToA_final as ToA
 
 
 """
@@ -159,18 +159,16 @@ class PLBVelo():
         else:
             raise Exception('Choose a valid test label.')
 
-
-
         # get pridb of testlabel and testno
         pridb = di.getPrimaryDatabase(testlabel, testno)
-        print(f'dataset label and test number are: \n {testlabel}, {testno}')
+        #print(f'dataset label and test number are: \n {testlabel}, {testno}')
         # get the sensor times from tradb
         sensor_times = di.filterPrimaryDatabase(pridb, testlabel, testno).iloc[:, 1].to_numpy()
-        print(f'sensor times are: \n {sensor_times}')
+        #print(f'sensor times are: \n {sensor_times}')
         channel_tags = di.filterPrimaryDatabase(pridb, testlabel, testno).iloc[:, 2].to_numpy()
-        print(f'channel tags are: \n {channel_tags}')
+        #print(f'channel tags are: \n {channel_tags}')
         number_of_events = np.count_nonzero(channel_tags == 1)
-        print(f'number of events is: \n {number_of_events}')
+        #print(f'number of events is: \n {number_of_events}')
 
         # separate sensor times into times per sensor
         # set the times of channel 1 as the reference value
@@ -184,11 +182,11 @@ class PLBVelo():
             tau_channel_i = times_channel_i - times_channel_1
             tau_array[:, i] = tau_channel_i
             # each row in tau_array is equal to the tau_vector
-            #print(np.shape(times_channel_i))
-            print(f'times of 1st channel are: \n {times_channel_1}')
-            print(f'times of channel i are: \n {times_channel_i}')
-            print(f'time differences per channel are: \n {tau_channel_i}')
-        print(f'array of time differences: \n {tau_array}')
+            # print(np.shape(times_channel_i))
+            #print(f'times of 1st channel are: \n {times_channel_1}')
+            #print(f'times of channel i are: \n {times_channel_i}')
+            #print(f'time differences per channel are: \n {tau_channel_i}')
+        #print(f'array of time differences: \n {tau_array}')
 
         return tau_array
 
@@ -292,7 +290,7 @@ class PLBVelo():
         v_averages = np.zeros(len(self.testno))
         for i in range(len(self.testno)):
             v, v_avg, T = self.find_PLB_velo_iso_one_test(testlabel, self.testno[i], relax_factor,
-                                                       vT_init, iterations)
+                                                          vT_init, iterations)
             v_array[i, :] = v
             T_array[i, :] = T
             # v becomes a row in v_array
@@ -350,7 +348,7 @@ class PLBVelo():
 
         """
         for i in range(len(v_blob)):
-            v_blob[i] = (v_blob[i] - self.PLB_velo_average(v_blob))/self.PLB_velo_std(v_blob)
+            v_blob[i] = (v_blob[i] - self.PLB_velo_average(v_blob)) / self.PLB_velo_std(v_blob)
         return v_blob
 
     # get interquartile range
@@ -368,7 +366,7 @@ class PLBVelo():
         q1 = np.percentile(v_blob, 25)
         q3 = np.percentile(v_blob, 75)
         IQR = q3 - q1
-        IQR_rel = IQR/v_range
+        IQR_rel = IQR / v_range
         return IQR, IQR_rel, q3, q1
 
     # drop nonsense velocities
@@ -424,7 +422,7 @@ class PLBVelo():
         T_mega_blob = []
         for i in range(len(self.testlabels)):
             v_array, v_blob, v_avg, T_array, T_blob = self.find_PLB_velo_all_tests(self.testlabels[i], relax_factor,
-                                                          vT_init, iterations)
+                                                                                   vT_init, iterations)
             v_avg_array[i] = v_avg
             for j in range(len(v_blob)):
                 v_mega_blob.append(v_blob[j])
@@ -441,7 +439,7 @@ class PLBVelo():
                 v_list_5.append(v_array)
             elif i == 5:
                 v_list_6.append(v_array)
-        return v_list_1, v_list_2, v_list_3, v_list_4, v_list_5, v_list_6,\
+        return v_list_1, v_list_2, v_list_3, v_list_4, v_list_5, v_list_6, \
                np.array(v_mega_blob), np.average(v_avg_array), np.array(T_mega_blob)
 
     # find PLB velocity for one test using all events
@@ -512,6 +510,7 @@ class PLBVelo():
                                           relax_factor, vT_init, iterations)[1]
         print(f'v of this test are: \n {v}')
         return v, np.average(v), x, S, events, channels, T
+
 
 """    
     def set_state(self, setting):
@@ -589,28 +588,116 @@ class PLBVelo():
         return x, S, tau
 """
 
+
 class PLBTester(PLBVelo):
     """
     PLB_tester() class will test the velocities from PLB_velo() to determine the optimal
     wave speed using MSE and R².
 
     """
+
     def __init__(self, relax_factor, vT_init, iterations):
         """
         get the required velocities and initial time of flights
+        and assign labels to each pair of velos and times
+        PCLS: 8
+        PCLO: 9
+        PST: 9
+        PT: 9
+        ST: 18
+        T: 18
         """
         super().__init__()
         self.v_list = self.PLB_velo_all_labels(relax_factor, vT_init, iterations)[6]
         self.T_list = self.PLB_velo_all_labels(relax_factor, vT_init, iterations)[8]
+        self.vT_array = np.zeros((len(self.v_list), 3))
+        count = 0
+        for i in range(len(self.vT_array)):
+            count += 1
+            self.vT_array[i, 0] = self.v_list[i]
+            self.vT_array[i, 1] = self.T_list[i]
+            if count < 9:
+                self.vT_array[i, 2] = "PCLS"
+            elif 9 <= count < 18:
+                self.vT_array[i, 2] = "PCLO"
+            elif 18 <= count < 27:
+                self.vT_array[i, 2] = "PST"
+            elif 27 <= count < 36:
+                self.vT_array[i, 2] = "PT"
+            elif 36 <= count < 54:
+                self.vT_array[i, 2] = "ST"
+            elif 54 <= count < 72:
+                self.vT_array[i, 2] = "T"
 
-    def locate(self):
+    def residual_one_label(self, test_label: str, v, T):
         """
-        locate will calculate the emission location based on the given velocity and initial time of flight
+        residual_one_label will calculate the emission location based on the given velo and ToAs and label
+        and calculate the residual
+        """
+        # set x and S and number of events and number of channels
+        if test_label == "PCLS":
+            x = self.x1
+            S = self.S1
+            events = self.events1
+            channels = self.channels1
+        elif test_label == "PCLO":
+            x = self.x2
+            S = self.S2
+            events = self.events2
+            channels = self.channels2
+        elif test_label == "PST":
+            x = self.x3
+            S = self.S3
+            events = self.events3
+            channels = self.channels3
+        elif test_label == "PT":
+            x = self.x4
+            S = self.S4
+            events = self.events4
+            channels = self.channels4
+        elif test_label == "ST":
+            x = self.x5
+            S = self.S5
+            events = self.events5
+            channels = self.channels5
+        elif test_label == "T":
+            x = self.x6
+            S = self.S6
+            events = self.events6
+            channels = self.channels6
+        else:
+            raise Exception('Choose a valid test label.')
+        # define empty list of residuals
+        residual_list = []
+        # loop over each test number
+        for i in range(len(self.testno)):
+            # get the ToAs (events x channels) for each label and test number
+            ToAs = self.tau_sorter(test_label, self.testno[i]) + T
+            for j in range(events):
+                x_pred = ls.localise(S, ToAs[j, :], v)
+                residual = x - x_pred
+                residual_list.append(residual)
+        return residual_list
+
+    def residual(self):
+        """
+        residual will calculate the entire list of residuals over all labels for each velo and ToA pair
+        the method to be used is the
+
+
+
         """
         count = 0
-        for i in range(len(self.v_list)):
+        for i in range(len(self.vT_array)):
+            # get the velo, T and label
             count += 1
+            v = self.vT_array[i, 0]
+            T = self.vT_array[i, 1]
+            label = self.vT_array[i, 2]
 
+            for j in range(len(self.testlabels)):
+                # calculate the residuals for this label
+                residual_list = self.residual_one_label(label, v, T)
 
 
 if __name__ == '__main__':
@@ -639,7 +726,8 @@ if __name__ == '__main__':
     tau = np.array([0, -0.0000033361194415, 0.00000395852087374, 0.00000820232866552])
 """
     relax_factor = 1.
-    vT_init = np.array([np.random.uniform(0.,100000.), np.random.uniform(0.,100000.)])
+    #vT_init = np.array([np.random.uniform(-100000., 100000.), np.random.uniform(100000., 100000.)])
+    vT_init = np.array([-10000., -10.])
     print(f'initial guess is: \n {vT_init}')
     iterations = 10
 
@@ -665,10 +753,10 @@ if __name__ == '__main__':
           f' {q3_stand}, {q3_stand}')
 
     # get velo of all experiments
-    v_mega_blob= PLB.PLB_velo_all_labels(relax_factor, np.copy(vT_init),
-                                                            iterations)[6]
+    v_mega_blob = PLB.PLB_velo_all_labels(relax_factor, np.copy(vT_init),
+                                          iterations)[6]
     v_avg_all = PLB.PLB_velo_all_labels(relax_factor, np.copy(vT_init),
-                                                            iterations)[7]
+                                        iterations)[7]
     v_mega_blob_median = PLB.PLB_velo_median(v_mega_blob)
     v_mega_blob_avg = PLB.PLB_velo_average(v_mega_blob)
     v_mega_blob_std = PLB.PLB_velo_std(v_mega_blob)
@@ -688,10 +776,7 @@ if __name__ == '__main__':
     print(f'median post velo is: \n {v_median_post}')
     print(f'post velo IQR is: \n {v_post_iqr}, {v_post_iqr_rel}, {v_post_q3}, {v_post_q1}')
 
-    #toa = ToA.get_toa_filtered("T", 1)
-
-
-
+    # toa = ToA.get_toa_filtered("T", 1)
 
     """
     # get velocity of all experiments 
