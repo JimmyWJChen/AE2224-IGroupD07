@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 import csv
 from data_import import getWaveform, getPrimaryDatabase, filterPrimaryDatabase, getPeakFrequency
 #this doesnt work so well when changing the number of sensors, pls go to file name and make sure it's exactly what you are looking for
-TestType = 'T'
-TestNo = 2
+TestType = 'ST'
+TestNo = 3
 NoOfRows = 18
 NoOfSens = 8
 
@@ -38,7 +38,7 @@ for i in range(NoOfSens * NoOfRows):
     PeakFrequencies[i % NoOfRows, j] = PeakFreq
     # TOA[i % 8, j] = pridb.iloc[i, 1]
 TOA = np.zeros((NoOfRows, NoOfSens))
-with open('testing_data/toa_improved/PLB-8-channels/PLBS8_QI090_' + TestType + str(TestNo) + '.csv', newline = '') as TOAData:
+with open('testing_data\\toa\\PLB-hinkley-8-channels\\PLBS8_QI090_' + TestType + str(TestNo) + '.csv', newline = '') as TOAData:
     Data = csv.reader(TOAData)
     i = 0
     for row in Data:
@@ -121,13 +121,13 @@ RepS = NoOfRows*NoOfSens
 RepA = NoOfRows*NoOfSens
 for i in range (0,x):
     for j in range (0, y):
-        if PtA[i,j] > 4:
-            PtA[i,j] = 0
-            RepA -= 1
-
-        if PtS[i,j] > 0.9:
+        if PtS[i,j] > 1000:
             PtS[i,j] = 0
             RepS -= 1
+
+        if PtA[i,j] > 5:
+            PtA[i,j] = 0
+            RepA -= 1
 
 RepA = RepA / NoOfRows / NoOfSens
 RepS = RepS / NoOfRows / NoOfSens
@@ -135,7 +135,7 @@ print(RepS, RepA)
 #print(PeakFrequencies)
 #print(DiffTOAS/CalculatedTOAS)
 #print(DiffTOAS/CalculatedTOAA)
-#print(TOAR)
+print(TOAR)
 #print(DiffTOAS)
 #print(CalculatedTOAS)
 Discrepency = []
