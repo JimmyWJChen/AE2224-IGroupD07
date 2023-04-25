@@ -117,10 +117,21 @@ PtS = abs(DiffTOAS/TOAR)
 
 PtA = abs(DiffTOAA/TOAR)
 (x, y) = PtA.shape
+RepS = NoOfRows*NoOfSens
+RepA = NoOfRows*NoOfSens
 for i in range (0,x):
     for j in range (0, y):
-        if PtA[i,j] > 10:
+        if PtA[i,j] > 4:
             PtA[i,j] = 0
+            RepA -= 1
+
+        if PtS[i,j] > 0.9:
+            PtS[i,j] = 0
+            RepS -= 1
+
+RepA = RepA / NoOfRows / NoOfSens
+RepS = RepS / NoOfRows / NoOfSens
+print(RepS, RepA)
 #print(PeakFrequencies)
 #print(DiffTOAS/CalculatedTOAS)
 #print(DiffTOAS/CalculatedTOAA)
@@ -130,8 +141,8 @@ for i in range (0,x):
 Discrepency = []
 Discrepency1 = []
 for i in range (NoOfSens -1):
-    Discrepency.append(np.sum(PtS[:, i+1])/NoOfRows*100)
-    Discrepency1.append(np.sum(PtA[:, i+1])/NoOfRows*100)
-print (Discrepency1)
-print(PtA)
+    Discrepency.append(str(np.sum(PtS[:, i+1])/NoOfRows*100/RepS)[0:6] +'%')
+    Discrepency1.append(str(np.sum(PtA[:, i+1])/NoOfRows*100/RepA)[0:6] +'%')
+print (Discrepency, Discrepency1)
+#print(PtA)
 #print(PeakFrequencies)
