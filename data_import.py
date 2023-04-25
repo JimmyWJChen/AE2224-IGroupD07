@@ -7,7 +7,9 @@ import numpy as np
 
 
 def getPrimaryDatabase(label, testno=1):
-    if label == "PCLO" or label == "PCLS":
+    if label[:2] == "PD":
+        path = "testing_data/4-channels/" + label[3:] + ".pridb"
+    elif label == "PCLO" or label == "PCLS":
         path = "testing_data/PLB-4-channels/PLBS4_CP090_" + label + str(testno) + ".pridb"
     elif label == "TEST":
         path = "testing_data/PLB-8-channels/PLBS8_QI090_" + label + ".pridb"
@@ -21,7 +23,9 @@ def getPrimaryDatabase(label, testno=1):
 
 
 def getWaveform(label, testno=1, trai=1):
-    if label == "PCLO" or label == "PCLS":
+    if label[:2] == "PD":
+        path = "testing_data/4-channels/" + label[3:] + ".tradb"
+    elif label == "PCLO" or label == "PCLS":
         path = "testing_data/PLB-4-channels/PLBS4_CP090_" + label + str(testno) + ".tradb"
     elif label == "TEST":
         path = "testing_data/PLB-8-channels/PLBS8_QI090_" + label + ".tradb"
@@ -50,13 +54,18 @@ def addPeakFreq(pridb, label, testno=1):
     trais = pridb['trai']
     frequencies = []
     for trai in trais:
+        print(label, testno, trai)
         y, t = getWaveform(label, testno, trai)
         frequencies.append(getPeakFrequency(y, t))
     pridb.insert(4, "frequency", frequencies, True)
     return pridb
 
+def addDecibels(pridb):
+    base = np.min(pridb["amplitude"])
+    pridb["amplitude_db"] = 20 * np.log10(pridb["amplitude"]/base)
+    return pridb
 
-def filterPrimaryDatabase(pridb, label, testno, sortby="energy", epsilon=0.2, thamp=0.009, thdur = 0.002, thenergy=1e5, thstrength=2500, thcounts=70):
+def filterPrimaryDatabase(pridb, label, testno=1, sortby="energy", epsilon=0.2, thamp=0.009, thdur = 0.002, thenergy=1e5, thstrength=2500, thcounts=70):
 
     if label == "ST" and testno == 1:
         epsilon = 0.1
@@ -67,11 +76,12 @@ def filterPrimaryDatabase(pridb, label, testno, sortby="energy", epsilon=0.2, th
         thcounts = 70
 
     pridb = pridb.read_hits()
-    pridb = pridb[pridb['amplitude'] >= thamp]
-    pridb = pridb[pridb['duration'] >= thdur]
-    pridb = pridb[pridb['energy'] >= thenergy]
-    pridb = pridb[pridb['signal_strength'] >= thstrength]
-    pridb = pridb[pridb['counts'] >= thcounts]
+    # pridb = pridb[pridb['amplitude'] >= thamp]
+    # pridb = pridb[pridb['duration'] >= thdur]
+    # pridb = pridb[pridb['energy'] >= thenergy]
+    # pridb = pridb[pridb['signal_strength'] >= thstrength]
+    # pridb = pridb[pridb['counts'] >= thcounts]
+    pridb = pridb[pridb['trai'] != 0]
     pridb_channels = []
     for channel in range(1, int(pridb.max()['channel']+1)):
         pridb_chan = pridb.loc[pridb['channel'] == channel].copy()
@@ -124,14 +134,14 @@ def getHitsPerSensor(pridb):
 
 
 if __name__ == "__main__":
-    testlabel = "ST"
-    testno = 3
+    testlabel = "PD_PCLO_QI00"
+    testno = 1
     pridb = getPrimaryDatabase(testlabel, testno)
 
     # print(getHitsPerSensor(pridb.read_hits()))
-    print(pridb.read_hits().loc[pridb.read_hits()['channel'] == 4]['energy'])
+    print(pridb.read_hits())
     # print(filterPrimaryDatabase(pridb))
-    filtereddata = filterPrimaryDatabase(pridb, testlabel, testno)
-    print(filtereddata.loc[filtereddata['channel'] == 6])
+    filtereddata = filterPrimaryDatabase(pridb, testlabel, testno, epsilon=0.001)
+    print(filtereddata)
     #print(filtereddata.loc[filtereddata['channel'] == 3])
     # pridb.read_hits().to_csv('data.csv')
