@@ -237,11 +237,14 @@ class PLBVelo():
         tau_array = self.tau_sorter(testlabel, testno)
 
         v = np.zeros(len(x[:, 0]))
+        T = np.zeros(len(x[:, 0]))
         for i in range(len(v)):
             v[i] = ls.findVelocityIso_alt(x[i, :], S, tau_array[i, :],
                                           relax_factor, vT_init, iterations)[0]
+            T[i] = ls.findVelocityIso_alt(x[i, :], S, tau_array[i, :],
+                                          relax_factor, vT_init, iterations)[1]
         print(f'v of this test are: \n {v}')
-        return v, np.average(v)
+        return v, np.average(v), T
 
     # get PLB velocities from all tests
     def find_PLB_velo_all_tests(self, testlabel, relax_factor, vT_init, iterations):
@@ -283,18 +286,22 @@ class PLBVelo():
             raise Exception('Choose a valid test label.')
 
         v_array = np.zeros((len(self.testno), events))
+        T_array = np.zeros((len(self.testno), events))
         v_blob = []
+        T_blob = []
         v_averages = np.zeros(len(self.testno))
         for i in range(len(self.testno)):
-            v, v_avg = self.find_PLB_velo_iso_one_test(testlabel, self.testno[i], relax_factor,
+            v, v_avg, T = self.find_PLB_velo_iso_one_test(testlabel, self.testno[i], relax_factor,
                                                        vT_init, iterations)
             v_array[i, :] = v
+            T_array[i, :] = T
             # v becomes a row in v_array
             for j in range(len(v)):
                 v_blob.append(v[j])
+                T_blob.append(T[j])
             v_averages[i] = v_avg
 
-        return v_array, np.array(v_blob), np.average(v_averages)
+        return v_array, np.array(v_blob), np.average(v_averages), T_array, np.array(T_blob)
 
     # get average velocity
     def PLB_velo_average(self, v_blob):
@@ -414,12 +421,14 @@ class PLBVelo():
         v_list_6 = []
         v_avg_array = np.zeros(len(self.testlabels))
         v_mega_blob = []
+        T_mega_blob = []
         for i in range(len(self.testlabels)):
-            v_array, v_blob, v_avg = self.find_PLB_velo_all_tests(self.testlabels[i], relax_factor,
+            v_array, v_blob, v_avg, T_array, T_blob = self.find_PLB_velo_all_tests(self.testlabels[i], relax_factor,
                                                           vT_init, iterations)
             v_avg_array[i] = v_avg
             for j in range(len(v_blob)):
                 v_mega_blob.append(v_blob[j])
+                T_mega_blob.append(T_blob[j])
             if i == 0:
                 v_list_1.append(v_array)
             elif i == 1:
@@ -433,7 +442,7 @@ class PLBVelo():
             elif i == 5:
                 v_list_6.append(v_array)
         return v_list_1, v_list_2, v_list_3, v_list_4, v_list_5, v_list_6,\
-               np.array(v_mega_blob), np.average(v_avg_array)
+               np.array(v_mega_blob), np.average(v_avg_array), np.array(T_mega_blob)
 
     # find PLB velocity for one test using all events
     def find_PLB_velo_iso_one_test_all_events(self, testlabel, testno, relax_factor, vT_init, iterations):
@@ -495,11 +504,14 @@ class PLBVelo():
         # we need to make it a k vector (number of events * number of channels)
 
         v = np.zeros(len(x[:, 0]))
+        T = np.zeros(len(x[:, 0]))
         for i in range(len(v)):
             v[i] = ls.findVelocityIso_alt(x[i, :], S, tau_array[i, :],
                                           relax_factor, vT_init, iterations)[0]
+            T[i] = ls.findVelocityIso_alt(x[i, :], S, tau_array[i, :],
+                                          relax_factor, vT_init, iterations)[1]
         print(f'v of this test are: \n {v}')
-        return v, np.average(v), x, S, events, channels
+        return v, np.average(v), x, S, events, channels, T
 
 """    
     def set_state(self, setting):
@@ -583,6 +595,22 @@ class PLBTester(PLBVelo):
     wave speed using MSE and R².
 
     """
+    def __init__(self, relax_factor, vT_init, iterations):
+        """
+        get the required velocities and initial time of flights
+        """
+        super().__init__()
+        self.v_list = self.PLB_velo_all_labels(relax_factor, vT_init, iterations)[6]
+        self.T_list = self.PLB_velo_all_labels(relax_factor, vT_init, iterations)[8]
+
+    def locate(self):
+        """
+        locate will calculate the emission location based on the given velocity and initial time of flight
+        """
+        count = 0
+        for i in range(len(self.v_list)):
+            count += 1
+
 
 
 if __name__ == '__main__':
@@ -618,7 +646,7 @@ if __name__ == '__main__':
     # define object
     PLB = PLBVelo()
     # get velocity of one experiment
-    v, v_blob, v_avg = PLB.find_PLB_velo_all_tests("ST", relax_factor, np.copy(vT_init), iterations)
+    v, v_blob, v_avg, T_array, T_blob = PLB.find_PLB_velo_all_tests("ST", relax_factor, np.copy(vT_init), iterations)
     print(f'v array is: \n {v}')
     print(f'v blob is: \n {v_blob}')
     print(f'average v of PCLS is: \n {v_avg}')
