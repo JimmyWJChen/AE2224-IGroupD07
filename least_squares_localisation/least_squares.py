@@ -154,60 +154,7 @@ def findVelocityIso_alt(x, S, tau, relax_factor, vT_init=np.random.rand(2), iter
 
 	return vT[0], vT[1]
 
-#PLB velocity determination (isotropic) using different FPI and using multiple events
-def f2_multi(x, S, tau, v, T):
-	"""
-		Finds the vector result of the overdefined system where every element:
-		|X - S_i| - v * (T + tau_i) = 0
-		Is the distance traveled by the wave to each sensor.
 
-		x = AE location (nx2-matrix)
-		S = array of sensor locations  ((n*m)x2 matrix)
-		tau = Time-of-arrival difference w.r.t. the first sensor (nxm-matrix)
-		v = Guess of wave velocity (scalar)
-		T = Guess of time-of-arrival from first sensor (scalar)
-		returns: m-vector of function values
-		"""
-	F = np.zeros(len(S[:, 0]))
-	for i in range(len(F)):
-		F[i] = np.linalg.norm(x - S[i, :]) - v * (T + tau[i])
-
-	return F
-
-def J2_multi(tau, T, v, printing=False):
-	"""
-	Finds the Moore-Penrose inverse of the Jacobian matrix of the overdefined system f2.
-
-	tau = Time-of-arrival difference w.r.t. the first sensor (m-vector)
-	v = Guess of wave velocity (scalar)
-	T = Guess of time-of-arrival from first sensor (m-vector)
-	returns: Moore-Penrose inverse of Jacobian matrix (2*m matrix)
-	"""
-	J = np.column_stack(([-(T + t) for t in tau], [-v for t in tau]))
-	if printing:
-		print(J)
-		print(f'pseudo inverse of J is: \n {np.linalg.pinv(J)}')
-	return np.linalg.pinv(J)
-
-
-def findVelocityIso_multi(x, S, tau, relax_factor, vT_init=np.random.rand(2), iterations=10):
-	"""
-	Itveratively finds the least-squares solution X of the overdefined system f2.
-
-	x = AE location (2-vector)
-	S = array of sensor locations  (m*2 matrix)
-	tau = Time-of-arrival difference w.r.t. the first sensor (m-vector)
-	relax_factor = factor of relaxation (scalar)
-	vT_init = Initial condition guess of velocity and T (2-vector)
-	iterations = Nr. of iterations (scalar)
-	returns: wave velocity (scalar)
-
-	"""
-	vT = vT_init
-	for i in range(iterations):
-		vT -= relax_factor * J2_multi(tau, vT[1], vT[0]) @ f2_multi(x, S, tau, vT[0], vT[1])
-
-	return vT[0], vT[1]
 
 def random_guess_velocity(n_guesses, x, S, tau, v_guess_max, T_guess_max, relax_factor, iterations=10):
 	v, t = np.zeros(2)
