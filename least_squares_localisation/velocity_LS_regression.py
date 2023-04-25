@@ -14,7 +14,7 @@ We will use the median PLB velocity as our wavespeed for the localisation.
 """
 
 
-class PLB_velo():
+class PLBVelo():
     """
     PLB_velo class will include everything needed to find the optimal PLB wavespeed
     for all settings and test it with the PLB locations
@@ -435,6 +435,71 @@ class PLB_velo():
         return v_list_1, v_list_2, v_list_3, v_list_4, v_list_5, v_list_6,\
                np.array(v_mega_blob), np.average(v_avg_array)
 
+    # find PLB velocity for one test using all events
+    def find_PLB_velo_iso_one_test_all_events(self, testlabel, testno, relax_factor, vT_init, iterations):
+        """
+        For a given array of emission locations and one test label and number,
+        find the wave speed iteratively using all event as data.
+
+        n = number of events
+        testlabel = label of the test (either PCLS, PCLO, PST, PT, ST, T)
+        testno = number of the test (either 1, 2 or 3)
+        x = AE location (n * 2) matrix
+        S = array of sensor locations  (m*2 matrix)
+        tau = Time-of-arrival difference w.r.t. the first sensor (n * m-vector)
+        relax_factor = factor of relaxation (scalar)
+        vT_init = Initial condition guess of velocity and T (2-vector)
+        iterations = Nr. of iterations (scalar)
+        returns: wave velocity (n vector), average velocity (scalar)
+
+
+
+        """
+        # set x and S and number of events and number of channels
+        if testlabel == "PCLS":
+            x = self.x1
+            S = self.S1
+            events = self.events1
+            channels = self.channels1
+        elif testlabel == "PCLO":
+            x = self.x2
+            S = self.S2
+            events = self.events2
+            channels = self.channels2
+        elif testlabel == "PST":
+            x = self.x3
+            S = self.S3
+            events = self.events3
+            channels = self.channels3
+        elif testlabel == "PT":
+            x = self.x4
+            S = self.S4
+            events = self.events4
+            channels = self.channels4
+        elif testlabel == "ST":
+            x = self.x5
+            S = self.S5
+            events = self.events5
+            channels = self.channels5
+        elif testlabel == "T":
+            x = self.x6
+            S = self.S6
+            events = self.events6
+            channels = self.channels6
+        else:
+            raise Exception('Choose a valid test label.')
+
+        tau_array = self.tau_sorter(testlabel, testno)
+
+        # x, S and tau are multidimensional arrays, but to regress over all events
+        # we need to make it a k vector (number of events * number of channels)
+
+        v = np.zeros(len(x[:, 0]))
+        for i in range(len(v)):
+            v[i] = ls.findVelocityIso_alt(x[i, :], S, tau_array[i, :],
+                                          relax_factor, vT_init, iterations)[0]
+        print(f'v of this test are: \n {v}')
+        return v, np.average(v), x, S, events, channels
 
 """    
     def set_state(self, setting):
@@ -512,7 +577,7 @@ class PLB_velo():
         return x, S, tau
 """
 
-class PLB_tester(PLB_velo):
+class PLBTester(PLBVelo):
     """
     PLB_tester() class will test the velocities from PLB_velo() to determine the optimal
     wave speed using MSE and R².
@@ -550,7 +615,7 @@ if __name__ == '__main__':
     iterations = 10
 
     # define object
-    PLB = PLB_velo()
+    PLB = PLBVelo()
     # get velocity of one experiment
     v, v_blob, v_avg = PLB.find_PLB_velo_all_tests("ST", relax_factor, np.copy(vT_init), iterations)
     print(f'v array is: \n {v}')
