@@ -28,23 +28,29 @@ def PCA(datapoints, n):
     var = usedValues/totalVariance
     return X_pca, var
 
-def clustering_kmeans(datapoints, n_clusters, params=['amplitude', 'frequency']):
+def clustering_kmeans(datapoints, n_clusters, params=['amplitude', 'frequency', 'rise_time']):
     cluster_model = KMeans(n_clusters=n_clusters, n_init=10).fit(datapoints[params])
     datapoints['cluster'] = cluster_model.predict(datapoints[params])
     return datapoints
 
-def clustering_hierarchical(datapoints, n_clusters, linkage='ward', params=['amplitude', 'frequency']):
+def clustering_hierarchical(datapoints, n_clusters, linkage='ward', params=['amplitude', 'frequency', 'energy', 'rms', 'counts', 'rise_time', 'signal_strength']):
     cluster_model = AgglomerativeClustering(n_clusters=n_clusters, linkage=linkage).fit(datapoints[params])
     datapoints['cluster'] = cluster_model.labels_
     return datapoints
 
 if __name__=="__main__":
-    datapoints = di.filterPrimaryDatabase(di.getPrimaryDatabase("PCLO", 3), "PCLO", 3)
-    datapoints = di.addPeakFreq(datapoints, "PCLO", 3)
+    datapoints = di.filterPrimaryDatabase(di.getPrimaryDatabase("PD_PCLO_QI090"), "PD_PCLO_QI090", epsilon=0.001)
     datapoints = datapoints[datapoints['channel'] == 2]
+    # datapoints = di.addDecibels(datapoints)
+    datapoints = di.addPeakFreq(datapoints, "PD_PCLO_QI090")
+    # datapoints = standarize(datapoints)
+    print(datapoints)
+    # datapoints = PCA(datapoints, 2)
     n_clusters = 3
     datapoints = clustering_kmeans(datapoints, n_clusters)
     for i in range(n_clusters):
         pridb_cluster = datapoints.loc[datapoints['cluster'] == i].copy()
-        plt.scatter(pridb_cluster['frequency'], pridb_cluster['amplitude'])
+        plt.scatter(pridb_cluster['amplitude'], pridb_cluster['frequency'])
+    plt.xlabel('Energy')
+    plt.ylabel('Peak Frequency')
     plt.show()

@@ -4,7 +4,7 @@ import data_import as di
 import vallenae as vae
 import numpy as np
 
-def get_toa_filtered(label, testno, timepicker="hc"):
+def get_toa_filtered(label, testno, timepicker):
     """
     get trai values from pridb, get the tribd file of these trai values and calculate the time difference
     to add the time difference to the time in the pridb file.
@@ -28,11 +28,8 @@ def get_toa_filtered(label, testno, timepicker="hc"):
     time_lst = filtered_pridb.iloc[:, 1:3].to_numpy()
     n_values = np.shape(trai_lst)[0]
     
-    possible_timepickers = ("hc", "aic", "er", "mer")
-    
     if  n_values % n_sensors != 0:
         print(f"In file: {label} & {testno} the number of signals is not divisble by 4")
-        return None
     
     for i, trai in enumerate(trai_lst):
         y,t = di.getWaveform(label, testno, int(trai))
@@ -83,4 +80,4 @@ def get_toa_plb(n_sensors, timepicker):
                 testno = file[-7]
                 toa_array = reshape(*get_toa_filtered(label, testno, timepicker))
                 np.savetxt(f"testing_data\\toa\\PLB-{name}-{n_sensors}-channels\\{file[:-5]}csv", toa_array, delimiter=",")
-            
+get_toa_plb(4,"hc")  
