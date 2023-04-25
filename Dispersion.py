@@ -7,14 +7,21 @@ import csv
 from data_import import getWaveform, getPrimaryDatabase, filterPrimaryDatabase, getPeakFrequency
 
 TestType = 'PCLO'
-TestNo = 3
+TestNo = 2
 NoOfRows = 9
 NoOfSens = 4
 
-DamageCoordinates = np.array([[60, 100], [100, 100], [80, 90], [70, 80], [60,60], [90, 80], [80, 70], [60, 60], [100, 60]])
-DamageCoordinates = DamageCoordinates/1000
-SensorCoordinates = np.array([[50, 120], [120, 120], [40, 40], [110, 40]])
-SensorCoordinates = SensorCoordinates/1000
+if NoOfSens == 4:
+    DamageCoordinates = np.array([[60, 100], [100, 100], [80, 90], [70, 80], [60,60], [90, 80], [80, 70], [60, 60], [100, 60]])
+    DamageCoordinates = DamageCoordinates/1000
+    SensorCoordinates = np.array([[50, 120], [120, 120], [40, 40], [110, 40]])
+    SensorCoordinates = SensorCoordinates/1000
+
+if NoOfSens == 8:
+    DamageCoordinates = np.array([150,250],[250,250],[175,225],[200,225],[225,225],[175,200],[200,200],[225,200],[175,175,[200,175],[225,175],[150,150],[100,100],[150,100],[250,100],[300,100],[100,300],[300,300])
+    DamageCoordinates = DamageCoordinates/1000
+    SensorCoordinates = np.array([[50, 120], [120, 120], [40, 40], [110, 40]])
+    SensorCoordinates = SensorCoordinates/1000
 
 pridb = filterPrimaryDatabase(getPrimaryDatabase(TestType, TestNo), TestType, TestNo)
 
@@ -30,7 +37,7 @@ for i in range(4 * NoOfRows):
     PeakFrequencies[i % NoOfRows, j] = PeakFreq
     # TOA[i % 8, j] = pridb.iloc[i, 1]
 TOA = np.zeros((NoOfRows, 4))
-with open('testing_data/toa/PLB-4-channels/PLBS4_CP090_' + TestType + str(TestNo) + '.csv', newline = '') as TOAData:
+with open('testing_data/toa_improved/PLB-4-channels/PLBS4_CP090_' + TestType + str(TestNo) + '.csv', newline = '') as TOAData:
     Data = csv.reader(TOAData)
     i = 0
     for row in Data:
@@ -70,7 +77,7 @@ for i in range(0, len(Frequency1)):
         Frequency1[i], Velocity1[i] = float(Frequency1[i]), float(Velocity1[i])
 
 fS0 = sp.interp1d(Frequency1, Velocity1, kind="linear", fill_value="extrapolate")
-
+print(Velocity1)
 
 def get_distance(x, y):
     distance = sqrt((y[0]-x[0])**2 + (y[1]-x[1])**2)
@@ -111,12 +118,12 @@ PtA = abs(DiffTOAA/CalculatedTOAA)
 #print(PeakFrequencies)
 #print(DiffTOAS/CalculatedTOAS)
 #print(DiffTOAS/CalculatedTOAA)
-print(DiffTOAS)
-print(CalculatedTOAS)
+#print(DiffTOAS)
+#print(CalculatedTOAS)
 Discrepency = []
 Discrepency1 = []
-'''for i in range (NoOfSens -1):
+for i in range (NoOfSens -1):
     Discrepency.append(np.sum(PtS[:, i+1]))
     Discrepency1.append(np.sum(PtA[:, i+1]))
-print (Discrepency, Discrepency1)'''
+print (Discrepency, Discrepency1)
 #print(PeakFrequencies)
