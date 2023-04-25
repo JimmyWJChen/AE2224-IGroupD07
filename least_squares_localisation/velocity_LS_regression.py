@@ -611,11 +611,13 @@ class PLBTester(PLBVelo):
         self.v_list = self.PLB_velo_all_labels(relax_factor, vT_init, iterations)[6]
         self.T_list = self.PLB_velo_all_labels(relax_factor, vT_init, iterations)[8]
         self.vT_array = np.zeros((len(self.v_list), 3))
+
         count = 0
         for i in range(len(self.vT_array)):
             count += 1
             self.vT_array[i, 0] = self.v_list[i]
             self.vT_array[i, 1] = self.T_list[i]
+            """
             if count < 9:
                 self.vT_array[i, 2] = "PCLS"
             elif 9 <= count < 18:
@@ -628,7 +630,7 @@ class PLBTester(PLBVelo):
                 self.vT_array[i, 2] = "ST"
             elif 54 <= count < 72:
                 self.vT_array[i, 2] = "T"
-
+"""
     def residual_one_label(self, test_label: str, v, T):
         """
         residual_one_label will calculate the emission location based on the given velo and ToAs and label
@@ -679,25 +681,39 @@ class PLBTester(PLBVelo):
                 residual_list.append(residual)
         return residual_list
 
-    def residual(self):
+    def optimal_velo(self):
         """
-        residual will calculate the entire list of residuals over all labels for each velo and ToA pair
-        the method to be used is the
+        optimal velo will calculate the entire list of residuals over all labels for each velo and ToA pair
+        and it will find the velo with the lowest squared residuals
 
 
 
         """
+        min_residuals_squared = np.inf
+        best_velo = 0.
         count = 0
         for i in range(len(self.vT_array)):
             # get the velo, T and label
             count += 1
             v = self.vT_array[i, 0]
             T = self.vT_array[i, 1]
-            label = self.vT_array[i, 2]
-
+            #label = self.vT_array[i, 2]
+            # define empty list of residuals
+            residuals = []
             for j in range(len(self.testlabels)):
                 # calculate the residuals for this label
-                residual_list = self.residual_one_label(label, v, T)
+                residual_list = self.residual_one_label(self.testlabels[j], v, T)
+                # add each residual to the big list
+                for k in range(len(residual_list)):
+                    residuals.append(residual_list[k])
+            # convert residuals to an np array and calculate the square
+            squared_residuals = (np.array(residuals))**2
+            if squared_residuals < min_residuals_squared:
+                min_residuals_squared = squared_residuals
+                best_velo = v
+        print(f'optimal velocity is \n {best_velo}')
+        print(f'squared residuals is \n {min_residuals_squared}')
+        return best_velo, min_residuals_squared
 
 
 if __name__ == '__main__':
@@ -777,6 +793,11 @@ if __name__ == '__main__':
     print(f'post velo IQR is: \n {v_post_iqr}, {v_post_iqr_rel}, {v_post_q3}, {v_post_q1}')
 
     # toa = ToA.get_toa_filtered("T", 1)
+    # find the optimal velocity
+    # initialise object
+    PLBEval = PLBTester(relax_factor, vT_init, iterations)
+    # find the optimal velocity
+    v_optimal, residuals_squared = PLBEval.optimal_velo()
 
     """
     # get velocity of all experiments 
