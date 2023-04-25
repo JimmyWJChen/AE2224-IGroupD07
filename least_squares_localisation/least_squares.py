@@ -154,6 +154,8 @@ def findVelocityIso_alt(x, S, tau, relax_factor, vT_init=np.random.rand(2), iter
 
 	return vT[0], vT[1]
 
+
+
 def random_guess_velocity(n_guesses, x, S, tau, v_guess_max, T_guess_max, relax_factor, iterations=10):
 	v, t = np.zeros(2)
 	#flag = False
