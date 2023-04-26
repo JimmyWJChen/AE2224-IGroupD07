@@ -5,7 +5,7 @@ import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import data_import as di
 
-# import toa_determination.ToA_final as ToA
+# from toa_determination.ToA_final import get_toa_filtered as get_toa_filtered
 
 
 """
@@ -161,14 +161,14 @@ class PLBVelo():
 
         # get pridb of testlabel and testno
         pridb = di.getPrimaryDatabase(testlabel, testno)
-        #print(f'dataset label and test number are: \n {testlabel}, {testno}')
+        # print(f'dataset label and test number are: \n {testlabel}, {testno}')
         # get the sensor times from tradb
         sensor_times = di.filterPrimaryDatabase(pridb, testlabel, testno).iloc[:, 1].to_numpy()
-        #print(f'sensor times are: \n {sensor_times}')
+        # print(f'sensor times are: \n {sensor_times}')
         channel_tags = di.filterPrimaryDatabase(pridb, testlabel, testno).iloc[:, 2].to_numpy()
-        #print(f'channel tags are: \n {channel_tags}')
+        # print(f'channel tags are: \n {channel_tags}')
         number_of_events = np.count_nonzero(channel_tags == 1)
-        #print(f'number of events is: \n {number_of_events}')
+        # print(f'number of events is: \n {number_of_events}')
 
         # separate sensor times into times per sensor
         # set the times of channel 1 as the reference value
@@ -183,10 +183,10 @@ class PLBVelo():
             tau_array[:, i] = tau_channel_i
             # each row in tau_array is equal to the tau_vector
             # print(np.shape(times_channel_i))
-            #print(f'times of 1st channel are: \n {times_channel_1}')
-            #print(f'times of channel i are: \n {times_channel_i}')
-            #print(f'time differences per channel are: \n {tau_channel_i}')
-        #print(f'array of time differences: \n {tau_array}')
+            # print(f'times of 1st channel are: \n {times_channel_1}')
+            # print(f'times of channel i are: \n {times_channel_i}')
+            # print(f'time differences per channel are: \n {tau_channel_i}')
+        # print(f'array of time differences: \n {tau_array}')
 
         return tau_array
 
@@ -595,17 +595,17 @@ class PLBTester(PLBVelo):
     wave speed using MSE and R².
 
     """
-
+    # initialise object
     def __init__(self, relax_factor, vT_init, iterations):
         """
         get the required velocities and initial time of flights
         and assign labels to each pair of velos and times
-        PCLS: 8
-        PCLO: 9
-        PST: 9
-        PT: 9
-        ST: 18
-        T: 18
+        PCLS: 8 events, id 1
+        PCLO: 9 events, id 2
+        PST: 9 events, id 3
+        PT: 9 events, id 4
+        ST: 18 events, id 5
+        T: 18 events, id 6
         """
         super().__init__()
         self.v_list = self.PLB_velo_all_labels(relax_factor, vT_init, iterations)[6]
@@ -617,20 +617,45 @@ class PLBTester(PLBVelo):
             count += 1
             self.vT_array[i, 0] = self.v_list[i]
             self.vT_array[i, 1] = self.T_list[i]
-            """
+            # assign id for PCLS
             if count < 9:
-                self.vT_array[i, 2] = "PCLS"
+                self.vT_array[i, 2] = 1
+            # assign id for PCLO
             elif 9 <= count < 18:
-                self.vT_array[i, 2] = "PCLO"
+                self.vT_array[i, 2] = 2
+            # assign id for PST
             elif 18 <= count < 27:
-                self.vT_array[i, 2] = "PST"
+                self.vT_array[i, 2] = 3
+            # assign id for PT
             elif 27 <= count < 36:
-                self.vT_array[i, 2] = "PT"
+                self.vT_array[i, 2] = 4
+            # assign id for ST
             elif 36 <= count < 54:
-                self.vT_array[i, 2] = "ST"
+                self.vT_array[i, 2] = 5
+            # assign id for T
             elif 54 <= count < 72:
-                self.vT_array[i, 2] = "T"
-"""
+                self.vT_array[i, 2] = 6
+
+    # get the label
+    def get_label(self, label_int: int):
+        """
+        Feed it an integer and get the test label
+        """
+        if label_int == 1:
+            label = "PCLS"
+        elif label_int == 2:
+            label = "PCLO"
+        elif label_int == 3:
+            label = "PST"
+        elif label_int == 4:
+            label = "PT"
+        elif label_int == 5:
+            label = "ST"
+        else:
+            label = "T"
+        return label
+
+    # get the residuals from one label
     def residual_one_label(self, test_label: str, v, T):
         """
         residual_one_label will calculate the emission location based on the given velo and ToAs and label
@@ -681,6 +706,7 @@ class PLBTester(PLBVelo):
                 residual_list.append(residual)
         return residual_list
 
+    # get optimal velocity
     def optimal_velo(self):
         """
         optimal velo will calculate the entire list of residuals over all labels for each velo and ToA pair
@@ -690,14 +716,15 @@ class PLBTester(PLBVelo):
 
         """
         min_residuals_squared = np.inf
-        best_velo = 0.
+        best_velo = np.mean(self.v_list)
+        best_label = "average"
         count = 0
         for i in range(len(self.vT_array)):
             # get the velo, T and label
             count += 1
             v = self.vT_array[i, 0]
             T = self.vT_array[i, 1]
-            #label = self.vT_array[i, 2]
+            label = self.vT_array[i, 2]
             # define empty list of residuals
             residuals = []
             for j in range(len(self.testlabels)):
@@ -707,13 +734,37 @@ class PLBTester(PLBVelo):
                 for k in range(len(residual_list)):
                     residuals.append(residual_list[k])
             # convert residuals to an np array and calculate the square
-            squared_residuals = (np.array(residuals))**2
-            if squared_residuals < min_residuals_squared:
-                min_residuals_squared = squared_residuals
+            squared_residuals = (np.array(residuals)) ** 2
+            # sum this array
+            ssr = np.sum(squared_residuals)
+            if ssr < min_residuals_squared:
+                min_residuals_squared = ssr
                 best_velo = v
+                best_label = self.get_label(label)
+        # check if averaged speeds is actually optimal
+        v_mean = np.mean(self.vT_array[:, 0])
+        T_mean = np.mean(self.vT_array[:, 1])
+        # define empty list of residuals
+        residuals = []
+        # iterate over test labels
+        for l in range(len(self.testlabels)):
+            # calculate residual for the l-th label
+            residual_list = self.residual_one_label(self.testlabels[l], v_mean, T_mean)
+            # add each element of residual_list to residuals
+            for m in range(len(residual_list)):
+                residuals.append(residual_list[m])
+        # convert residuals to an np array and calculate the square
+        squared_residuals = (np.array(residuals)) ** 2
+        # sum this array
+        ssr = np.sum(squared_residuals)
+        if ssr < min_residuals_squared:
+            min_residuals_squared = ssr
+            best_velo = v_mean
+            best_label = "average"
         print(f'optimal velocity is \n {best_velo}')
+        print(f'label of optimal velocity is \n {best_label}')
         print(f'squared residuals is \n {min_residuals_squared}')
-        return best_velo, min_residuals_squared
+        return best_velo, best_label, min_residuals_squared
 
 
 if __name__ == '__main__':
@@ -742,7 +793,7 @@ if __name__ == '__main__':
     tau = np.array([0, -0.0000033361194415, 0.00000395852087374, 0.00000820232866552])
 """
     relax_factor = 1.
-    #vT_init = np.array([np.random.uniform(-100000., 100000.), np.random.uniform(100000., 100000.)])
+    # vT_init = np.array([np.random.uniform(-100000., 100000.), np.random.uniform(100000., 100000.)])
     vT_init = np.array([-10000., -10.])
     print(f'initial guess is: \n {vT_init}')
     iterations = 10
@@ -792,7 +843,8 @@ if __name__ == '__main__':
     print(f'median post velo is: \n {v_median_post}')
     print(f'post velo IQR is: \n {v_post_iqr}, {v_post_iqr_rel}, {v_post_q3}, {v_post_q1}')
 
-    # toa = ToA.get_toa_filtered("T", 1)
+    # toa, n_sensors, n_values = get_toa_filtered("T", 1, "hc")
+    # print(f'toa list is \n : {toa}')
     # find the optimal velocity
     # initialise object
     PLBEval = PLBTester(relax_factor, vT_init, iterations)
