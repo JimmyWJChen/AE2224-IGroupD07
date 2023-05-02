@@ -44,7 +44,7 @@ def performance_comparison():
 
 def plot_waveform_criteria():
 
-    y,t = di.getWaveform("PCLO",2,20)
+    y,t = di.getWaveform("PCLO",1,1)
 
     SAMPLES = 1000
 
@@ -68,3 +68,6 @@ def plot_waveform_criteria():
     plt.vlines(criteria_time,-1,1,("r","y","g","b"))
     plt.axis([t[0]/50, max(criteria_time)*2,min(y),max(y)])
     plt.show()
+    
+if __name__ == "__main__":
+    plot_waveform_criteria()
