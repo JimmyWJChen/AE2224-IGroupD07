@@ -6,10 +6,10 @@ import matplotlib.pyplot as plt
 import csv
 from data_import import getWaveform, getPrimaryDatabase, filterPrimaryDatabase, getPeakFrequency
 #this doesnt work so well when changing the number of sensors, pls go to file name and make sure it's exactly what you are looking for
-TestType = 'PCLO'
-TestNo = 3
-NoOfRows = 9
-NoOfSens = 4
+TestType = 'ST'
+TestNo = 2
+NoOfRows = 18
+NoOfSens = 8
 
 if NoOfSens == 4:
     DamageCoordinates = np.array([[60, 100], [100, 100], [80, 90], [70, 80], [60,60], [90, 80], [80, 70], [60, 60], [100, 60]])
@@ -38,7 +38,7 @@ for i in range(NoOfSens * NoOfRows):
     PeakFrequencies[i % NoOfRows, j] = PeakFreq
     # TOA[i % 8, j] = pridb.iloc[i, 1]
 TOA = np.zeros((NoOfRows, NoOfSens))
-with open('testing_data\\toa\\PLB-hinkley-4-channels\\PLBS4_CP090_' + TestType + str(TestNo) + '.csv', newline = '') as TOAData:
+with open('testing_data\\toa\\PLB-hinkley-8-channels\\PLBS8_QI090_' + TestType + str(TestNo) + '.csv', newline = '') as TOAData:
     Data = csv.reader(TOAData)
     i = 0
     for row in Data:
@@ -48,7 +48,7 @@ with open('testing_data\\toa\\PLB-hinkley-4-channels\\PLBS4_CP090_' + TestType +
 # Asymmetric Assumption
 Frequency = []
 Velocity = []
-with open("dispersion_curves/A0.csv", newline='') as A0:
+with open("dispersion_curves/A0.csv") as A0:
     Data = csv.reader(A0)
 # Size = len(Data)
 # Frequency= np.zero(Size)
@@ -60,24 +60,24 @@ with open("dispersion_curves/A0.csv", newline='') as A0:
 for i in range(0, len(Frequency)):
         Frequency[i], Velocity[i] = float(Frequency[i]), float(Velocity[i])
 
-fA0 = sp.interp1d(Frequency, Velocity, kind="linear", fill_value="extrapolate")
+fA0 = sp.interp1d(Frequency, Velocity, fill_value="extrapolate")
 
 # Symmetric Below
 Velocity1 = []
 Frequency1 = []
-with open('dispersion_curves/S0.csv', newline='') as S0:
+with open('dispersion_curves/S0.csv') as S0:
     Data1 = csv.reader(S0)
 # Size = len(Data)
 # Frequency= np.zero(Size)
 # Velocity = np.zero(Size)
-    for row in Data1:
-        Frequency1.append(row[0])
-        Velocity1.append(row[1])
+    for row1 in Data1:
+        Frequency1.append(row1[0])
+        Velocity1.append(row1[1])
 
 for i in range(0, len(Frequency1)):
         Frequency1[i], Velocity1[i] = float(Frequency1[i]), float(Velocity1[i])
 
-fS0 = sp.interp1d(Frequency1, Velocity1, kind="linear", fill_value="extrapolate")
+fS0 = sp.interp1d(Frequency1, Velocity1, fill_value="extrapolate")
 
 def get_distance(x, y):
     distance = sqrt((y[0]-x[0])**2 + (y[1]-x[1])**2)
@@ -131,10 +131,33 @@ for z in range(0, 100):
 #print(CalculatedTOAS)
 Discrepency = np.empty((100, NoOfSens-1))
 #print(Pt[50, :, 2])
+SDiscre = []
 for z in range (100):
     for i in range (NoOfSens -1):
         Discrepency[z, i] = np.sum(Pt[z, :, i+1])/NoOfRows*100/Rep[z]
-print (Discrepency)
 
+    SDiscre.append(sum(Discrepency[z]))
+Minimum = SDiscre.index(min(SDiscre))
+print(Minimum)
 #print(PeakFrequencies)
-print(Rep)
+#print(SDiscre)
+V= np.empty((NoOfRows, NoOfSens))
+'''for i in range(NoOfRows):
+    for j in range(NoOfSens):
+        V[i,j] = 0.91* fS0(np.median(PeakFrequencies[i, :])) + 0.09 * fA0(np.median(PeakFrequencies[j, :]))
+print(V)'''
+vs = []
+v = []
+va = []
+for i in np.arange(0,150001, 1):
+    vs.append(fS0(i))
+    va.append(fA0(i))
+    v.append(0.91 * fS0(i) + 0.09*fA0(i))
+
+
+plt.plot(np.arange(0,150001, 1), vs, 'b')
+plt.plot(np.arange(0,150001, 1), va, 'r')
+plt.plot(np.arange(0,150001, 1), v, 'g')
+plt.ylim(0, 8000)
+plt.xlim(0, 150000)
+plt.show()
