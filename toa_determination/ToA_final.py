@@ -25,30 +25,32 @@ def get_toa_filtered(label: str, testno: int, timepicker: str):
     
     if  n_values % n_sensors != 0:
         print(f"In file: {label} & {testno} the number of signals is not divisble by 4")
+        
+    else:
     
-    for i, trai in enumerate(trai_lst):
-        y,t = di.getWaveform(label, testno, int(trai))
-        
-        try:
+        for i, trai in enumerate(trai_lst):
+            y,t = di.getWaveform(label, testno, int(trai))
             
+            try:
+                
+                
+                if timepicker == "hc":
+                    hc_index = vae.timepicker.hinkley(y, alpha=5)[1]
+                if timepicker == "aic":
+                    hc_index = vae.timepicker.aic(y)[1]
+                if timepicker == "er":
+                    hc_index = vae.timepicker.energy_ratio(y)[1]
+                else:
+                    hc_index = vae.timepicker.modified_energy_ratio(y)[1]
             
-            if timepicker == "hc":
-                hc_index = vae.timepicker.hinkley(y, alpha=5)[1]
-            if timepicker == "aic":
-                hc_index = vae.timepicker.aic(y)[1]
-            if timepicker == "er":
-                hc_index = vae.timepicker.energy_ratio(y)[1]
-            else:
-                hc_index = vae.timepicker.modified_energy_ratio(y)[1]
-        
-        except:
-            print("Invalid timepicker is chosen, hinkley is selected")
-            hc_index = vae.timepicker.hinkley(y, alpha=5)[1]    
-        
-        time_difference = t[hc_index]
-        time_lst[i][0] = time_lst[i][0] + time_difference
+            except:
+                print("Invalid timepicker is chosen, hinkley is selected")
+                hc_index = vae.timepicker.hinkley(y, alpha=5)[1]    
+            
+            time_difference = t[hc_index]
+            time_lst[i][0] = time_lst[i][0] + time_difference
 
-    return time_lst[:,0]
+        return time_lst[:,0]
 
 def reshape(label, testno, timepicker):
     
