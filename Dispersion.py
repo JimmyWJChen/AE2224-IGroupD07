@@ -116,24 +116,25 @@ for z in range(0, 100):
     Rep[z] = NoOfRows*NoOfSens
     for i in range (0,x):
         for j in range (0, y):
-            if Pt[z,i,j] > 0.5:
+            if Pt[z,i,j] > 10:
                 Pt[z, i,j] = 0
                 Rep[z] -= 1
 
     Rep[z] = Rep[z] / NoOfRows / NoOfSens
 
-print(Rep)
+#print(Rep)
 #print(PeakFrequencies)
 #print(DiffTOAS/CalculatedTOAS)
 #print(DiffTOAS/CalculatedTOAA)
 #print(TOAR)
 #print(DiffTOAS)
 #print(CalculatedTOAS)
-Discrepency = np.array((100, NoOfSens-1))
-#print(Pt)
+Discrepency = np.empty((100, NoOfSens-1))
+#print(Pt[50, :, 2])
 for z in range (100):
     for i in range (NoOfSens -1):
-        Discrepency[z, i] = (str(np.sum(Pt[z, :, i+1])/NoOfRows*100/Rep[z])[0:6] +'%')
+        Discrepency[z, i] = np.sum(Pt[z, :, i+1])/NoOfRows*100/Rep[z]
 print (Discrepency)
 
 #print(PeakFrequencies)
+print(Rep)
