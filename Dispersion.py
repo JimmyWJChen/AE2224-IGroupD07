@@ -6,10 +6,10 @@ import matplotlib.pyplot as plt
 import csv
 from data_import import getWaveform, getPrimaryDatabase, filterPrimaryDatabase, getPeakFrequency
 #this doesnt work so well when changing the number of sensors, pls go to file name and make sure it's exactly what you are looking for
-TestType = 'ST'
+TestType = 'PCLO'
 TestNo = 3
-NoOfRows = 18
-NoOfSens = 8
+NoOfRows = 9
+NoOfSens = 4
 
 if NoOfSens == 4:
     DamageCoordinates = np.array([[60, 100], [100, 100], [80, 90], [70, 80], [60,60], [90, 80], [80, 70], [60, 60], [100, 60]])
@@ -38,7 +38,7 @@ for i in range(NoOfSens * NoOfRows):
     PeakFrequencies[i % NoOfRows, j] = PeakFreq
     # TOA[i % 8, j] = pridb.iloc[i, 1]
 TOA = np.zeros((NoOfRows, NoOfSens))
-with open('testing_data\\toa\\PLB-hinkley-8-channels\\PLBS8_QI090_' + TestType + str(TestNo) + '.csv', newline = '') as TOAData:
+with open('testing_data\\toa\\PLB-hinkley-4-channels\\PLBS4_CP090_' + TestType + str(TestNo) + '.csv', newline = '') as TOAData:
     Data = csv.reader(TOAData)
     i = 0
     for row in Data:
@@ -82,7 +82,7 @@ fS0 = sp.interp1d(Frequency1, Velocity1, kind="linear", fill_value="extrapolate"
 def get_distance(x, y):
     distance = sqrt((y[0]-x[0])**2 + (y[1]-x[1])**2)
     return distance
-
+#print(Velocity1)
 
 SensorDistances = np.zeros((NoOfRows, NoOfSens))
 
@@ -98,51 +98,43 @@ for i in range(NoOfRows):
         TOF.append(TOA[i, j])
         TOAR[i, j] = TOF[j] - TOF[0]
 
-CalculatedTOAS = np.zeros((NoOfRows, NoOfSens))
-CalculatedTOAA = np.zeros((NoOfRows, NoOfSens))
+CalculatedTOA = np.zeros((100, NoOfRows, NoOfSens))
+w1 = np.arange(0,1.001, 0.01)
+w2 = np.flip(w1)
+DiffTOA = np.zeros((100, NoOfRows, NoOfSens))
+Pt = np.zeros((100, NoOfRows, NoOfSens))
+Rep = np.zeros(100)
+for z in range(0, 100):
+    for i in range(NoOfRows):
+        TOF = np.zeros(NoOfSens)
+        for j in range(NoOfSens):
+            TOF[j]=(SensorDistances[i, j]/(w1[z]* fS0(np.median(PeakFrequencies[i, :])) + w2[z]* fA0(np.median(PeakFrequencies[j, :]))))
+            CalculatedTOA[z,i, j] = TOF[j] - TOF[0]
+    DiffTOA[z] = CalculatedTOA[z] - TOAR
+    Pt[z] = abs(DiffTOA[z]/TOAR)
+    (x, y) = Pt[z].shape
+    Rep[z] = NoOfRows*NoOfSens
+    for i in range (0,x):
+        for j in range (0, y):
+            if Pt[z,i,j] > 10:
+                Pt[z, i,j] = 0
+                Rep[z] -= 1
 
-for i in range(NoOfRows):
-    TOFS = []
-    TOFA = []
-    for j in range(NoOfSens):
-        TOFS.append(SensorDistances[i, j]/fS0(np.median(PeakFrequencies[i, :])))
-        TOFA.append(SensorDistances[i, j]/fA0(np.median(PeakFrequencies[j, :])))
-        CalculatedTOAS[i, j] = TOFS[j] - TOFS[0]
-        CalculatedTOAA[i, j] = TOFA[j] - TOFA[0]
+    Rep[z] = Rep[z] / NoOfRows / NoOfSens
 
-DiffTOAS = CalculatedTOAS - TOAR
-DiffTOAA = CalculatedTOAA - TOAR
-
-PtS = abs(DiffTOAS/TOAR)
-
-PtA = abs(DiffTOAA/TOAR)
-(x, y) = PtA.shape
-RepS = NoOfRows*NoOfSens
-RepA = NoOfRows*NoOfSens
-for i in range (0,x):
-    for j in range (0, y):
-        if PtS[i,j] > 1000:
-            PtS[i,j] = 0
-            RepS -= 1
-
-        if PtA[i,j] > 5:
-            PtA[i,j] = 0
-            RepA -= 1
-
-RepA = RepA / NoOfRows / NoOfSens
-RepS = RepS / NoOfRows / NoOfSens
-print(RepS, RepA)
+#print(Rep)
 #print(PeakFrequencies)
 #print(DiffTOAS/CalculatedTOAS)
 #print(DiffTOAS/CalculatedTOAA)
-print(TOAR)
+#print(TOAR)
 #print(DiffTOAS)
 #print(CalculatedTOAS)
-Discrepency = []
-Discrepency1 = []
-for i in range (NoOfSens -1):
-    Discrepency.append(str(np.sum(PtS[:, i+1])/NoOfRows*100/RepS)[0:6] +'%')
-    Discrepency1.append(str(np.sum(PtA[:, i+1])/NoOfRows*100/RepA)[0:6] +'%')
-print (Discrepency, Discrepency1)
-#print(PtA)
+Discrepency = np.empty((100, NoOfSens-1))
+#print(Pt[50, :, 2])
+for z in range (100):
+    for i in range (NoOfSens -1):
+        Discrepency[z, i] = np.sum(Pt[z, :, i+1])/NoOfRows*100/Rep[z]
+print (Discrepency)
+
 #print(PeakFrequencies)
+print(Rep)
