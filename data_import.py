@@ -76,11 +76,11 @@ def filterPrimaryDatabase(pridb, label, testno=1, sortby="energy", epsilon=0.2, 
         thcounts = 70
 
     pridb = pridb.read_hits()
-    # pridb = pridb[pridb['amplitude'] >= thamp]
-    # pridb = pridb[pridb['duration'] >= thdur]
-    # pridb = pridb[pridb['energy'] >= thenergy]
-    # pridb = pridb[pridb['signal_strength'] >= thstrength]
-    # pridb = pridb[pridb['counts'] >= thcounts]
+    pridb = pridb[pridb['amplitude'] >= thamp]
+    pridb = pridb[pridb['duration'] >= thdur]
+    pridb = pridb[pridb['energy'] >= thenergy]
+    pridb = pridb[pridb['signal_strength'] >= thstrength]
+    pridb = pridb[pridb['counts'] >= thcounts]
     pridb = pridb[pridb['trai'] != 0]
     pridb_channels = []
     for channel in range(1, int(pridb.max()['channel']+1)):
