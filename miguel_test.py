@@ -20,5 +20,5 @@ def equations(vars):
     return [eq1, eq2, eq3]
 
 x, y, T =  fsolve(equations, (1, 1, 1))
-
+h
 print(x, y, T)
