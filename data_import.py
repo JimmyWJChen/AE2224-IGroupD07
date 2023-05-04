@@ -53,14 +53,18 @@ def getWaveform(label, testno=1, trai=1):
 def getPeakFrequency(y, t):
     N = len(y)
     T = t[1] - t[0]
-    yf = fft(y)
+    yf = np.abs(fft(y))
     xf = fftfreq(N, T)[:N // 2]
     PeakFreq = xf[np.argmax(yf[:N // 2])]
-    WPF = 0
+    Fcentr = 0
     for i in range(len(xf)):
-        WPF += xf[i] * yf[i]
-    WPF /= np.sum(yf)
-    return PeakFreq, WPF
+        Fcentr += xf[i] * yf[i]
+    Fcentr /= np.sum(yf)
+    WPF = np.sqrt(PeakFreq * Fcentr)
+    # import matplotlib.pyplot as plt
+    # plt.plot(xf, yf[:N//2])
+    # plt.show()
+    return PeakFreq, Fcentr, WPF
 
 def addPeakFreq(pridb, label, testno=1):
     try:
@@ -70,15 +74,18 @@ def addPeakFreq(pridb, label, testno=1):
     tradb = getTransientDatabase(label, testno)
     trais = pridb['trai']
     frequencies = []
+    fcentrs = []
     wpfs = []
     for trai in trais:
         print(label, testno, trai)
         y, t = tradb.read_wave(trai)
-        f, wpf = getPeakFrequency(y, t)
+        f, fcentr, wpf = getPeakFrequency(y, t)
         frequencies.append(f)
+        fcentrs.append(fcentr)
         wpfs.append(wpf)
     pridb.insert(4, "frequency", frequencies, True)
-    pridb.insert(5, "wpfrequency", wpfs, True)
+    pridb.insert(5, "freqcentroid", fcentrs, True)
+    pridb.insert(6, "wpfrequency", wpfs, True)
     return pridb
 
 def addDecibels(pridb):
