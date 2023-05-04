@@ -1,16 +1,16 @@
 import numpy as np
 import os
 from scipy.optimize import fsolve
-#from Dispersion import fS0,fA0, Minimum, PeakFrequencies, NoOfSens, NoOfRows
+from Dispersion import fS0,fA0, Minimum, PeakFrequencies, NoOfSens, NoOfRows
 import math
 
-#def Velocity(fs, fa, Min, frequencies):
-#    v = (min * fs(frequencies) + (100 - Min) * fa(frequencies)) / 100
-#    return v
-# V = np.zeros((NoOfSens, NoOfRows))
-#V = fS0(PeakFrequencies)
-#print(V)
-#V = Velocity(fS0, fA0, Minimum, PeakFrequencies)
+def Velocity(fs, fa, Min, frequencies):
+    Vsym = fs(frequencies)
+    Vasy = fa(frequencies)
+    v = (Min * Vsym + (100 - Min) * Vasy) / 100
+    return v
+V = np.zeros((NoOfSens, NoOfRows))
+V = Velocity(fS0, fA0, Minimum, PeakFrequencies)
 
 
 file = os.path.join(os.path.dirname(__file__), "testing_data/PLB-hinkley-4-channels/PLBS4_CP090_PCLO1"+".csv")
@@ -34,7 +34,7 @@ def non_linear(a1, a2, a3, b1, b2, b3, v, T, t2, t3):
 
 #--------------------------------------------------------
 
-
+'''
 n_sensors = [[50, 120], [120, 120], [40, 40], [110, 40]]
 
 s = 0
@@ -43,3 +43,4 @@ for i in range(n_sensors):
     P = math.sqrt((l_f[0] - x)**2 + (l_f[1] - y)**2) + v*t[i]
     s =+ (D - P)**2
 LUCY = math.sqrt((s)/(n_sensors-1))
+'''
