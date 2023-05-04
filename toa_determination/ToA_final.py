@@ -48,14 +48,15 @@ def get_toa_filtered(label: str, testno: int, timepicker: str):
                 print("Invalid timepicker is chosen, hinkley is selected")
                 hc_index = vae.timepicker.hinkley(y, alpha=5)[1]
 
-            time_difference = t[hc_index]
+            time_difference = t[hc_index] # type: ignore
             time_lst[i][0] = time_lst[i][0] + time_difference
 
         return time_lst[:,0], n_sensors
 
 def reshape(label, timepicker, testno=1):
     
-    time_lst, n_sensors = get_toa_filtered(label, testno, timepicker)
+    new_var = get_toa_filtered(label, testno, timepicker)
+    time_lst, n_sensors = new_var # type: ignore
     filtered_pridb = di.filterPrimaryDatabase(di.getPrimaryDatabase(label, testno), label, testno)
     trai_lst = filtered_pridb.iloc[:, -1:].to_numpy()
     n_values = np.shape(trai_lst)[0]
@@ -103,4 +104,4 @@ def get_toa_test(timepicker):
             np.savetxt(f"testing_data\\toa\\{name}-4-channels\\{file[:-5]}csv", toa_array, delimiter=",")
             
 if __name__ == "__main__":
-    get_toa_test("hc")
+    print(reshape("T", "hc"))
