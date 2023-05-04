@@ -21,6 +21,18 @@ def getPrimaryDatabase(label, testno=1):
     pridb = vae.io.PriDatabase(PRIDB)
     return pridb
 
+def getTransientDatabase(label, testno=1):
+    if label[:2] == "PD":
+        path = "testing_data/4-channels/" + label[3:] + ".tradb"
+    elif label == "PCLO" or label == "PCLS":
+        path = "testing_data/PLB-4-channels/PLBS4_CP090_" + label + str(testno) + ".tradb"
+    elif label == "TEST":
+        path = "testing_data/PLB-8-channels/PLBS8_QI090_" + label + ".tradb"
+    else:
+        path = "testing_data/PLB-8-channels/PLBS8_QI090_" + label + str(testno) + ".tradb"
+    HERE = os.path.dirname(__file__)
+    TRADB = os.path.join(HERE, path)
+    return vae.io.TraDatabase(TRADB)
 
 def getWaveform(label, testno=1, trai=1):
     if label[:2] == "PD":
@@ -55,12 +67,13 @@ def addPeakFreq(pridb, label, testno=1):
         pridb = pridb.read_hits()
     except AttributeError:
         pass
+    tradb = getTransientDatabase(label, testno)
     trais = pridb['trai']
     frequencies = []
     wpfs = []
     for trai in trais:
         print(label, testno, trai)
-        y, t = getWaveform(label, testno, trai)
+        y, t = tradb.read_wave(trai)
         f, wpf = getPeakFrequency(y, t)
         frequencies.append(f)
         wpfs.append(wpf)
