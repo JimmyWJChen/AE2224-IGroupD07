@@ -1,5 +1,5 @@
 from scipy.optimize import fsolve
-h
+
 v = 1
 t2 = 1
 t3 = 1
