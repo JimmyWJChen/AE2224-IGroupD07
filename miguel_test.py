@@ -5,7 +5,8 @@ from Dispersion import fS0,fA0, Minimum, PeakFrequencies, NoOfSens, NoOfRows
 def Velocity(fs, fa, Min,frequency):
     Vsym = fs(frequency)
     Vasy = fa(frequency)
-    v = (min * Vsym + (100 - Min) * Vasy) / 100
+    print(type(Vsym))
+    v = (Min * Vsym + (100 - Min) * Vasy) / 100
     return v
 # V = np.zeros((NoOfSens, NoOfRows))
 #V = fS0(PeakFrequencies)
