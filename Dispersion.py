@@ -144,15 +144,15 @@ print(V)'''
 vs = []
 v = []
 va = []
-for i in np.arange(0,500001, 10):
+for i in np.arange(0,500001, 100):
     vs.append(fS0(i))
     va.append(fA0(i))
     v.append(0.91 * fS0(i) + 0.09*fA0(i))
 
 
-plt.plot(np.arange(0,500001, 10), vs, 'b')
-plt.plot(np.arange(0,500001, 10), va, 'r')
-plt.plot(np.arange(0,500001, 10), v, 'g')
+plt.plot(np.arange(0,500001, 100), vs, 'b')
+plt.plot(np.arange(0,500001, 100), va, 'r')
+plt.plot(np.arange(0,500001, 100), v, 'g')
 plt.ylim(0, 8000)
 plt.xlim(0, 500000)
 plt.show()
