@@ -2,13 +2,17 @@ import numpy as np
 from scipy.optimize import fsolve
 from Dispersion import fS0,fA0, Minimum, PeakFrequencies, NoOfSens, NoOfRows
 
-def Velocity(fs, fa, Min, frequencies):
-    v = (min * fs(frequencies) + (100 - Min) * fa(frequencies)) / 100
+def Velocity(fs, fa, Min,frequency):
+    Vsym = fs(frequency)
+    Vasy = fa(frequency)
+    v = (min * Vsym + (100 - Min) * Vasy) / 100
     return v
 # V = np.zeros((NoOfSens, NoOfRows))
-V = fS0(PeakFrequencies)
+#V = fS0(PeakFrequencies)
+
+V = []
+V = Velocity(fS0, fA0, Minimum, PeakFrequencies)
 print(V)
-#V = Velocity(fS0, fA0, Minimum, PeakFrequencies)
 t2 = 1
 t3 = 1
 a1 = 1
