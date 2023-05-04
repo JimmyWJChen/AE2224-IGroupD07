@@ -1,5 +1,4 @@
 from scipy.optimize import fsolve
-from math import exp
 
 v = 1
 t2 = 1
