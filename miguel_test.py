@@ -1,7 +1,7 @@
 import numpy as np
 import os
 from scipy.optimize import fsolve
-from Dispersion import fS0,fA0, Minimum, PeakFrequencies, NoOfSens, NoOfRows, TOAData, SensorCoordinates
+from Dispersion import fS0,fA0, Minimum, PeakFrequencies, NoOfSens, NoOfRows, TOAData, SensorCoordinates, TOAR
 from itertools import combinations
 import math
 
@@ -10,6 +10,18 @@ def Velocity(fs, fa, Min, frequencies):
     Vasy = fa(frequencies)
     v = (Min * Vsym + (100 - Min) * Vasy) / 100
     return v
+
+def non_linear(a1, a2, a3, b1, b2, b3, v, T, t1, t2, t3):
+    def equations(vars):
+        x, y, T = vars
+        eq1 = x**2 + y**2 - 2*a1*x - 2*b1*y - v*T - a1**2 + b1**2 - v*t1
+        eq2 = x**2 + y**2 - 2*a2*x - 2*b2*y - v*T - a2**2 + b2**2 - v*t2
+        eq3 = x**2 + y**2 - 2*a3*x - 2*b3*y - v*T - a3**2 + b3**2 - v*t3
+        return [eq1, eq2, eq3]
+    return fsolve(equations, (1, 1, 1))
+
+
+
 V = np.zeros((NoOfSens, NoOfRows))
 V = Velocity(fS0, fA0, Minimum, PeakFrequencies)
 
@@ -23,18 +35,15 @@ t3 = 1
 
 
 l_i = np.array(list(combinations([0,1,2,3,4,5,6,7], 3)))
-print(l_i)
 
-def non_linear(a1, a2, a3, b1, b2, b3, v, T, t2, t3):
-    def equations(vars):
-        x, y, T = vars
-        eq1 = x**2 + y**2 - 2*a1*x - 2*b1*y - v*T - a1**2 + b1**2
-        eq2 = x**2 + y**2 - 2*a2*x - 2*b2*y - v*T - a2**2 + b2**2 - v*t2
-        eq3 = x**2 + y**2 - 2*a3*x - 2*b3*y - v*T - a3**2 + b3**2 - v*t3
-        return [eq1, eq2, eq3]
 
-    return fsolve(equations, (1, 1, 1))
-
+for i in l_i:
+    A = np.zeros(3)
+    B = np.zeros(3)
+    for j in i:
+        A.append(SensorCoordinates[j][0])
+        B.append(SensorCoordinates[j][1])
+    non_linear(A[0], A[1], A[2], B[0], B[1], B[2], V[i], TOAR, t2, t3)
 
 
 #--------------------------------------------------------
