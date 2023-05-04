@@ -24,6 +24,7 @@ def get_toa_filtered(label: str, testno: int, timepicker: str):
     n_values = np.shape(trai_lst)[0]
 
     if  n_values % n_sensors != 0:
+        print(n_values)
         print(f"In file: {label} & {testno} the number of signals is not divisble by 4")
 
     else:
@@ -52,15 +53,9 @@ def get_toa_filtered(label: str, testno: int, timepicker: str):
 
         return time_lst[:,0], n_sensors
 
-def reshape(label, testno, timepicker):
-
-    time_lst = get_toa_filtered(label, testno, timepicker)
-    if label == "PCLO" or label == "PCLS":
-        n_sensors = 4
-    elif label == "TEST":
-        n_sensors = 8
-    else:
-        n_sensors = 8
+def reshape(label, timepicker, testno=1):
+    
+    time_lst, n_sensors = get_toa_filtered(label, testno, timepicker)
     filtered_pridb = di.filterPrimaryDatabase(di.getPrimaryDatabase(label, testno), label, testno)
     trai_lst = filtered_pridb.iloc[:, -1:].to_numpy()
     n_values = np.shape(trai_lst)[0]
@@ -89,5 +84,23 @@ def get_toa_plb(n_sensors, timepicker):
                 toa_array = reshape(label, testno, timepicker)
                 np.savetxt(f"testing_data\\toa\\PLB-{name}-{n_sensors}-channels\\{file[:-5]}csv", toa_array, delimiter=",")
 
+
+def get_toa_test(timepicker):
+    
+    possible_timepickers = ("hc", "aic", "er", "mer")
+    timepickers_name = ("hinkley", "akaike", "er", "mer")
+    
+    name = timepickers_name[possible_timepickers.index(timepicker)]
+    
+    test_files = os.listdir("testing_data\\4-channels")
+    print(test_files)
+    for file in test_files:
+        if file[-3:] == "idb":
+                
+            label = f"PD_{file[:-6]}"
+            print(label)
+            toa_array = reshape(label, timepicker)
+            np.savetxt(f"testing_data\\toa\\{name}-4-channels\\{file[:-5]}csv", toa_array, delimiter=",")
+            
 if __name__ == "__main__":
-    get_toa_plb(4,"hc")
+    get_toa_test("hc")
