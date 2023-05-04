@@ -44,7 +44,11 @@ def getPeakFrequency(y, t):
     yf = fft(y)
     xf = fftfreq(N, T)[:N // 2]
     PeakFreq = xf[np.argmax(yf[:N // 2])]
-    return PeakFreq
+    WPF = 0
+    for i in range(len(xf)):
+        WPF += xf[i] * yf[i]
+    WPF /= np.sum(yf)
+    return PeakFreq, WPF
 
 def addPeakFreq(pridb, label, testno=1):
     try:
@@ -53,11 +57,15 @@ def addPeakFreq(pridb, label, testno=1):
         pass
     trais = pridb['trai']
     frequencies = []
+    wpfs = []
     for trai in trais:
         print(label, testno, trai)
         y, t = getWaveform(label, testno, trai)
-        frequencies.append(getPeakFrequency(y, t))
+        f, wpf = getPeakFrequency(y, t)
+        frequencies.append(f)
+        wpfs.append(wpf)
     pridb.insert(4, "frequency", frequencies, True)
+    pridb.insert(5, "wpfrequency", wpfs, True)
     return pridb
 
 def addDecibels(pridb):
@@ -152,6 +160,7 @@ if __name__ == "__main__":
     print(pridb.read_hits())
     # print(filterPrimaryDatabase(pridb))
     filtereddata = filterPrimaryDatabase(pridb, testlabel, testno, epsilon=0.001)
+    filtereddata = addPeakFreq(filtereddata, testlabel)
     print(filtereddata)
     #print(filtereddata.loc[filtereddata['channel'] == 3])
     # pridb.read_hits().to_csv('data.csv')

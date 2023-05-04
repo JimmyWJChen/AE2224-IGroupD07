@@ -50,7 +50,8 @@ if __name__=="__main__":
     datapoints = clustering_kmeans(datapoints, n_clusters)
     for i in range(n_clusters):
         pridb_cluster = datapoints.loc[datapoints['cluster'] == i].copy()
-        plt.scatter(pridb_cluster['amplitude'], pridb_cluster['frequency'])
-    plt.xlabel('Energy')
-    plt.ylabel('Peak Frequency')
+        plt.scatter(pridb_cluster['amplitude'], pridb_cluster['frequency']/1000, label='Cluster '+str(i+1))
+    plt.xlabel('Amplitude [dB]')
+    plt.ylabel('Peak Frequency [kHz]')
+    plt.legend()
     plt.show()

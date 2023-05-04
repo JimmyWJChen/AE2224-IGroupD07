@@ -6,6 +6,12 @@ __pycache__/
 # macos stuff
 **/.DS_Store
 
+.idea/
+.vscode/
+
+# ACTUAL TEST DATABASE FILES - ADD THEM MANUALLY
+testing_data/4-channels/**
+
 # C extensions
 *.so
 
