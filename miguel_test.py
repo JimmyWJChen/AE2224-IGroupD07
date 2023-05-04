@@ -5,9 +5,10 @@ from Dispersion import fS0,fA0, Minimum, PeakFrequencies, NoOfSens, NoOfRows
 def Velocity(fs, fa, Min, frequencies):
     v = (min * fs(frequencies) + (100 - Min) * fa(frequencies)) / 100
     return v
-V = np.zeros((NoOfSens, NoOfRows))
-
-V = Velocity(fS0, fA0, Minimum, PeakFrequencies)
+# V = np.zeros((NoOfSens, NoOfRows))
+V = fS0(PeakFrequencies)
+print(V)
+#V = Velocity(fS0, fA0, Minimum, PeakFrequencies)
 t2 = 1
 t3 = 1
 a1 = 1
