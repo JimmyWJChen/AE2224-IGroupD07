@@ -50,7 +50,7 @@ def get_toa_filtered(label: str, testno: int, timepicker: str):
             time_difference = t[hc_index]
             time_lst[i][0] = time_lst[i][0] + time_difference
 
-        return time_lst[:,0]
+        return time_lst[:,0], n_sensors
 
 def reshape(label, testno, timepicker):
     

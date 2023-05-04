@@ -66,7 +66,13 @@ def addDecibels(pridb):
     return pridb
 
 def filterPrimaryDatabase(pridb, label, testno=1, sortby="energy", epsilon=0.2, thamp=0.009, thdur = 0.002, thenergy=1e5, thstrength=2500, thcounts=70):
+    pridb = pridb.read_hits()
+    pridb = pridb[pridb['trai'] > 0]
 
+    # ACTUAL TEST DATA - DATABASE ALREADY FILTERED
+    if label[:2] == "PD":
+        return pridb
+    
     if label == "ST" and testno == 1:
         epsilon = 0.1
         thamp = 0.005
@@ -75,13 +81,15 @@ def filterPrimaryDatabase(pridb, label, testno=1, sortby="energy", epsilon=0.2, 
         thstrength = 1500
         thcounts = 70
 
-    pridb = pridb.read_hits()
-    # pridb = pridb[pridb['amplitude'] >= thamp]
-    # pridb = pridb[pridb['duration'] >= thdur]
-    # pridb = pridb[pridb['energy'] >= thenergy]
-    # pridb = pridb[pridb['signal_strength'] >= thstrength]
-    # pridb = pridb[pridb['counts'] >= thcounts]
+    # THRESHOLDS FILTERING
+    pridb = pridb[pridb['amplitude'] >= thamp]
+    pridb = pridb[pridb['duration'] >= thdur]
+    pridb = pridb[pridb['energy'] >= thenergy]
+    pridb = pridb[pridb['signal_strength'] >= thstrength]
+    pridb = pridb[pridb['counts'] >= thcounts]
     pridb = pridb[pridb['trai'] != 0]
+
+    # EPSILON FILTERING
     pridb_channels = []
     for channel in range(1, int(pridb.max()['channel']+1)):
         pridb_chan = pridb.loc[pridb['channel'] == channel].copy()
@@ -99,6 +107,8 @@ def filterPrimaryDatabase(pridb, label, testno=1, sortby="energy", epsilon=0.2, 
                 i+=1
         pridb_channels.append(pridb_chan)
     pridb_output = pd.concat(pridb_channels, ignore_index=True)
+
+    # CASE SPECIFIC CODE
     if label == "ST" and testno == 1:
         for channel in range(1, 8 + 1):
             if channel != 4 and channel != 6 and channel != 8:
@@ -112,7 +122,6 @@ def filterPrimaryDatabase(pridb, label, testno=1, sortby="energy", epsilon=0.2, 
                     idx_to_drop = channel_data.index[row - 1]
                     pridb_output.drop(idx_to_drop, inplace=True)
 
-
     if label == "PST" and (testno == 2 or testno == 3):
         for channel in range(1, 8 + 1):
             while len(pridb_output.loc[pridb_output['channel'] == channel]) > 9:
@@ -125,6 +134,7 @@ def filterPrimaryDatabase(pridb, label, testno=1, sortby="energy", epsilon=0.2, 
             for row in rows_to_drop:
                 idx_to_drop = channel_data.index[row - 1]
                 pridb_output.drop(idx_to_drop, inplace=True)
+
     return pridb_output
 
 
