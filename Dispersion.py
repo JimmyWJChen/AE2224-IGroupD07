@@ -7,7 +7,7 @@ import csv
 from data_import import getWaveform, getPrimaryDatabase, filterPrimaryDatabase, getPeakFrequency
 #this doesnt work so well when changing the number of sensors, pls go to file name and make sure it's exactly what you are looking for
 TestType = 'ST'
-TestNo = 3
+TestNo = 2
 NoOfRows = 18
 NoOfSens = 8
 
@@ -32,7 +32,7 @@ j = 0
 
 for i in range(NoOfSens * NoOfRows):
     y, t = getWaveform(TestType, TestNo, pridb.iloc[i, -1])
-    PeakFreq = getPeakFrequency(y, t)
+    PeakFreq = getPeakFrequency(y, t)[0]
     if i % NoOfRows == 0 and i != 0:
         j += 1
     PeakFrequencies[i % NoOfRows, j] = PeakFreq
@@ -98,6 +98,7 @@ w2 = np.flip(w1)
 DiffTOA = np.zeros((100, NoOfRows, NoOfSens))
 Pt = np.zeros((100, NoOfRows, NoOfSens))
 Rep = np.zeros(100)
+
 for z in range(0, 100):
     for i in range(NoOfRows):
         TOF = np.zeros(NoOfSens)
@@ -134,10 +135,9 @@ for z in range (100):
 Minimum = SDiscre.index(min(SDiscre))
 print(Minimum)
 #print(PeakFrequencies)
-print(SDiscre[Minimum]/(NoOfSens-1))
+#print(SDiscre)
 V= np.empty((NoOfRows, NoOfSens))
-'''
-for i in range(NoOfRows):
+'''for i in range(NoOfRows):
     for j in range(NoOfSens):
         V[i,j] = 0.91* fS0(np.median(PeakFrequencies[i, :])) + 0.09 * fA0(np.median(PeakFrequencies[j, :]))
 print(V)
