@@ -1,6 +1,7 @@
 from scipy.optimize import fsolve
+from Dispersion import fS0,fA0, Minimum
 
-v = 1
+v = (Minimum * fS0 +
 t2 = 1
 t3 = 1
 a1 = 1

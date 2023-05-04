@@ -7,7 +7,7 @@ import csv
 from data_import import getWaveform, getPrimaryDatabase, filterPrimaryDatabase, getPeakFrequency
 #this doesnt work so well when changing the number of sensors, pls go to file name and make sure it's exactly what you are looking for
 TestType = 'ST'
-TestNo = 2
+TestNo = 3
 NoOfRows = 18
 NoOfSens = 8
 
@@ -70,8 +70,7 @@ with open('dispersion_curves\\S0.csv') as S0:
 
 for i in range(0, len(Frequency1)):
     Frequency1[i], Velocity1[i] = float(Frequency1[i]), float(Velocity1[i])
-print(Frequency1)
-print(Velocity1)
+
 fS0 = sp.interp1d(x=Frequency1, y=Velocity1, fill_value="extrapolate")
 
 def get_distance(x, y):
@@ -135,12 +134,13 @@ for z in range (100):
 Minimum = SDiscre.index(min(SDiscre))
 print(Minimum)
 #print(PeakFrequencies)
-#print(SDiscre)
+print(SDiscre[Minimum]/(NoOfSens-1))
 V= np.empty((NoOfRows, NoOfSens))
-'''for i in range(NoOfRows):
+'''
+for i in range(NoOfRows):
     for j in range(NoOfSens):
         V[i,j] = 0.91* fS0(np.median(PeakFrequencies[i, :])) + 0.09 * fA0(np.median(PeakFrequencies[j, :]))
-print(V)'''
+print(V)
 vs = []
 v = []
 va = []
@@ -156,3 +156,4 @@ plt.plot(np.arange(0,500001, 100), v, 'g')
 plt.ylim(0, 8000)
 plt.xlim(0, 500000)
 plt.show()
+'''
