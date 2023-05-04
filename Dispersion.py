@@ -48,36 +48,31 @@ with open('testing_data\\toa\\PLB-hinkley-8-channels\\PLBS8_QI090_' + TestType +
 # Asymmetric Assumption
 Frequency = []
 Velocity = []
-with open("dispersion_curves/A0.csv") as A0:
+with open("dispersion_curves\\A0.csv") as A0:
     Data = csv.reader(A0)
-# Size = len(Data)
-# Frequency= np.zero(Size)
-# Velocity = np.zero(Size)
     for row in Data:
         Frequency.append(row[0])
         Velocity.append(row[1])
 
 for i in range(0, len(Frequency)):
-        Frequency[i], Velocity[i] = float(Frequency[i]), float(Velocity[i])
+    Frequency[i], Velocity[i] = float(Frequency[i]), float(Velocity[i])
 
 fA0 = sp.interp1d(Frequency, Velocity, fill_value="extrapolate")
 
 # Symmetric Below
 Velocity1 = []
 Frequency1 = []
-with open('dispersion_curves/S0.csv') as S0:
+with open('dispersion_curves\\S0.csv') as S0:
     Data1 = csv.reader(S0)
-# Size = len(Data)
-# Frequency= np.zero(Size)
-# Velocity = np.zero(Size)
     for row1 in Data1:
         Frequency1.append(row1[0])
         Velocity1.append(row1[1])
 
 for i in range(0, len(Frequency1)):
-        Frequency1[i], Velocity1[i] = float(Frequency1[i]), float(Velocity1[i])
-
-fS0 = sp.interp1d(Frequency1, Velocity1, fill_value="extrapolate")
+    Frequency1[i], Velocity1[i] = float(Frequency1[i]), float(Velocity1[i])
+print(Frequency1)
+print(Velocity1)
+fS0 = sp.interp1d(x=Frequency1, y=Velocity1, fill_value="extrapolate")
 
 def get_distance(x, y):
     distance = sqrt((y[0]-x[0])**2 + (y[1]-x[1])**2)
@@ -149,15 +144,15 @@ print(V)'''
 vs = []
 v = []
 va = []
-for i in np.arange(0,150001, 1):
+for i in np.arange(0,500001, 100):
     vs.append(fS0(i))
     va.append(fA0(i))
     v.append(0.91 * fS0(i) + 0.09*fA0(i))
 
 
-plt.plot(np.arange(0,150001, 1), vs, 'b')
-plt.plot(np.arange(0,150001, 1), va, 'r')
-plt.plot(np.arange(0,150001, 1), v, 'g')
+plt.plot(np.arange(0,500001, 100), vs, 'b')
+plt.plot(np.arange(0,500001, 100), va, 'r')
+plt.plot(np.arange(0,500001, 100), v, 'g')
 plt.ylim(0, 8000)
-plt.xlim(0, 150000)
+plt.xlim(0, 500000)
 plt.show()
