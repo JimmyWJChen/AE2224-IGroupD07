@@ -1,7 +1,8 @@
 import numpy as np
 import os
 from scipy.optimize import fsolve
-from Dispersion import fS0,fA0, Minimum, PeakFrequencies, NoOfSens, NoOfRows
+from Dispersion import fS0,fA0, Minimum, PeakFrequencies, NoOfSens, NoOfRows, TOAData, SensorCoordinates
+from itertools import combinations
 import math
 
 def Velocity(fs, fa, Min, frequencies):
@@ -13,12 +14,16 @@ V = np.zeros((NoOfSens, NoOfRows))
 V = Velocity(fS0, fA0, Minimum, PeakFrequencies)
 
 
+
 file = os.path.join(os.path.dirname(__file__), "testing_data/PLB-hinkley-4-channels/PLBS4_CP090_PCLO1"+".csv")
 
 
 t2 = 1
 t3 = 1
-l_i = []
+
+
+l_i = np.array(list(combinations([0,1,2,3,4,5,6,7], 3)))
+print(l_i)
 
 def non_linear(a1, a2, a3, b1, b2, b3, v, T, t2, t3):
     def equations(vars):
