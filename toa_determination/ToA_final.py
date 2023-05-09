@@ -13,7 +13,7 @@ def get_toa_filtered(label: str, timepicker: str, filtered: bool, testno=1):
     possible timepickers: "hc", "aic", "er", "mer". respectively hinkley, akaike, energy ratio and modified energy ratio
     """
 
-    if label == "PCLO" or label == "PCLS" or label[:7] == "PD_PCLO":
+    if label == "PCLO" or label == "PCLS" or label[:5] == "PD_PC":
         n_sensors = 4
     else:
         n_sensors = 8
@@ -62,14 +62,20 @@ def reshape(label, timepicker, filtered, testno=1):
     
     new_var = get_toa_filtered(label, timepicker, filtered, testno)
     time_lst, n_sensors = new_var # type: ignore
-    filtered_pridb = di.filterPrimaryDatabase(di.getPrimaryDatabase(label, testno), label, testno)
-    trai_lst = filtered_pridb.iloc[:, -1:].to_numpy()
-    n_values = np.shape(trai_lst)[0]
-
-    new_times = np.reshape(time_lst, (n_sensors, int(n_values/n_sensors)))
     
-    return np.transpose(new_times)
-
+    if filtered == False:
+        filtered_pridb = di.filterPrimaryDatabase(di.getPrimaryDatabase(label, testno), label, testno)
+        trai_lst = filtered_pridb.iloc[:, -1:].to_numpy()
+        n_values = np.shape(trai_lst)[0]
+        new_times = np.reshape(time_lst, (n_sensors, int(n_values/n_sensors)))
+        return np.transpose(new_times)
+    
+    if filtered == True:
+        filtered_pridb = di.getPrimaryDatabase(label, testno, filtered)
+        trai_lst = filtered_pridb.iloc[:, -2:-1].to_numpy()
+        n_values = np.shape(trai_lst)[0]
+        new_times = np.reshape(time_lst, (int(n_values/n_sensors), n_sensors))
+        return new_times
 
     
 def get_toa_plb(n_sensors, timepicker):
@@ -100,17 +106,15 @@ def get_toa_test(timepicker):
     
     test_files = os.listdir("testing_data\\4-channels")
     filtered = True
-    print(test_files)
     for file in test_files:
-        if file[-3:] == "idb":
+        if file[-3:] == "csv":
                 
-            label = f"PD_{file[:-6]}"
+            label = file[:-4]
             print(label)
             toa_array = reshape(label, timepicker, filtered)
             np.savetxt(f"testing_data\\toa\\{name}-4-channels\\{file[:-5]}csv", toa_array, delimiter=",")
             
 if __name__ == "__main__":
-    print(get_toa_filtered("PD_PCLO_QI090", "hc", True, 1))
-    # path = "testing_data/4-channels/PD_PCLO_QI090.csv"
-    # pridb = pd.read_csv(path)
-    # print(pridb)
+    get_toa_test("er")
+    get_toa_test("mer")
+    #print(reshape("PD_PCLO_QI090", "hc", True, testno=1))
