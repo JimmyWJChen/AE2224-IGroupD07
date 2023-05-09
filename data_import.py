@@ -158,7 +158,7 @@ def filterPrimaryDatabase(pridb, label, testno=1, sortby="energy", epsilon=0.2, 
                     pridb_output = pd.concat([pridb_output, row], ignore_index=True)
                 hit_id+=1
     
-    pridb = pridb_output.copy()
+        pridb = pridb_output.copy()
 
     # THRESHOLDS FILTERING
     if not actualData:

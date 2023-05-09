@@ -3,7 +3,6 @@ import os
 from scipy.optimize import fsolve
 from Dispersion import fS0,fA0, Minimum, PeakFrequencies, NoOfSens, NoOfRows, TOAData, SensorCoordinates, TOAR
 from itertools import combinations
-import math
 
 def Velocity(fs, fa, Min, frequencies):
     Vsym = fs(frequencies)
@@ -35,8 +34,9 @@ l_i = np.array(list(combinations([0,1,2,3,4,5,6,7], 3)))
 X = 0
 Y = 0
 #k is the number of hits
-
-for k in range (1):
+S = np.empty(( NoOfRows, len(l_i), 2))
+for k in range (NoOfRows):
+    Cords = []
     for i in l_i:
         A = []
         B = []
@@ -47,16 +47,20 @@ for k in range (1):
             t.append(TOAR[k,j])
         x,y,T = non_linear(A[0], A[1], A[2], B[0], B[1], B[2], V[k,0], t[0], t[1], t[2])
         if x > 0 and y > 0 and T > 0:
-            print("x=", x, "y=", y, "T=", T, "A=", A, "B=", B, 'V=', V[k,0], "t=", t)
-'''        X += x
-        Y += y
+            continue#print("x=", x, "y=", y, "T=", T)
+        else:
+            x = 0
+            y = 0
+        Cords = [x,y]
+        S[k, np.where(np.isclose(l_i, i)), :] = Cords[0], Cords[1]
+print(np.shape(S))
+
 
 X = X/(len(l_i))
 Y = Y/(len(l_i))
-print (X, Y)
 
 #--------------------------------------------------------
-
+'''
 
 n_sensors = [[50, 120], [120, 120], [40, 40], [110, 40]]
 

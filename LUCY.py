@@ -5,6 +5,7 @@ from math import *
 X = np.array([[1, 2], [2, 2], [1, 3], [3, 4]])
 S = np.array([[[1, 2], [3, 4]], [[5, 6], [2, 4]]])
 TOAR = np.array([[1, 3], [2, 4]])
+v = 3
 
 
 def TOF_finder(S, X, v, i, j, k, TOAR):
@@ -34,18 +35,24 @@ def LUCY(D, P):
     LUCY = sqrt(sum(Y)/(len(D)-1))
     return LUCY
 
-print(S)
 print(len(X))
 
+L_min = np.zeros((len(S[:, 0, 0]), 3))
 for i in range(len(S[:, 0, 0])):
-    L = []
+    L = np.zeros(len(S[0, :, 0]))
     for j in range(len(S[0, :, 0])):
-        D = []
-        P = []
-        for k in range(len(X)):
-            D.append(Di_finder(S,X,i,j,k))
-            P.append(Pi_finder(S,X,v,i,j,k,TOAR))
-        L.append(LUCY(D, P))
-    L_min = min(L)
+        print(S[i,j,:])
+        if (S[i, j, :] == [0, 0]).any():
+            L[j] = 10000
+        else:
+            D = []
+            P = []
+            for k in range(len(X)):
+                D.append(Di_finder(S, X, i, j, k))
+                P.append(Pi_finder(S, X, v, i, j, k, TOAR))
+            L[j] = LUCY(D, P)
+    L_min[i, :] = min(L), S[i, np.argmin(L), 0], S[i, np.argmin(L), 1]
 
+
+print(L_min)
 
