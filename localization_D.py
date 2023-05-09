@@ -53,13 +53,11 @@ for k in range (NoOfRows):
             y = 0
         Cords = [x,y]
         S[k, np.where(np.isclose(l_i, i)), :] = Cords[0], Cords[1]
-print(S)
 print(np.shape(S))
 
 
 X = X/(len(l_i))
 Y = Y/(len(l_i))
-print (X, Y)
 
 #--------------------------------------------------------
 '''

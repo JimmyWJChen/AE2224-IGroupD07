@@ -35,14 +35,14 @@ def LUCY(D, P):
     LUCY = sqrt(sum(Y)/(len(D)-1))
     return LUCY
 
-print(S)
 print(len(X))
 
-L_min = np.zeros(len(S[:, 0, 0]), 3)
+L_min = np.zeros((len(S[:, 0, 0]), 3))
 for i in range(len(S[:, 0, 0])):
     L = np.zeros(len(S[0, :, 0]))
     for j in range(len(S[0, :, 0])):
-        if S[i, j] == [0, 0]:
+        print(S[i,j,:])
+        if (S[i, j, :] == [0, 0]).any():
             L[j] = 10000
         else:
             D = []
@@ -54,5 +54,5 @@ for i in range(len(S[:, 0, 0])):
     L_min[i, :] = min(L), S[i, np.argmin(L), 0], S[i, np.argmin(L), 1]
 
 
-
+print(L_min)
 
