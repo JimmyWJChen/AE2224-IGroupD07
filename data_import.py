@@ -6,7 +6,11 @@ from scipy.fft import fft, fftfreq
 import numpy as np
 
 
-def getPrimaryDatabase(label, testno=1):
+def getPrimaryDatabase(label, testno=1, filtered=False):
+    if filtered:
+        path = "testing_data/4-channels/" + label + ".csv"
+        pridb = pd.read_csv(path)
+        return pridb
     if label[:2] == "PD":
         path = "testing_data/4-channels/" + label[3:] + ".pridb"
     elif label == "PCLO" or label == "PCLS":
