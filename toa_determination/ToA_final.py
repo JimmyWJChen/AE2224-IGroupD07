@@ -5,7 +5,7 @@ import vallenae as vae
 import numpy as np
 import pandas as pd
 
-def get_toa_filtered(label: str, timepicker: str, filtered: bool, testno=1):
+def get_toa_filtered(label: str, timepicker: str, filtered: bool, testno: int =1):
     """
     get trai values from pridb, get the tribd file of these trai values and calculate the time difference
     to add the time difference to the time in the pridb file.
@@ -107,7 +107,7 @@ def get_toa_test(timepicker):
     test_files = os.listdir("testing_data\\4-channels")
     filtered = True
     for file in test_files:
-        if file[-3:] == "csv":
+        if file[-3:] == "csv" and file[:8] == "PD_PCLSR":
                 
             label = file[:-4]
             print(label)
@@ -117,4 +117,6 @@ def get_toa_test(timepicker):
 if __name__ == "__main__":
     get_toa_test("er")
     get_toa_test("mer")
+    get_toa_test("hc")
+    get_toa_test("aic")
     #print(reshape("PD_PCLO_QI090", "hc", True, testno=1))
