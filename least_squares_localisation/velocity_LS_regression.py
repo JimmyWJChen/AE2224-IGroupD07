@@ -161,6 +161,7 @@ class PLBVelo():
         else:
             raise Exception('Choose a valid test label.')
 
+        """
         # get pridb of testlabel and testno
         pridb = di.getPrimaryDatabase(testlabel, testno)
         #print(f'dataset label and test number are: \n {testlabel}, {testno}')
@@ -188,19 +189,30 @@ class PLBVelo():
             # print(f'times of 1st channel are: \n {times_channel_1}')
             # print(f'times of channel i are: \n {times_channel_i}')
             # print(f'time differences per channel are: \n {tau_channel_i}')
-        #print(f'array of time differences: \n {tau_array}')
+        #print(f'array of time differences: \n {tau_array}')"""
 
         # actually get ToAs now
-        ToA_array = get_toa_filtered(testlabel, testno, 'hc')
+        ToA_list = get_toa_filtered(testlabel, testno, 'hc')[0]
         # this is a 1D list, need to split it into different channels for the rest of the class
         dToAs = np.zeros((events, channels))
+        # reshape ToA_array to have events rows and channels columns
+        ToA_array = ToA_list.reshape((channels, events))
+        # transpose it
+        ToA_array_T = ToA_array.T
+        # get the ToA differences
+        ToA_channel_1 = ToA_array_T[:, 0]
+        for k in range(channels):
+            ToA_channel_k = ToA_array_T[:, k]
+            dToA_channel_k = ToA_channel_k - ToA_channel_1
+            dToAs[:, k] = dToA_channel_k
+        """
         ToA_channel_1 = ToA_array[0:events]
         for j in range(channels):
             ToA_channel_j = ToA_array[j * events:(j + 1) * events]
             dToA_channel_j = ToA_channel_j - ToA_channel_1
             dToAs[:, j] = dToA_channel_j
 
-
+"""
 
         return dToAs
 
@@ -1180,7 +1192,7 @@ if __name__ == '__main__':
     # print vT_array
     print(f'vT_array is \n {vT_array}')
     # save vT_array to a csv file
-    PLBEval.write_to_csv(vT_array, 5)
+    PLBEval.write_to_csv(vT_array, 6)
 
     """
     # get velocity of all experiments 
