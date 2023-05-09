@@ -42,7 +42,7 @@ L_min = np.zeros(len(S[:, 0, 0]), 3)
 for i in range(len(S[:, 0, 0])):
     L = np.zeros(len(S[0, :, 0]))
     for j in range(len(S[0, :, 0])):
-        if S[i, j] == 0:
+        if S[i, j] == [0, 0]:
             L[j] = 10000
         else:
             D = []
@@ -51,7 +51,7 @@ for i in range(len(S[:, 0, 0])):
                 D.append(Di_finder(S, X, i, j, k))
                 P.append(Pi_finder(S, X, v, i, j, k, TOAR))
             L[j] = LUCY(D, P)
-    L_min[i, :] = min(L), S[i, L.index(min(L)), 0], S[i, L.index(min(L)), 1]
+    L_min[i, :] = min(L), S[i, np.argmin(L), 0], S[i, np.argmin(L), 1]
 
 
 
