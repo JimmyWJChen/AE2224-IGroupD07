@@ -3,8 +3,9 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import data_import as di
 import vallenae as vae
 import numpy as np
+import pandas as pd
 
-def get_toa_filtered(label: str, testno: int, timepicker: str):
+def get_toa_filtered(label: str, timepicker: str, filtered: bool, testno=1):
     """
     get trai values from pridb, get the tribd file of these trai values and calculate the time difference
     to add the time difference to the time in the pridb file.
@@ -12,14 +13,18 @@ def get_toa_filtered(label: str, testno: int, timepicker: str):
     possible timepickers: "hc", "aic", "er", "mer". respectively hinkley, akaike, energy ratio and modified energy ratio
     """
 
-    if label == "PCLO" or label == "PCLS":
+    if label == "PCLO" or label == "PCLS" or label[:7] == "PD_PCLO":
         n_sensors = 4
     else:
         n_sensors = 8
     
-    filtered_pridb = di.filterPrimaryDatabase(di.getPrimaryDatabase(label, testno), label, testno)
+    if filtered == False:
+        filtered_pridb = di.filterPrimaryDatabase(di.getPrimaryDatabase(label, testno), label, testno)
+        trai_lst = filtered_pridb.iloc[:, -1:].to_numpy()
+    else:
+        filtered_pridb = di.getPrimaryDatabase(label, testno, filtered)
+        trai_lst = filtered_pridb.iloc[:, -2:-1].to_numpy()
     
-    trai_lst = filtered_pridb.iloc[:, -1:].to_numpy()
     time_lst = filtered_pridb.iloc[:, 1:3].to_numpy()
     n_values = np.shape(trai_lst)[0]
 
@@ -53,9 +58,9 @@ def get_toa_filtered(label: str, testno: int, timepicker: str):
 
         return time_lst[:,0], n_sensors
 
-def reshape(label, timepicker, testno=1):
+def reshape(label, timepicker, filtered, testno=1):
     
-    new_var = get_toa_filtered(label, testno, timepicker)
+    new_var = get_toa_filtered(label, timepicker, filtered, testno)
     time_lst, n_sensors = new_var # type: ignore
     filtered_pridb = di.filterPrimaryDatabase(di.getPrimaryDatabase(label, testno), label, testno)
     trai_lst = filtered_pridb.iloc[:, -1:].to_numpy()
@@ -94,14 +99,18 @@ def get_toa_test(timepicker):
     name = timepickers_name[possible_timepickers.index(timepicker)]
     
     test_files = os.listdir("testing_data\\4-channels")
+    filtered = True
     print(test_files)
     for file in test_files:
         if file[-3:] == "idb":
                 
             label = f"PD_{file[:-6]}"
             print(label)
-            toa_array = reshape(label, timepicker)
+            toa_array = reshape(label, timepicker, filtered)
             np.savetxt(f"testing_data\\toa\\{name}-4-channels\\{file[:-5]}csv", toa_array, delimiter=",")
             
 if __name__ == "__main__":
-    print(reshape("T", "hc"))
+    print(get_toa_filtered("PD_PCLO_QI090", "hc", True, 1))
+    # path = "testing_data/4-channels/PD_PCLO_QI090.csv"
+    # pridb = pd.read_csv(path)
+    # print(pridb)
