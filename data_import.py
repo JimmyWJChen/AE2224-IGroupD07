@@ -93,13 +93,15 @@ def addDecibels(pridb):
     pridb["amplitude_db"] = 20 * np.log10(pridb["amplitude"]/base)
     return pridb
 
-def filterPrimaryDatabase(pridb, label, testno=1, sortby="energy", epsilon=0.2, thamp=0.009, thdur = 0.002, thenergy=1e5, thstrength=2500, thcounts=70):
+def filterPrimaryDatabase(pridb, label, testno=1, sortby="energy", epsilon=0.2, epsilon_mc=0.001, thamp=0.009, thdur = 0.002, thenergy=1e5, thstrength=2500, thcounts=70, saveToCSV=False):
     pridb = pridb.read_hits()
     pridb = pridb[pridb['trai'] > 0]
 
     # ACTUAL TEST DATA - DATABASE ALREADY FILTERED
     if label[:2] == "PD":
-        return pridb
+        actualData = True
+    else:
+        actualData = False
     
     if label == "ST" and testno == 1:
         epsilon = 0.1
@@ -109,32 +111,79 @@ def filterPrimaryDatabase(pridb, label, testno=1, sortby="energy", epsilon=0.2, 
         thstrength = 1500
         thcounts = 70
 
+    if actualData:
+        pridb_channels = []
+        for channel in range(1, int(pridb.max()['channel']+1)):
+            pridb_chan = pridb.loc[pridb['channel'] == channel].copy()
+            pridb_chan.reset_index(drop=False, inplace=True)
+            pridb_channels.append(pridb_chan)
+        # print(pridb_channels[0])
+        indices = [0 for i in range(int(pridb.max()['channel']))]
+        pridb_output = pd.DataFrame(columns=pridb.columns)
+        pridb_output.insert(1, "hit_id", [])
+        hit_id = 0
+        for i in range(len(pridb_channels[0])):
+            print(f'{i} out of {len(pridb_channels[0])}')
+            prev_indices = indices
+            indices = [i] + [0 for m in range(int(pridb.max()['channel']-1))]
+            cur_time = pridb_channels[0].loc[i, 'time']
+            for channel in range(2, int(pridb.max()['channel']+1)):
+                stop = False
+                j = prev_indices[channel-1]
+                # print(channel)
+                try:
+                    while cur_time - pridb_channels[channel-1].loc[j, 'time'] > 0 and not stop:
+                        if cur_time - pridb_channels[channel-1].loc[j, 'time'] < epsilon_mc:
+                            # print("yo")
+                            indices[channel-1] = j
+                            stop = True
+                        else:
+                            j += 1
+                    if pridb_channels[channel-1].loc[j, 'time'] - cur_time < epsilon_mc:
+                        indices[channel-1] = j
+                        stop = True
+                    if not stop:
+                        break
+                except KeyError:
+                    break
+            if indices.count(0) == 0:
+                for ind in range(len(indices)):
+                    row = pridb_channels[ind].loc[indices[ind]].to_frame().T
+                    row.insert(1, "hit_id", [hit_id])
+                    # print(row)
+                    pridb_output = pd.concat([pridb_output, row], ignore_index=True)
+            hit_id+=1
+    
+    pridb = pridb_output.copy()
+
     # THRESHOLDS FILTERING
-    pridb = pridb[pridb['amplitude'] >= thamp]
-    pridb = pridb[pridb['duration'] >= thdur]
-    pridb = pridb[pridb['energy'] >= thenergy]
-    pridb = pridb[pridb['signal_strength'] >= thstrength]
-    pridb = pridb[pridb['counts'] >= thcounts]
-    pridb = pridb[pridb['trai'] != 0]
+    if not actualData:
+        pridb = pridb[pridb['amplitude'] >= thamp]
+        pridb = pridb[pridb['duration'] >= thdur]
+        pridb = pridb[pridb['energy'] >= thenergy]
+        pridb = pridb[pridb['signal_strength'] >= thstrength]
+        pridb = pridb[pridb['counts'] >= thcounts]
+        pridb = pridb[pridb['trai'] != 0]
 
     # EPSILON FILTERING
-    pridb_channels = []
-    for channel in range(1, int(pridb.max()['channel']+1)):
-        pridb_chan = pridb.loc[pridb['channel'] == channel].copy()
-        pridb_chan.reset_index(drop=False, inplace=True)
-        i = 0
-        while i < len(pridb_chan)-1:
-            if pridb_chan.loc[i+1, 'time'] - pridb_chan.loc[i, 'time'] < epsilon:
-                if pridb_chan.loc[i+1, sortby] > pridb_chan.loc[i, sortby]:
-                    pridb_chan.drop(i, inplace=True)
-                    pridb_chan.reset_index(drop=True, inplace=True)
+    if not actualData:
+        pridb_channels = []
+        for channel in range(1, int(pridb.max()['channel']+1)):
+            pridb_chan = pridb.loc[pridb['channel'] == channel].copy()
+            pridb_chan.reset_index(drop=False, inplace=True)
+            i = 0
+            while i < len(pridb_chan)-1:
+                if pridb_chan.loc[i+1, 'time'] - pridb_chan.loc[i, 'time'] < epsilon:
+                    if pridb_chan.loc[i+1, sortby] > pridb_chan.loc[i, sortby]:
+                        pridb_chan.drop(i, inplace=True)
+                        pridb_chan.reset_index(drop=True, inplace=True)
+                    else:
+                        pridb_chan.drop(i+1, inplace=True)
+                        pridb_chan.reset_index(drop=True, inplace=True)
                 else:
-                    pridb_chan.drop(i+1, inplace=True)
-                    pridb_chan.reset_index(drop=True, inplace=True)
-            else:
-                i+=1
-        pridb_channels.append(pridb_chan)
-    pridb_output = pd.concat(pridb_channels, ignore_index=True)
+                    i+=1
+            pridb_channels.append(pridb_chan)
+        pridb_output = pd.concat(pridb_channels, ignore_index=True)
 
     # CASE SPECIFIC CODE
     if label == "ST" and testno == 1:
@@ -163,6 +212,9 @@ def filterPrimaryDatabase(pridb, label, testno=1, sortby="energy", epsilon=0.2, 
                 idx_to_drop = channel_data.index[row - 1]
                 pridb_output.drop(idx_to_drop, inplace=True)
 
+    if saveToCSV:
+        pridb_output.to_csv(label + ".csv", index=False)
+
     return pridb_output
 
 
@@ -172,15 +224,16 @@ def getHitsPerSensor(pridb):
 
 
 if __name__ == "__main__":
-    testlabel = "PD_PCLO_QI00"
+    testlabel = "PD_PCLO_QI090"
     testno = 1
     pridb = getPrimaryDatabase(testlabel, testno)
 
     # print(getHitsPerSensor(pridb.read_hits()))
     print(pridb.read_hits())
     # print(filterPrimaryDatabase(pridb))
-    filtereddata = filterPrimaryDatabase(pridb, testlabel, testno, epsilon=0.001)
-    filtereddata = addPeakFreq(filtereddata, testlabel)
+    filtereddata = filterPrimaryDatabase(pridb, testlabel, testno, saveToCSV=True)
+    # filtereddata = addPeakFreq(filtereddata, testlabel)
     print(filtereddata)
+    print(getHitsPerSensor(filtereddata))
     #print(filtereddata.loc[filtereddata['channel'] == 3])
     # pridb.read_hits().to_csv('data.csv')
