@@ -34,6 +34,7 @@ file = os.path.join(os.path.dirname(__file__), "testing_data/PLB-hinkley-4-chann
 l_i = np.array(list(combinations([0,1,2,3,4,5,6,7], 3)))
 X = 0
 Y = 0
+#k is the number of hits
 
 for k in range (1):
     for i in l_i:
@@ -45,8 +46,8 @@ for k in range (1):
             B.append(SensorCoordinates[j][1])
             t.append(TOAR[k,j])
         x,y,T = non_linear(A[0], A[1], A[2], B[0], B[1], B[2], V[k,0], t[0], t[1], t[2])
-        #print("x=", x, "y=", y, "T=", T)
-        X += x
+        print("x=", x, "y=", y, "T=", T, "A=", A, "B=", B, 'V=', V[k,0], "t=", t)
+'''        X += x
         Y += y
 
 X = X/(len(l_i))
@@ -55,7 +56,7 @@ print (X, Y)
 
 #--------------------------------------------------------
 
-'''
+
 n_sensors = [[50, 120], [120, 120], [40, 40], [110, 40]]
 
 s = 0
