@@ -77,7 +77,7 @@ def addPeakFreq(pridb, label, testno=1):
     fcentrs = []
     wpfs = []
     for trai in trais:
-        print(label, testno, trai)
+        if trai%100==0: print(trai)
         y, t = tradb.read_wave(trai)
         f, fcentr, wpf = getPeakFrequency(y, t)
         frequencies.append(f)
@@ -123,7 +123,7 @@ def filterPrimaryDatabase(pridb, label, testno=1, sortby="energy", epsilon=0.2, 
         pridb_output.insert(1, "hit_id", [])
         hit_id = 0
         for i in range(len(pridb_channels[0])):
-            print(f'{i} out of {len(pridb_channels[0])}')
+            if i%100==0: print(f'{i} out of {len(pridb_channels[0])}')
             prev_indices = indices
             indices = [i] + [0 for m in range(int(pridb.max()['channel']-1))]
             cur_time = pridb_channels[0].loc[i, 'time']
@@ -152,7 +152,7 @@ def filterPrimaryDatabase(pridb, label, testno=1, sortby="energy", epsilon=0.2, 
                     row.insert(1, "hit_id", [hit_id])
                     # print(row)
                     pridb_output = pd.concat([pridb_output, row], ignore_index=True)
-            hit_id+=1
+                hit_id+=1
     
     pridb = pridb_output.copy()
 
@@ -231,9 +231,10 @@ if __name__ == "__main__":
     # print(getHitsPerSensor(pridb.read_hits()))
     print(pridb.read_hits())
     # print(filterPrimaryDatabase(pridb))
-    filtereddata = filterPrimaryDatabase(pridb, testlabel, testno, saveToCSV=True)
-    # filtereddata = addPeakFreq(filtereddata, testlabel)
+    filtereddata = filterPrimaryDatabase(pridb, testlabel, testno)
+    filtereddata = addPeakFreq(filtereddata, testlabel)
     print(filtereddata)
     print(getHitsPerSensor(filtereddata))
+    filtereddata.to_csv("testing_data/4-channels/" + testlabel + ".csv", index=False)
     #print(filtereddata.loc[filtereddata['channel'] == 3])
     # pridb.read_hits().to_csv('data.csv')
