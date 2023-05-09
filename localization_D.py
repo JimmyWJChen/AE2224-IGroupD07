@@ -30,7 +30,7 @@ file = os.path.join(os.path.dirname(__file__), "testing_data/PLB-hinkley-4-chann
 
 
 
-
+#l_i is a list of all combination of indeces
 l_i = np.array(list(combinations([0,1,2,3,4,5,6,7], 3)))
 X = 0
 Y = 0
