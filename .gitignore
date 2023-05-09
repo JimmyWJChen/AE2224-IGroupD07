@@ -10,7 +10,7 @@ __pycache__/
 .vscode/
 
 # ACTUAL TEST DATABASE FILES - ADD THEM MANUALLY
-testing_data/4-channels/**
+testing_data/4-channels/*.tradb
 
 # C extensions
 *.so
