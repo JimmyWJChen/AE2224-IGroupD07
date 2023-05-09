@@ -25,8 +25,6 @@ def get_toa_filtered(label: str, timepicker: str, filtered: bool, testno=1):
         filtered_pridb = di.getPrimaryDatabase(label, testno, filtered)
         trai_lst = filtered_pridb.iloc[:, -2:-1].to_numpy()
     
-
-    print(trai_lst)
     time_lst = filtered_pridb.iloc[:, 1:3].to_numpy()
     n_values = np.shape(trai_lst)[0]
 
