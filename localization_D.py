@@ -76,12 +76,12 @@ for k in range (NoOfRows):
         print(Cords)
         index = 0
         for a in range (len(l_i[:, 0])):
-            if (l_i[a] == i).all:
+            if (l_i[a, :] == i):
                 index = a
                 continue
-        S[k, index, :]= Cords
-#print(l_i)
-print(S[0,1, :])
+        S[k, index, :] = Cords
+        print(index)
+print(S[0,2, :])
 
 #--------------------------------------------------------
 '''
