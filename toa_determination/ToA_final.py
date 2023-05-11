@@ -85,7 +85,7 @@ def get_toa_plb(n_sensors, timepicker):
 
     name = timepickers_name[possible_timepickers.index(timepicker)]
 
-    plb_files = os.listdir(f"testing_data\\PLB-{n_sensors}-channels")
+    plb_files = os.listdir(f"testing_data/PLB-{n_sensors}-channels")
 
     for file in plb_files:
         if file[-3:] == "idb":
@@ -94,7 +94,7 @@ def get_toa_plb(n_sensors, timepicker):
                 label = file.split("_")[-1][:-7]
                 testno = file[-7]
                 toa_array = reshape(label, testno, timepicker)
-                np.savetxt(f"testing_data\\toa\\PLB-{name}-{n_sensors}-channels\\{file[:-5]}csv", toa_array, delimiter=",")
+                np.savetxt(f"testing_data/toa/PLB-{name}-{n_sensors}-channels/{file[:-5]}csv", toa_array, delimiter=",")
 
 
 def get_toa_test(timepicker):
@@ -104,7 +104,7 @@ def get_toa_test(timepicker):
     
     name = timepickers_name[possible_timepickers.index(timepicker)]
     
-    test_files = os.listdir("testing_data\\4-channels")
+    test_files = os.listdir("testing_data/4-channels")
     filtered = True
     for file in test_files:
         if file[-3:] == "csv" and file[:8] == "PD_PCLSR":
@@ -112,7 +112,7 @@ def get_toa_test(timepicker):
             label = file[:-4]
             print(label)
             toa_array = reshape(label, timepicker, filtered)
-            np.savetxt(f"testing_data\\toa\\{name}-4-channels\\{file[:-5]}csv", toa_array, delimiter=",")
+            np.savetxt(f"testing_data/toa/{name}-4-channels/{file[:-5]}csv", toa_array, delimiter=",")
             
 if __name__ == "__main__":
     get_toa_test("er")

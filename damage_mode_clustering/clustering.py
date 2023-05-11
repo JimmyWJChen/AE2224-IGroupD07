@@ -39,14 +39,10 @@ def clustering_hierarchical(datapoints, n_clusters, linkage='ward', params=['amp
     return datapoints
 
 if __name__=="__main__":
-    label = "PD_PCLO_QI090"
-    datapoints = di.filterPrimaryDatabase(di.getPrimaryDatabase(label), label, epsilon=0.001)
+    label = "PD_PCLO_QI00"
+    datapoints = di.getPrimaryDatabase(label, filtered=True)
     datapoints = datapoints[datapoints['channel'] == 2]
-    # datapoints = di.addDecibels(datapoints)
-    datapoints = di.addPeakFreq(datapoints, label)
-    # datapoints = standarize(datapoints)
     print(datapoints)
-    # datapoints = PCA(datapoints, 2)
     n_clusters = 3
     datapoints = clustering_hierarchical(datapoints, n_clusters, params=['amplitude', 'wpfrequency', 'rise_time'])
     for i in range(n_clusters):
