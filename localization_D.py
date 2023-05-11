@@ -47,7 +47,7 @@ for k in range (NoOfRows):
             t.append(TOAR[k,j])
         x,y,T = non_linear(A[0], A[1], A[2], B[0], B[1], B[2], V[k,0], t[0], t[1], t[2])
         if x > 0 and y > 0 and T > 0:
-            continue#print("x=", x, "y=", y, "T=", T)
+            print("x=", x, "y=", y, "T=", T)
         else:
             x = 0
             y = 0
