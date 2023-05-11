@@ -2,6 +2,7 @@ import numpy as np
 from localization_D import S, V
 from Dispersion import TOAR, SensorCoordinates
 from math import *
+from openpyxl import *
 
 def TOF_finder(S, X, v, i, j, k, TOAR):
     tf = sqrt(((X[k, 0] - S[i, j, 0]) ** 2 + (X[k, 1] - S[i, j, 1]) ** 2) / v)
@@ -50,4 +51,13 @@ for i in range(len(S[:, 0, 0])):
 
 print(L_min)
 
+wb = Workbook()
 
+# grab the active worksheet
+ws = wb.active
+
+for i in range(L_min[:, 0]):
+    ws.append(L_min[i, :])
+
+# Save the file
+wb.save("sample.xlsx")
