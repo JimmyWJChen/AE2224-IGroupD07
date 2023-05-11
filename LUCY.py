@@ -3,7 +3,6 @@ from localization_D import S, V
 from Dispersion import TOAR, SensorCoordinates
 from math import *
 
-
 def TOF_finder(S, X, v, i, j, k, TOAR):
     tf = sqrt(((X[k, 0] - S[i, j, 0]) ** 2 + (X[k, 1] - S[i, j, 1]) ** 2) / v)
     t = np.zeros(4)
@@ -32,14 +31,14 @@ def LUCY(D, P):
     return LUCY
 
 print(S)
-print(len(X))
 
-L_min = np.zeros(len(S[:, 0, 0]), 3)
+
+L_min = np.zeros((len(S[:, 0, 0]), 3))
 for i in range(len(S[:, 0, 0])):
     L = np.zeros(len(S[0, :, 0]))
     for j in range(len(S[0, :, 0])):
-        if S[i, j] == [0, 0]:
-            L[j] = 10000
+        if (S[i, j, :] == [0, 0]).any:
+            L[j] = 1000000000000000000000000
         else:
             D = []
             P = []
@@ -49,6 +48,6 @@ for i in range(len(S[:, 0, 0])):
             L[j] = LUCY(D, P)
     L_min[i, :] = min(L), S[i, np.argmin(L), 0], S[i, np.argmin(L), 1]
 
-
+print(L_min)
 
 
