@@ -6,7 +6,7 @@ import os, sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from toa_determination.ToA_final import get_toa_filtered
+from toa_determination.ToA_final import get_toa_filtered, reshape
 
 """
 This script will use regression to locate the source of emissions. 
@@ -36,12 +36,12 @@ class LS_localiser():
         self.S2 = np.array([[0.030, 0.030], [0.100, 0.030], [0.040, 0.110], [0.110, 0.110]])
         self.v_LE = 4352.14708386999
         self.v_LU = 4347.18703177823
-        self.testlabels = ["PCLSR_Q100", "PCLSR_Q090", "PCLO_Q100", "PCLO_Q090"]
+        self.testlabels = ["PCLSR_QI00", "PCLSR_QI090", "PCLO_QI00", "PCLO_QI090"]
         self.channels = 4
-        self.test_label_1 = "PCLSR_Q100"
-        self.test_label_2 = "PCLSR_Q090"
-        self.test_label_3 = "PCLO_Q100"
-        self.test_label_4 = "PCLO_Q090"
+        self.test_label_1 = "PCLSR_QI00"
+        self.test_label_2 = "PCLSR_QI090"
+        self.test_label_3 = "PCLO_QI00"
+        self.test_label_4 = "PCLO_QI090"
 
     def tau_finder(self, testlabel: str, testno: int):
         """
@@ -54,7 +54,7 @@ class LS_localiser():
         dToAs (n*m) matrix
         """
         # call ToAs
-        ToA_list = get_toa_filtered(testlabel, testno, 'hc')[0]
+        ToA_list = get_toa_filtered(testlabel, 'hc', True, testno)[0]
         # find number of events
         self.events = int(len(ToA_list) / self.channels)
         # this is a 1D list, need to split it into different channels for the rest of the class
@@ -205,4 +205,15 @@ class LS_localiser():
 if __name__ == "__main__":
     X_init = np.random.random(2)
     iterations = 50
-    # call LU_array, rel_LU_array, 
+    testlabel = "PD_PCLSR_QI00"
+    ToA = reshape(testlabel, 'hc', True, 1)
+    print(ToA)
+    """
+    # initialise object
+    localiser = LS_localiser()
+    # call LU_array, rel_LU_array, X_pred, v
+    LU_array, rel_LU_array, X_pred, v = localiser.LU_one_test(testlabel, 1, "LE", X_init, iterations)
+    print(f'array of LU is \n {LU_array}')
+    print(f'array of relative LU is \n {rel_LU_array}')
+    print(f'wave speed \n {v}')
+    print(f'predicted locations \n {X_pred}')"""
