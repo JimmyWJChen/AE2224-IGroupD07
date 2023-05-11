@@ -36,20 +36,24 @@ print(S)
 
 
 L_min = np.zeros((len(S[:, 0, 0]), 3))
-for i in range(len(S[:, 0, 0])):
-    L = np.zeros(len(S[0, :, 0]))
-    for j in range(len(S[0, :, 0])):
+Ls = np.zeros((len(S[:, 0, 0]), len(S[0, :, 0])))
+
+for i in range(len(S[:, 0, 0])):                                                # hits
+    L = np.zeros((len(S[0, :, 0]), 1))
+    for j in range(len(S[0, :, 0])):                                            # combinations
         if (S[i, j, :] == [0, 0]).any:
             L[j] = 1000000000000000000000000
         else:
             D = []
             P = []
-            for k in range(len(SensorCoordinates)):
+            for k in range(len(SensorCoordinates)):                             # sensors
                 D.append(Di_finder(S, SensorCoordinates, i, j, k))
                 P.append(Pi_finder(S, SensorCoordinates, V, i, j, k, TOAR))
             L[j] = LUCY(D, P)
-    L_min[i, :] = min(L), S[i, np.argmin(L), 0], S[i, np.argmin(L), 1]
+        Ls[i, j] = L[j]
+    L_min[i, :] = min(Ls[i, :]), S[i, np.argmin(Ls[i, :]), 0], S[i, np.argmin(L[i, :]), 1]
 
+print(Ls)
 print(L_min)
 
 wb = Workbook()
@@ -61,10 +65,26 @@ for i in range(len(S[:, 0, 0])):
     j = np.arange(0, int((len(S[0, :, 0])))+1, 1)
     k = list(S[i, 0: max(j),0])
     ws.append(k)
+
 ws.append([' '])
+
 for i in range(len(S[:, 0, 0])):
     j = np.arange(0, int((len(S[0, :, 0])))+1, 1)
     k = list(S[i, 0: max(j),1])
+    ws.append(k)
+
+ws.append([' '])
+
+for i in range(len(S[:, 0, 0])):
+    j = np.arange(0, int((len(S[0, :, 0])))+1, 1)
+    k = list(Ls[i, 0: max(j)])
+    ws.append(k)
+
+ws.append([' '])
+
+for i in range(len(S[:, 0, 0])):
+    j = np.arange(0, int((len(S[0, :, 0])))+1, 1)
+    k = list(L_min[i, 0: max(j)])
     ws.append(k)
 
 # Save the file
