@@ -1,11 +1,12 @@
 import numpy as np
 from localization_D import S, V
-from Dispersion import TOAR, SensorCoordinates
+from Dispersion import TOAR, SensorCoordinates, DamageCoordinates
 from math import *
 from openpyxl import *
+import csv
 
 def TOF_finder(S, X, v, i, j, k, TOAR):
-    tf = sqrt(((X[k, 0] - S[i, j, 0]) ** 2 + (X[k, 1] - S[i, j, 1]) ** 2) / v)
+    tf = sqrt(((X[k, 0] - S[i, j, 0]) ** 2 + (X[k, 1] - S[i, j, 1]) ** 2) / v[i,0])
     t = np.zeros(4)
     if k == 0:
         return tf
@@ -20,7 +21,7 @@ def Di_finder(S, X, i, j, k):
 
 
 def Pi_finder(S, X, v, i, j, k, TOAR):
-    P = sqrt((X[k, 0]-S[i, j, 1])**2+(X[k, 1]-S[i, j, 1])**2) + v * TOAR[i, k]
+    P = sqrt((X[k, 0]-S[i, j, 1])**2+(X[k, 1]-S[i, j, 1])**2) + v[i,0] * TOAR[i, k]
     return P
 
 
@@ -28,36 +29,68 @@ def LUCY(D, P):
     Y = []
     for i in range(len(D)):
         Y.append((D[i]-P[i])**2)
+        #print ("D=", D[i],'P=', P[i])
     LUCY = sqrt(sum(Y)/(len(D)-1))
     return LUCY
 
-print(S)
+#print(S)
 
 
 L_min = np.zeros((len(S[:, 0, 0]), 3))
-for i in range(len(S[:, 0, 0])):
-    L = np.zeros(len(S[0, :, 0]))
-    for j in range(len(S[0, :, 0])):
-        if (S[i, j, :] == [0, 0]).any:
+Ls = np.zeros((len(S[:, 0, 0]), len(S[0, :, 0])))
+
+for i in range(len(S[:, 0, 0])):                                                # hits
+    L = np.zeros((len(S[0, :, 0]), 1))
+    for j in range(len(S[0, :, 0])):                            # combinations
+        #print(S[i, j, :], np.zeros((2)))
+        if (S[i, j, 0] == 0) and (S[i, j, 1] == 0):
             L[j] = 1000000000000000000000000
         else:
+
             D = []
             P = []
-            for k in range(len(SensorCoordinates)):
+            for k in range(len(SensorCoordinates)):                             # sensors
                 D.append(Di_finder(S, SensorCoordinates, i, j, k))
                 P.append(Pi_finder(S, SensorCoordinates, V, i, j, k, TOAR))
+                #print(P)
             L[j] = LUCY(D, P)
-    L_min[i, :] = min(L), S[i, np.argmin(L), 0], S[i, np.argmin(L), 1]
-
-print(L_min)
+        Ls[i, j] = L[j]
+    L_min[i, :] = min(Ls[i, :]), S[i, np.argmin(Ls[i, :]), 0], S[i, np.argmin(Ls[i, :]), 1]
+#print(Ls)
+#print(L_min)
 
 wb = Workbook()
 
 # grab the active worksheet
 ws = wb.active
 
-for i in range(L_min[:, 0]):
-    ws.append(L_min[i, :])
+for i in range(len(S[:, 0, 0])):
+    j = np.arange(0, int((len(S[0, :, 0])))+1, 1)
+    k = list(S[i, 0: max(j),0])
+    ws.append(k)
 
+ws.append([' '])
+
+for i in range(len(S[:, 0, 0])):
+    j = np.arange(0, int((len(S[0, :, 0])))+1, 1)
+    k = list(S[i, 0: max(j),1])
+    ws.append(k)
+
+ws.append([' '])
+
+for i in range(len(S[:, 0, 0])):
+    j = np.arange(0, int((len(S[0, :, 0])))+1, 1)
+    k = list(Ls[i, 0: max(j)])
+    ws.append(k)
+
+ws.append([' '])
+
+for i in range(len(S[:, 0, 0])):
+    j = np.arange(0, int((len(S[0, :, 0])))+1, 1)
+    k = list(L_min[i, 0: max(j)])
+    ws.append(k)
+
+for i in range (18):
+    ws.append(list(DamageCoordinates[i]))
 # Save the file
 wb.save("sample.xlsx")

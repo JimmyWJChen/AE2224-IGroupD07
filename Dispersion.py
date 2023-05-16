@@ -140,7 +140,8 @@ V= np.empty((NoOfRows, NoOfSens))
 for i in range(NoOfRows):
     for j in range(NoOfSens):
         V[i,j] = 0.91* fS0(np.median(PeakFrequencies[i, :])) + 0.09 * fA0(np.median(PeakFrequencies[j, :]))
-print(V)
+#print(V)
+'''
 vs = []
 v = []
 va = []
@@ -156,5 +157,8 @@ plt.plot(np.arange(0,500001, 100), v, 'g', label = 'Optimal Combination')
 plt.ylim(0, 8000)
 plt.xlim(0, 500000)
 plt.title("Velocity of the Wave")
-plt.legend()
+plt.legend(loc= "center right")
+plt.xlabel('Frequency [Hz]')
+plt.ylabel('Velocity [m/s]')
 plt.show()
+'''

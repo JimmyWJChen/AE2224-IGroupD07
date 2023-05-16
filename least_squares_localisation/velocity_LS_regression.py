@@ -192,7 +192,7 @@ class PLBVelo():
         #print(f'array of time differences: \n {tau_array}')"""
 
         # actually get ToAs now
-        ToA_list = get_toa_filtered(testlabel, testno, 'hc')[0]
+        ToA_list = get_toa_filtered(testlabel, 'hc', True, testno)[0]
         # this is a 1D list, need to split it into different channels for the rest of the class
         dToAs = np.zeros((events, channels))
         # reshape ToA_array to have events rows and channels columns
@@ -1119,7 +1119,7 @@ if __name__ == '__main__':
     # ToA differences per AE location
     tau = np.array([0, -0.0000033361194415, 0.00000395852087374, 0.00000820232866552])
 """
-    toa = get_toa_filtered("T", 1, "hc")
+    toa = get_toa_filtered("T", 'hc', True, 1)
     print(f'toa list is \n : {toa}')
     relax_factor = 1.
     vT_init = np.array([np.random.uniform(-100000., 100000.), np.random.uniform(-100000., 100000.)])

@@ -2,11 +2,13 @@ import least_squares as ls
 import velocity_LS_regression as velo_ls
 import numpy as np
 import pandas as pd
+import vallenae as vae
 import os, sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from toa_determination.ToA_final import get_toa_filtered
+import data_import as di
+from toa_determination.ToA_final import get_toa_filtered, reshape
 
 """
 This script will use regression to locate the source of emissions. 
@@ -36,12 +38,12 @@ class LS_localiser():
         self.S2 = np.array([[0.030, 0.030], [0.100, 0.030], [0.040, 0.110], [0.110, 0.110]])
         self.v_LE = 4352.14708386999
         self.v_LU = 4347.18703177823
-        self.testlabels = ["PCLSR_Q100", "PCLSR_Q090", "PCLO_Q100", "PCLO_Q090"]
+        self.testlabels = ["PCLSR_QI00", "PCLSR_QI090", "PCLO_QI00", "PCLO_QI090"]
         self.channels = 4
-        self.test_label_1 = "PCLSR_Q100"
-        self.test_label_2 = "PCLSR_Q090"
-        self.test_label_3 = "PCLO_Q100"
-        self.test_label_4 = "PCLO_Q090"
+        self.test_label_1 = "PCLSR_QI00"
+        self.test_label_2 = "PCLSR_QI090"
+        self.test_label_3 = "PCLO_QI00"
+        self.test_label_4 = "PCLO_QI090"
 
     def tau_finder(self, testlabel: str, testno: int):
         """
@@ -54,19 +56,21 @@ class LS_localiser():
         dToAs (n*m) matrix
         """
         # call ToAs
-        ToA_list = get_toa_filtered(testlabel, testno, 'hc')[0]
+        ToAs = reshape(testlabel, 'hc', True, testno)
         # find number of events
-        self.events = int(len(ToA_list) / self.channels)
+        self.events = len(ToAs)
         # this is a 1D list, need to split it into different channels for the rest of the class
         dToAs = np.zeros((self.events, self.channels))
+        """
         # reshape ToA_array to have events rows and channels columns
         ToA_array = ToA_list.reshape((self.channels, self.events))
         # transpose it
         ToA_array_T = ToA_array.T
+        """
         # get the ToA differences
-        ToA_channel_1 = ToA_array_T[:, 0]
+        ToA_channel_1 = ToAs[:, 0]
         for i in range(self.channels):
-            ToA_channel_i = ToA_array_T[:, i]
+            ToA_channel_i = ToAs[:, i]
             dToA_channel_i = ToA_channel_i - ToA_channel_1
             dToAs[:, i] = dToA_channel_i
 
@@ -202,7 +206,59 @@ class LS_localiser():
 
         return LU_array, rel_LU_array, X_pred, v
 
+def getWaveform(label, testno=1, trai=1):
+    if label[:2] == "PD":
+        path = "C:/Users/Jimmy Chen/OneDrive - Delft University of Technology/Documents/GitHub/AE2224-IGroupD07/testing_data/4-channels/" + label[3:] + ".tradb"
+    elif label == "PCLO" or label == "PCLS":
+        path = "testing_data/PLB-4-channels/PLBS4_CP090_" + label + str(testno) + ".tradb"
+    elif label == "TEST":
+        path = "testing_data/PLB-8-channels/PLBS8_QI090_" + label + ".tradb"
+    else:
+        path = "testing_data/PLB-8-channels/PLBS8_QI090_" + label + str(testno) + ".tradb"
+    HERE = os.path.dirname(__file__)
+    TRADB = os.path.join(HERE, path)
+    with vae.io.TraDatabase(TRADB) as tradb:
+        y, t = tradb.read_wave(trai)
+    return y, t
+
 if __name__ == "__main__":
     X_init = np.random.random(2)
     iterations = 50
-    # call LU_array, rel_LU_array, 
+    n_sensors = 4
+    testlabel = "PD_PCLO_QI00"
+    path = "C:/Users/Jimmy Chen/OneDrive - Delft University of Technology/Documents/GitHub/AE2224-IGroupD07/testing_data/4-channels/" + str(testlabel) + ".csv"
+    pridb = pd.read_csv(path)
+    #filtered_pridb = di.getPrimaryDatabase(testlabel, 1, True)
+    trai_lst = pridb.iloc[:, -2:-1].to_numpy()
+
+    time_lst = pridb.iloc[:, 1:3].to_numpy()
+    print(time_lst)
+    for i, trai in enumerate(trai_lst):
+        y, t = getWaveform(testlabel, 1, int(trai))
+
+        try:
+
+
+            hc_index = vae.timepicker.hinkley(y, alpha=5)[1]
+
+
+        except:
+            print("Invalid timepicker is chosen, hinkley is selected")
+            hc_index = vae.timepicker.hinkley(y, alpha=5)[1]
+
+        time_difference = t[hc_index]  # type: ignore
+        time_lst[i][0] = time_lst[i][0] + time_difference
+    print(time_lst[:, 0])
+    n_values = np.shape(trai_lst)[0]
+    new_times = np.reshape(time_lst, (int(n_values / n_sensors), n_sensors))
+    print(new_times)
+
+    """
+    # initialise object
+    localiser = LS_localiser()
+    # call LU_array, rel_LU_array, X_pred, v
+    LU_array, rel_LU_array, X_pred, v = localiser.LU_one_test(testlabel, 1, "LE", X_init, iterations)
+    print(f'array of LU is \n {LU_array}')
+    print(f'array of relative LU is \n {rel_LU_array}')
+    print(f'wave speed \n {v}')
+    print(f'predicted locations \n {X_pred}')"""
