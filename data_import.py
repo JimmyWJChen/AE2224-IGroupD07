@@ -97,9 +97,10 @@ def addDecibels(pridb):
     pridb["amplitude_db"] = 20 * np.log10(pridb["amplitude"]/base)
     return pridb
 
-def filterPrimaryDatabase(pridb, label, testno=1, sortby="energy", epsilon=0.2, epsilon_mc=0.001, thamp=0.009, thdur = 0.002, thenergy=1e5, thstrength=2500, thcounts=70, saveToCSV=False):
+def filterPrimaryDatabase(pridb, label, testno=1, sortby="energy", epsilon=0.2, epsilon_mc=0.0001, thamp=0.009, thdur = 0.002, thenergy=1e5, thstrength=2500, thcounts=70, saveToCSV=False):
     pridb = pridb.read_hits()
     pridb = pridb[pridb['trai'] > 0]
+    legacyCode = True
 
     # ACTUAL TEST DATA - DATABASE ALREADY FILTERED
     if label[:2] == "PD":
@@ -115,7 +116,7 @@ def filterPrimaryDatabase(pridb, label, testno=1, sortby="energy", epsilon=0.2, 
         thstrength = 1500
         thcounts = 70
 
-    if actualData:
+    if actualData and legacyCode:
         pridb_channels = []
         for channel in range(1, int(pridb.max()['channel']+1)):
             pridb_chan = pridb.loc[pridb['channel'] == channel].copy()
@@ -128,12 +129,15 @@ def filterPrimaryDatabase(pridb, label, testno=1, sortby="energy", epsilon=0.2, 
         hit_id = 0
         for i in range(len(pridb_channels[0])):
             if i%100==0: print(f'{i} out of {len(pridb_channels[0])}')
-            prev_indices = indices
+            prev_indices = indices[:]
             indices = [i] + [0 for m in range(int(pridb.max()['channel']-1))]
             cur_time = pridb_channels[0].loc[i, 'time']
             for channel in range(2, int(pridb.max()['channel']+1)):
                 stop = False
-                j = prev_indices[channel-1]
+                try:
+                    j = pridb_channels[channel-1].index[pridb_channels[channel-1]['time'] > cur_time - 2*epsilon_mc].tolist()[0]
+                except IndexError:
+                    break
                 # print(channel)
                 try:
                     while cur_time - pridb_channels[channel-1].loc[j, 'time'] > 0 and not stop:
