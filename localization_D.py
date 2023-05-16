@@ -36,9 +36,9 @@ def non_linear(a1, a2, a3, b1, b2, b3, v, t1, t2, t3):
 
 V = np.zeros((NoOfSens, NoOfRows))
 V = Velocity(fS0, fA0, Minimum, PeakFrequencies)
-for i in range (len(V[:, 0])):
+'''for i in range (len(V[:, 0])):
     for j in range (len(V[0, :])):
-        V[i,j] = 4347
+        V[i,j] = 4347'''
 
 file = os.path.join(os.path.dirname(__file__), "testing_data/PLB-hinkley-4-channels/PLBS4_CP090_PCLO1"+".csv")
 
@@ -76,12 +76,11 @@ for k in range (NoOfRows):
         print(Cords)
         index = 0
         for a in range (len(l_i[:, 0])):
-            if (l_i[a, :] == i):
+            if (l_i[a, 0] == i[0]) and (l_i[a, 1] == i[1]) and (l_i[a, 2] == i[2]):
                 index = a
                 continue
         S[k, index, :] = Cords
-        print(index)
-print(S[0,2, :])
+print(S[0,1, :])
 
 #--------------------------------------------------------
 '''
