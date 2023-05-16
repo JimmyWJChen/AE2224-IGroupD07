@@ -339,4 +339,4 @@ if __name__ == "__main__":
     print(f'array of relative LU is \n {rel_LU_array}')
     print(f'wave speed \n {v}')
     print(f'predicted locations \n {X_pred}')
-    localiser.write_to_csv(X_pred, LU_array, 1, "LE", 1)
+    localiser.write_to_csv(X_pred, LU_array, 4, "LU", 1)
