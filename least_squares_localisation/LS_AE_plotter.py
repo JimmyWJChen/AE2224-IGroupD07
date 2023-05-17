@@ -27,7 +27,7 @@ class Plotter:
         self.ax = self.map.add_subplot(111)
         self.map.canvas.mpl_connect('button_press_event', self.press)
         self.ax.axis(xmin=0, xmax=self.size[0], ymin=0, ymax=self.size[1])
-        self.ax.title.set_text("Damage map, " + self.label)
+        #self.ax.title.set_text("Damage map, " + self.label)
         self.ax.set_xlabel("x [m]")
         self.ax.set_ylabel("y [m]")
         self.damages = self.read_csv()
@@ -36,12 +36,18 @@ class Plotter:
         print(self.X_coordinates)
         print(self.Y_coordinates)
         print(np.shape(self.X_coordinates))
-        self.ax.scatter(self.X_coordinates, self.Y_coordinates)
+        self.ax.scatter(self.X_coordinates, self.Y_coordinates, marker='.')
 
         self.ax.legend()
         self.ax.grid()
         self.ax.set_aspect('equal')
+        fig = plt.gcf()
+        name_eps = 'AE_source_plot_' + self.label + '.eps'
+        name_pdf = 'AE_source_plot_' + self.label + '.pdf'
+        fig.savefig(name_eps)
+        fig.savefig(name_pdf)
         plt.show()
+
 
     def press(self, event):
         x = event.xdata
@@ -69,6 +75,11 @@ class Plotter:
         self.lucyax.legend()
         self.lucyax.grid()
         self.lucyax.set_aspect('equal')
+        fig = plt.gcf()
+        name_eps = f'LU_for_point_[{point[0]}, {point[1]}]_' + self.label + '.eps'
+        name_pdf = f'LU_for_point_[{point[0]}, {point[1]}]_' + self.label + '.pdf'
+        fig.savefig(name_eps)
+        fig.savefig(name_pdf)
         plt.show()
 
     def lucypress(self, event):
@@ -76,5 +87,5 @@ class Plotter:
 
 
 if __name__ == "__main__":
-    map = Plotter("PD_PCLO_QI00LE1")
+    map = Plotter("PD_PCLSR_QI090LU1")
     map.draw()
