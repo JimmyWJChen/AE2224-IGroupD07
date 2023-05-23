@@ -63,18 +63,24 @@ def clustering_hierarchical(datapoints, n_clusters, linkage='ward', params=['amp
     return datapoints
 
 if __name__=="__main__":
-    # pd.set_option('display.max_rows', 20)
-    label = "PD_PCLO_QI00"
+    pd.set_option('display.max_rows', 20)
+    label = "PD_PCLSR_QI00"
+    filtered = True
     n_clusters = 3
-    params = ['wpfrequency', 'frequency', 'freqcentroid', 'amplitude', 'rise_time', 'counts', 'signal_strength']
-    multichannel = True
+    params = ['frequency', 'amplitude']
+    multichannel = False
 
     sum_31 = 0
     sum_22 = 0
     sum_211 = 0
     sum_4 = 0
-    datapoints = di.getPrimaryDatabase(label, filtered=True)
-    print(datapoints.head(20))
+    
+    datapoints = di.getPrimaryDatabase(label, filtered=filtered)
+    if not filtered:
+        datapoints = di.addPeakFreq(datapoints, label)
+        # datapoints = datapoints.read_hits()
+    datapoints = di.addRA(datapoints)
+    # print(datapoints.head(20))
     hits_total = int(datapoints.max()['hit_id'])
     datapoints['cluster'] = np.zeros(len(datapoints.index))
     channels = int(datapoints.max()['channel'])
@@ -83,7 +89,7 @@ if __name__=="__main__":
         for ch in range(1, channels+1):
             print(ch)
             datapoints_ch = datapoints.loc[datapoints['channel'] == ch].copy()
-            datapoints_ch = clustering_kmeans(datapoints_ch, n_clusters, params=params)
+            datapoints_ch = clustering_hierarchical(datapoints_ch, n_clusters, params=params)
             # print(datapoints_ch)
             for index, row in datapoints_ch.iterrows():
                 datapoints.loc[index, 'cluster'] = row['cluster']
@@ -97,17 +103,19 @@ if __name__=="__main__":
 
     else:
         datapoints = clustering_kmeans(datapoints, n_clusters, params=params)
+
     print(datapoints.head(20))
+
     for hit in range(hits_total):
         hit_points = datapoints.loc[datapoints['hit_id'] == hit].copy()
         clustercounts = hit_points['cluster'].value_counts().to_frame()
         if 3 in clustercounts.values:
-            print(clustercounts)
-            correct_cluster = clustercounts.index[clustercounts['count'] == 3].to_list()[0]
-            incorrect_cluster = clustercounts.index[clustercounts['count'] == 1].to_list()[0]
-            trai_to_correct = hit_points.loc[hit_points['cluster'] == incorrect_cluster]['trai'].to_list()[0]
-            datapoints.loc[datapoints['trai'] == trai_to_correct, 'cluster'] = correct_cluster
-            print(f'{trai_to_correct} moved from Cluster {incorrect_cluster} to {correct_cluster}')
+            # print(clustercounts)
+            # correct_cluster = clustercounts.index[clustercounts['count'] == 3].to_list()[0]
+            # incorrect_cluster = clustercounts.index[clustercounts['count'] == 1].to_list()[0]
+            # trai_to_correct = hit_points.loc[hit_points['cluster'] == incorrect_cluster]['trai'].to_list()[0]
+            # datapoints.loc[datapoints['trai'] == trai_to_correct, 'cluster'] = correct_cluster
+            # print(f'{trai_to_correct} moved from Cluster {incorrect_cluster} to {correct_cluster}')
             sum_31+=1
             
         elif 2 in clustercounts.values:
@@ -121,10 +129,13 @@ if __name__=="__main__":
     print(f'2 vs 2 clusters: {sum_22}, {sum_22/hits_total * 100}%')
     print(f'2 vs 1 vs 1 clusters: {sum_211}, {sum_211/hits_total * 100}%')
     print(f'4 vs 0 clusters: {sum_4}, {sum_4/hits_total * 100}%')
+    # datapoints = di.createHitDataframe(di.getPrimaryDatabase(label, filtered=filtered))
+    print(datapoints)
+    # datapoints = clustering_kmeans(datapoints, n_clusters, params=["wpfrequency", "frequency", "freqcentroid", "amplitude1", "amplitude2", "amplitude3", "amplitude4", "RA"])
     for i in range(n_clusters):
         pridb_cluster = datapoints.loc[datapoints['cluster'] == i]
-        plt.scatter(pridb_cluster['amplitude'], pridb_cluster['wpfrequency']/1000, label='Cluster '+str(i+1))
-    plt.xlabel('Amplitude [dB]')
-    plt.ylabel('Weighted Peak Frequency [kHz]')
+        plt.scatter(pridb_cluster['amplitude'], pridb_cluster['frequency']/1000, label='Cluster '+str(i+1))
+    plt.xlabel('Amplitude [V]')
+    plt.ylabel('Peak Frequency [kHz]')
     plt.legend()
     plt.show()

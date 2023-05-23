@@ -54,7 +54,10 @@ def getWaveform(label, testno=1, trai=1):
     return y, t
 
 
-def getPeakFrequency(y, t):
+def getPeakFrequency(y, t, trai=0):
+    idx = np.argmin(abs(t))
+    y = y[idx:]
+    t = t[idx:]
     N = len(y)
     T = t[1] - t[0]
     yf = np.abs(fft(y))
@@ -67,23 +70,25 @@ def getPeakFrequency(y, t):
     WPF = np.sqrt(PeakFreq * Fcentr)
     # import matplotlib.pyplot as plt
     # plt.plot(xf, yf[:N//2])
+    # plt.title(f"Trai: {trai}, Peak: {PeakFreq}, WPeak: {WPF}")
     # plt.show()
     return PeakFreq, Fcentr, WPF
 
 def addPeakFreq(pridb, label, testno=1):
     try:
         pridb = pridb.read_hits()
+        pridb = pridb[pridb['trai'] > 0]
     except AttributeError:
-        pass
+        pridb = pridb[pridb['trai'] > 0]
     tradb = getTransientDatabase(label, testno)
     trais = pridb['trai']
     frequencies = []
     fcentrs = []
     wpfs = []
     for trai in trais:
-        if trai%100==0: print(trai)
+        if trai%1000==0: print(trai)
         y, t = tradb.read_wave(trai)
-        f, fcentr, wpf = getPeakFrequency(y, t)
+        f, fcentr, wpf = getPeakFrequency(y, t, trai)
         frequencies.append(f)
         fcentrs.append(fcentr)
         wpfs.append(wpf)
@@ -97,7 +102,26 @@ def addDecibels(pridb):
     pridb["amplitude_db"] = 20 * np.log10(pridb["amplitude"]/base)
     return pridb
 
-def filterPrimaryDatabase(pridb, label, testno=1, sortby="energy", epsilon=0.2, epsilon_mc=0.0001, thamp=0.009, thdur = 0.002, thenergy=1e5, thstrength=2500, thcounts=70, saveToCSV=False):
+def addRA(pridb):
+    pridb["RA"] = pridb["rise_time"]/pridb["amplitude"]
+    return pridb
+
+def createHitDataframe(pridb):
+    hitdb = pd.DataFrame(columns=["hit_id", "time", "wpfrequency", "frequency", "freqcentroid", "amplitude1", "amplitude2", "amplitude3", "amplitude4", "RA"])
+    hits_total = int(pridb.max()['hit_id'])
+    for hit in range(hits_total):
+        hit_points = pridb.loc[pridb['hit_id'] == hit].copy()
+        time = hit_points['time'].mean()
+        wpfrequency = hit_points['wpfrequency'].mean()
+        frequency = hit_points['frequency'].mean()
+        freqcentroid = hit_points['freqcentroid'].mean()
+        ra = hit_points['RA'].mean()
+        hit_points.sort_values(by=['time'], inplace=True)
+        hitdb.loc[len(hitdb.index)] = [hit, time, wpfrequency, frequency, freqcentroid,
+                                       hit_points['amplitude'].iloc[0], hit_points['amplitude'].iloc[1], hit_points['amplitude'].iloc[1], hit_points['amplitude'].iloc[3], ra]
+    return hitdb
+
+def filterPrimaryDatabase(pridb, label, testno=1, sortby="energy", epsilon=0.2, epsilon_mc=0.001, freqmargin = 5, thamp=0.009, thdur = 0.002, thenergy=1e5, thstrength=2500, thcounts=70, saveToCSV=False):
     pridb = pridb.read_hits()
     pridb = pridb[pridb['trai'] > 0]
     legacyCode = True
@@ -116,6 +140,9 @@ def filterPrimaryDatabase(pridb, label, testno=1, sortby="energy", epsilon=0.2, 
         thstrength = 1500
         thcounts = 70
 
+    if actualData:
+        pridb = addPeakFreq(pridb, label)
+
     if actualData and legacyCode:
         pridb_channels = []
         for channel in range(1, int(pridb.max()['channel']+1)):
@@ -129,9 +156,9 @@ def filterPrimaryDatabase(pridb, label, testno=1, sortby="energy", epsilon=0.2, 
         hit_id = 0
         for i in range(len(pridb_channels[0])):
             if i%100==0: print(f'{i} out of {len(pridb_channels[0])}')
-            prev_indices = indices[:]
             indices = [i] + [0 for m in range(int(pridb.max()['channel']-1))]
             cur_time = pridb_channels[0].loc[i, 'time']
+            cur_freqs = np.array([pridb_channels[0].loc[i, 'frequency'], pridb_channels[0].loc[i, 'wpfrequency'], pridb_channels[0].loc[i, 'freqcentroid']])
             for channel in range(2, int(pridb.max()['channel']+1)):
                 stop = False
                 try:
@@ -140,14 +167,19 @@ def filterPrimaryDatabase(pridb, label, testno=1, sortby="energy", epsilon=0.2, 
                     break
                 # print(channel)
                 try:
-                    while cur_time - pridb_channels[channel-1].loc[j, 'time'] > 0 and not stop:
-                        if cur_time - pridb_channels[channel-1].loc[j, 'time'] < epsilon_mc:
-                            # print("yo")
+                    tested_time = pridb_channels[channel-1].loc[j, 'time']
+                    tested_freqs = np.array([pridb_channels[channel-1].loc[j, 'frequency'], pridb_channels[channel-1].loc[j, 'wpfrequency'], pridb_channels[channel-1].loc[j, 'freqcentroid']])
+                    while cur_time - tested_time > 0 and (not stop):
+                        if cur_time - tested_time < epsilon_mc:
+                            #  and np.all((np.abs(tested_freqs - cur_freqs)/cur_freqs) < freqmargin)
+                            # print(((tested_freqs - cur_freqs)/cur_freqs))
                             indices[channel-1] = j
                             stop = True
                         else:
                             j += 1
-                    if pridb_channels[channel-1].loc[j, 'time'] - cur_time < epsilon_mc:
+                            tested_time = pridb_channels[channel-1].loc[j, 'time']
+                            tested_freqs = np.array([pridb_channels[channel-1].loc[j, 'frequency'], pridb_channels[channel-1].loc[j, 'wpfrequency'], pridb_channels[channel-1].loc[j, 'freqcentroid']])
+                    if tested_time - cur_time < epsilon_mc:
                         indices[channel-1] = j
                         stop = True
                     if not stop:
@@ -232,18 +264,21 @@ def getHitsPerSensor(pridb):
 
 
 if __name__ == "__main__":
-    testlabel = "PD_PCLO_QI00"
+    testlabel = "PD_PCLO_QI090"
     testno = 1
-    pridb = getPrimaryDatabase(testlabel, testno, True)
-    print(pridb)
-
+    pridb = getPrimaryDatabase(testlabel, testno, filtered=False)
+    pridb = addPeakFreq(pridb, testlabel)
+    pridb = addRA(pridb)
+    print(pridb[:10])
+    # pridb = filterPrimaryDatabase(pridb, testlabel)
+    # print(pridb)
+    # hitdb = createHitDataframe(pridb)
+    # print(hitdb)
     # print(getHitsPerSensor(pridb.read_hits()))
-    print(pridb.read_hits())
     # print(filterPrimaryDatabase(pridb))
-    filtereddata = filterPrimaryDatabase(pridb, testlabel, testno)
-    filtereddata = addPeakFreq(filtereddata, testlabel)
-    print(filtereddata)
-    print(getHitsPerSensor(filtereddata))
-    filtereddata.to_csv("testing_data/4-channels/" + testlabel + ".csv", index=False)
+    # filtereddata = filterPrimaryDatabase(pridb, testlabel, testno)
+    # print(filtereddata)
+    # print(getHitsPerSensor(filtereddata))
+    # pridb.to_csv("testing_data/4-channels/" + testlabel + ".csv", index=False)
     #print(filtereddata.loc[filtereddata['channel'] == 3])
     # pridb.read_hits().to_csv('data.csv')
