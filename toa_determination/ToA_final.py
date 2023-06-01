@@ -119,4 +119,4 @@ if __name__ == "__main__":
     get_toa_test("mer")
     get_toa_test("hc")
     get_toa_test("aic")
-    #print(reshape("PD_PCLO_QI090", "hc", True, testno=1))
+    print(reshape("PD_PCLO_QI090", "hc", True, testno=1))
