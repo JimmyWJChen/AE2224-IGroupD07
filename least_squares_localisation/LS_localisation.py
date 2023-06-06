@@ -36,8 +36,8 @@ class LS_localiser():
         import velocity_LS_regression as vLS
         self.S1 = np.array([[0.030, 0.030], [0.110, 0.030], [0.030, 0.110], [0.110, 0.110]])
         self.S2 = np.array([[0.030, 0.030], [0.100, 0.030], [0.040, 0.110], [0.110, 0.110]])
-        self.v_LE = 4352.14708386999
-        self.v_LU = 4347.18703177823
+        self.v_ave = 5061.53099445339
+        self.v_LU = 4033.9296162753753
         self.testlabels = ["PD_PCLSR_QI00", "PD_PCLSR_QI090", "PD_PCLO_QI00", "PD_PCLO_QI090"]
         self.channels = 4
         self.test_label_1 = "PD_PCLSR_QI00"
@@ -142,8 +142,8 @@ class LS_localiser():
             S = self.S2
         else:
             raise Exception('Use valid test label.')
-        if v_type == "LE":
-            v = self.v_LE
+        if v_type == "ave":
+            v = self.v_ave
         elif v_type == "LU":
             v = self.v_LU
         else:
@@ -153,7 +153,7 @@ class LS_localiser():
         # calculate location prediction for each event
         X_pred = np.zeros((self.events, 2))
         for i in range(self.events):
-            x_pred = ls.localise(S, dToAs[i, :], v, X_init, iterations)
+            x_pred = ls.localise_2(S, dToAs[i, :], v, X_init, iterations)
             X_pred[i, :] = x_pred
 
         return X_pred, S, dToAs, v
@@ -293,7 +293,11 @@ if __name__ == "__main__":
     X_init = np.random.random(2)
     iterations = 50
     n_sensors = 4
-    testlabel = "PD_PCLO_QI00"
+    testlabel3 = "PD_PCLO_QI00"
+    testlabel4 = "PD_PCLO_QI090"
+    testlabel1 = "PD_PCLSR_QI00"
+    testlabel2 = "PD_PCLSR_QI090"
+    testlabels = [testlabel1, testlabel2, testlabel3, testlabel4]
 
     #self.test_label_1 = "PCLSR_QI00"
     #self.test_label_2 = "PCLSR_QI090"
@@ -334,9 +338,20 @@ if __name__ == "__main__":
     # initialise object
     localiser = LS_localiser()
     # call LU_array, rel_LU_array, X_pred, v
-    LU_array, rel_LU_array, X_pred, v = localiser.LU_one_test(testlabel, 1, "LE", X_init, iterations)
-    print(f'array of LU is \n {LU_array}')
-    print(f'array of relative LU is \n {rel_LU_array}')
-    print(f'wave speed \n {v}')
-    print(f'predicted locations \n {X_pred}')
-    localiser.write_to_csv(X_pred, LU_array, 4, "LU", 1)
+    for i in range(len(testlabels)):
+        testlabel = testlabels[i]
+        count = i + 1
+        # LU
+        LU_array, rel_LU_array, X_pred, v = localiser.LU_one_test(testlabel, 1, "LU", X_init, iterations)
+        print(f'array of LU is \n {LU_array}')
+        print(f'array of relative LU is \n {rel_LU_array}')
+        print(f'wave speed \n {v}')
+        print(f'predicted locations \n {X_pred}')
+        localiser.write_to_csv(X_pred, LU_array, count, "LU", 2)
+        # average
+        LU_array_ave, rel_LU_array_ave, X_pred_ave, v_ave = localiser.LU_one_test(testlabel, 1, "ave", X_init, iterations)
+        print(f'array of LU is \n {LU_array_ave}')
+        print(f'array of relative LU is \n {rel_LU_array_ave}')
+        print(f'wave speed \n {v_ave}')
+        print(f'predicted locations \n {X_pred_ave}')
+        localiser.write_to_csv(X_pred_ave, LU_array_ave, count, "ave", 2)
