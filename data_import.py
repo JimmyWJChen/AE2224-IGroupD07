@@ -64,7 +64,7 @@ def filterWaveform(y, t, trai=1):
 
     # ToA
     hc_index = vae.timepicker.hinkley(y, alpha=5)[1]
-    plt.plot(t, y)
+    # plt.plot(t, y)
     y = y[hc_index:]
     t = t[hc_index:]
     b, a = signal.butter(order, cutoff_freq, fs=fs, btype='high')
@@ -380,7 +380,7 @@ def getHitDatabase(label, created=True):
         hitdb = createHitDataframe(getPrimaryDatabase(label, filtered=True), label)
         hitdb = addDecibels(hitdb)
         hitdb = addRA(hitdb)
-        hitdb.to_csv("testing_data/4-channels/HITS_" + label + ".csv", index=False)
+        # hitdb.to_csv("testing_data/4-channels/HITS_" + label + ".csv", index=False)
         return hitdb
 
 
