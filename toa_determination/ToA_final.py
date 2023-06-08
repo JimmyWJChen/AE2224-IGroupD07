@@ -23,7 +23,7 @@ def get_toa_filtered(label: str, timepicker: str, filtered: bool, testno: int =1
         trai_lst = filtered_pridb.iloc[:, -1:].to_numpy()
     else:
         filtered_pridb = di.getPrimaryDatabase(label, testno, filtered)
-        trai_lst = filtered_pridb.iloc[:, -2:-1].to_numpy()
+        trai_lst = filtered_pridb.iloc[:, -4:-3].to_numpy()
     
     time_lst = filtered_pridb.iloc[:, 1:3].to_numpy()
     n_values = np.shape(trai_lst)[0]
@@ -75,6 +75,11 @@ def reshape(label, timepicker, filtered, testno=1):
         trai_lst = filtered_pridb.iloc[:, -2:-1].to_numpy()
         n_values = np.shape(trai_lst)[0]
         new_times = np.reshape(time_lst, (int(n_values/n_sensors), n_sensors))
+        
+        #adding cluster number
+        cluster_numbers = pd.read_csv(f"testing_data/4-channels/HITS_{label}.csv").to_numpy()[:,-1]
+        new_times = np.append(new_times, cluster_numbers.reshape((-1, 1)), axis=1)
+        
         return new_times
 
     
@@ -115,8 +120,9 @@ def get_toa_test(timepicker):
             np.savetxt(f"testing_data/toa/{name}-4-channels/{file[:-5]}csv", toa_array, delimiter=",")
             
 if __name__ == "__main__":
-    get_toa_test("er")
-    get_toa_test("mer")
-    get_toa_test("hc")
-    get_toa_test("aic")
+    # get_toa_test("er")
+    # get_toa_test("mer")
+    # get_toa_test("hc")
+    # get_toa_test("aic")
     print(reshape("PD_PCLO_QI090", "hc", True, testno=1))
+    #print(reshape("PLBS4_CP090_PCLO1", "hc", False, testno=1))
