@@ -201,10 +201,11 @@ def addRA(pridb):
 
 def createHitDataframe(pridb, label, testno=1):
     hitdb = pd.DataFrame(columns=["hit_id", "time", "wpfrequency", "frequency", "freqcentroid", "amplitude", "rise_time"])
-    hits_total = int(pridb.max()['hit_id'])
+    hits_total = int(pridb.max()['hit_id']) + 1
+    print(hits_total)
     tradb = getTransientDatabase(label, testno)
     for hit in range(hits_total):
-        if hit%10==0:
+        if hit%100==0:
             print(hit)
         hit_points = pridb.loc[pridb['hit_id'] == hit].copy()
         time = hit_points['time'].mean()
@@ -387,7 +388,7 @@ def getHitDatabase(label, created=True):
 if __name__ == "__main__":
     testlabel = "PD_PCLO_QI090"
     testno = 1
-    pridb = getPrimaryDatabase(testlabel, testno, filtered=True)
+    # pridb = getPrimaryDatabase(testlabel, testno, filtered=True)
     # pridb = pridb.read_hits()
     # print(pridb[4:])
     # for i in range(13, 13+4):
@@ -408,13 +409,13 @@ if __name__ == "__main__":
     # plt.show()
     # pridb = addPeakFreq(pridb, testlabel)
     # pridb = addRA(pridb)
-    hitdb = getHitDatabase(testlabel, created=True)
+    hitdb = getHitDatabase(testlabel, created=False)
     print(hitdb)
     # hitdb = createHitDataframe(pridb, testlabel)
     # hitdb = addRA(hitdb)
     # hitdb = addDecibels(hitdb)
     # print(hitdb)
-    # hitdb.to_csv("testing_data/4-channels/HITS_" + testlabel + ".csv", index=False)
+    hitdb.to_csv("testing_data/4-channels/HITS_" + testlabel + ".csv", index=False)
     
     # print(pridb[:15])
     # signals = []
