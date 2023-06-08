@@ -192,7 +192,7 @@ class PLBVelo():
         #print(f'array of time differences: \n {tau_array}')"""
 
         # actually get ToAs now
-        ToA_list = get_toa_filtered(testlabel, 'hc', True, testno)[0]
+        ToA_list = get_toa_filtered(testlabel, 'hc', False, testno)[0]
         # this is a 1D list, need to split it into different channels for the rest of the class
         dToAs = np.zeros((events, channels))
         # reshape ToA_array to have events rows and channels columns
@@ -267,9 +267,9 @@ class PLBVelo():
         events_count = 0
         for i in range(len(v)):
             events_count += 1
-            v[i] = ls.findVelocityIso_alt(x[i, :], S, tau_array[i, :],
+            v[i] = ls.findVelocityIso_3(x[i, :], S, tau_array[i, :],
                                           relax_factor, vT_init, iterations)[0]
-            T[i] = ls.findVelocityIso_alt(x[i, :], S, tau_array[i, :],
+            T[i] = ls.findVelocityIso_3(x[i, :], S, tau_array[i, :],
                                           relax_factor, vT_init, iterations)[1]
             events_array[i] = events_count
         print(f'v of this test are: \n {v}')
@@ -555,6 +555,113 @@ class PLBVelo():
         print(f'v of this test are: \n {v}')
         return v, np.average(v), x, S, events, channels, T
 
+    def find_PLB_velo_one_label_one_test_all_hits(self, testlabel, testno, relax_factor, v_init, iterations):
+        """
+        Description will follow
+        """
+        # set x and S and number of events and number of channels
+        if testlabel == "PCLS":
+            x = self.x1
+            S = self.S1
+            events = self.events1
+            channels = self.channels1
+        elif testlabel == "PCLO":
+            x = self.x2
+            S = self.S2
+            events = self.events2
+            channels = self.channels2
+        elif testlabel == "PST":
+            x = self.x3
+            S = self.S3
+            events = self.events3
+            channels = self.channels3
+        elif testlabel == "PT":
+            x = self.x4
+            S = self.S4
+            events = self.events4
+            channels = self.channels4
+        elif testlabel == "ST":
+            x = self.x5
+            S = self.S5
+            events = self.events5
+            channels = self.channels5
+        elif testlabel == "T":
+            x = self.x6
+            S = self.S6
+            events = self.events6
+            channels = self.channels6
+        else:
+            raise Exception('Choose a valid test label.')
+
+        tau_array = self.tau_sorter(testlabel, testno)
+
+
+        v = ls.findVelocityIsoAllHits(x, S, tau_array, relax_factor, v_init, iterations)[0]
+        return v, testlabel, testno
+
+    def find_PLB_velo_one_label_all_tests_all_hits(self, testlabel, relax_factor, v_init, iterations):
+        """
+        Descriptions will follow
+        """
+        # set x and S and number of events and number of channels
+        if testlabel == "PCLS":
+            x = self.x1
+            S = self.S1
+            events = self.events1
+            channels = self.channels1
+        elif testlabel == "PCLO":
+            x = self.x2
+            S = self.S2
+            events = self.events2
+            channels = self.channels2
+        elif testlabel == "PST":
+            x = self.x3
+            S = self.S3
+            events = self.events3
+            channels = self.channels3
+        elif testlabel == "PT":
+            x = self.x4
+            S = self.S4
+            events = self.events4
+            channels = self.channels4
+        elif testlabel == "ST":
+            x = self.x5
+            S = self.S5
+            events = self.events5
+            channels = self.channels5
+        elif testlabel == "T":
+            x = self.x6
+            S = self.S6
+            events = self.events6
+            channels = self.channels6
+        else:
+            raise Exception('Choose a valid test label.')
+
+        v_list = []
+        label_list = []
+        testno_list = []
+        for i in range(len(self.testno)):
+            v, label, testno = self.find_PLB_velo_one_label_one_test_all_hits(testlabel, self.testno[i], relax_factor, v_init, iterations)
+            v_list.append(v)
+            label_list.append(label)
+            testno_list.append(testno)
+        return np.array(v_list), np.array(label_list), np.array(testno_list)
+
+    def find_PLB_velo_all_labels_all_tests_all_hits(self, relax_factor, v_init, iterations):
+        """
+        Description will follow
+        """
+        v_list = []
+        label_list = []
+        testno_list = []
+
+        for i in range(len(self.testlabels)):
+            v_array, label_array, testno_array = self.find_PLB_velo_one_label_all_tests_all_hits(self.testlabels[i], relax_factor, v_init, iterations)
+            for j in range(len(v_array)):
+                v_list.append(v_array[j])
+                label_list.append(label_array[j])
+                testno_list.append(testno_array[j])
+        return np.array(v_list), np.array(label_list), np.array(testno_list)
 
 """    
     def set_state(self, setting):
@@ -633,7 +740,7 @@ class PLBVelo():
 """
 
 
-class PLBTester(PLBVelo):
+class PLBTester_old(PLBVelo):
     """
     PLB_tester() class will test the velocities from PLB_velo() to determine the optimal
     wave speed using MSE and R².
@@ -656,16 +763,29 @@ class PLBTester(PLBVelo):
         T: 18 events, id 6
         """
         super().__init__()
-        self.v_list = self.PLB_velo_all_labels(relax_factor, vT_init, iterations)[6]
+
+        """self.v_list = self.PLB_velo_all_labels(relax_factor, vT_init, iterations)[6]
         self.T_list = self.PLB_velo_all_labels(relax_factor, vT_init, iterations)[8]
         self.test_list = self.PLB_velo_all_labels(relax_factor, vT_init, iterations)[9]
         self.events_list = self.PLB_velo_all_labels(relax_factor, vT_init, iterations)[10]
         self.labels_list = self.PLB_velo_all_labels(relax_factor, vT_init, iterations)[11]
         self.labels_int_list = np.zeros(len(self.labels_list))
-        self.vT_array = np.zeros((len(self.v_list), 11))
+        self.vT_array = np.zeros((len(self.v_list), 11))"""
 
+        self.v_list_alt = self.find_PLB_velo_all_labels_all_tests_all_hits(relax_factor, vT_init[0], iterations)[0]
+        self.labels_alt = self.find_PLB_velo_all_labels_all_tests_all_hits(relax_factor, vT_init[0], iterations)[1]
+        self.tests_alt = self.find_PLB_velo_all_labels_all_tests_all_hits(relax_factor, vT_init[0], iterations)[2]
+        self.v_array = np.zeros((len(self.v_list_alt), 7))
+        self.labels_int_alt = np.zeros(len(self.labels_alt))
+
+        for j in range(len(self.v_array)):
+            self.labels_int_alt[j] = self.get_int_label(self.labels_alt[j])
+            self.v_array[j, 0] = self.v_list_alt[j]
+            self.v_array[j, 1] = self.labels_int_alt[j]
+            self.v_array[j, 2] = self.tests_alt[j]
 
         count = 0
+        """
         for i in range(len(self.vT_array)):
             count += 1
             self.labels_int_list[i] = self.get_int_label(self.labels_list[i])
@@ -675,25 +795,6 @@ class PLBTester(PLBVelo):
             self.vT_array[i, 3] = self.test_list[i]
             self.vT_array[i, 4] = self.events_list[i]
             """
-            # assign id for PCLS
-            if count < 9:
-                self.vT_array[i, 2] = 1
-            # assign id for PCLO
-            elif 9 <= count < 18:
-                self.vT_array[i, 2] = 2
-            # assign id for PST
-            elif 18 <= count < 27:
-                self.vT_array[i, 2] = 3
-            # assign id for PT
-            elif 27 <= count < 36:
-                self.vT_array[i, 2] = 4
-            # assign id for ST
-            elif 36 <= count < 54:
-                self.vT_array[i, 2] = 5
-            # assign id for T
-            elif 54 <= count < 72:
-                self.vT_array[i, 2] = 6
-"""
     # measured distance between i-th sensor and estimated emission location
     def distance_measured(self, x_S, x_pred):
         """
@@ -1077,6 +1178,248 @@ class PLBTester(PLBVelo):
                total_LU_list, total_rel_LU_list, best_velo_mixed, best_label_mixed, best_test_mixed, \
                best_event_mixed, lowest_mixed_mle_LU, total_mixed_mle_LU_list
 
+        # reject any nonsense velocities
+    def velo_rejecter_alt(self, tolerance: int):
+        """
+        Feed this function the vT_array and it will get rid of all the nonsensical velocities
+        """
+        # get the mean
+        mean_v = np.mean(self.v_array[:, 0])
+        # calculate std
+        std_v = np.std(self.v_array[:, 0])
+        # loop over the velocites
+        for i in range(len(self.v_array)):
+            if np.abs(mean_v - self.v_array[i, 0]) > tolerance * std_v:
+                self.v_array[i, 0] = 0
+        # now get rid of all 0s
+        v_new = np.delete(self.v_array, np.where(self.v_array[:, 0] == 0), 0)
+        print(f'vT_array is \n {self.v_array}')
+        print(f'vT_new is \n {v_new}')
+        return v_new
+    def location_errors_one_label_alt(self, test_label: str, v, velo_label: int, velo_test: int):
+        # set x and S and number of events and number of channels
+        if test_label == "PCLS":
+            x = self.x1
+            S = self.S1
+            events = self.events1
+            channels = self.channels1
+        elif test_label == "PCLO":
+            x = self.x2
+            S = self.S2
+            events = self.events2
+            channels = self.channels2
+        elif test_label == "PST":
+            x = self.x3
+            S = self.S3
+            events = self.events3
+            channels = self.channels3
+        elif test_label == "PT":
+            x = self.x4
+            S = self.S4
+            events = self.events4
+            channels = self.channels4
+        elif test_label == "ST":
+            x = self.x5
+            S = self.S5
+            events = self.events5
+            channels = self.channels5
+        elif test_label == "T":
+            x = self.x6
+            S = self.S6
+            events = self.events6
+            channels = self.channels6
+        else:
+            raise Exception('Choose a valid test label.')
+        # define empty list of location errors
+        LE_list = []
+        # define empty list of uncertainties
+        LU_list = []
+        rel_LU_list = []
+        # loop over each test number
+        for i in range(len(self.testno)):
+            # get the ToAs (events x channels) for each label and test number
+            taus = self.tau_sorter(test_label, self.testno[i])
+            ToAs = taus
+            event = 1
+            for j in range(events):
+
+                x_pred = ls.localise_2(S, ToAs[j, :], v)
+                residual = x[j, :] - x_pred
+                LE = np.sqrt((residual[0]) ** 2 + (residual[1]) ** 2)
+                LE_list.append(LE)
+                LU, rel_LU = self.localisation_uncertainty(S, x_pred, v, taus[j, :])
+                LU_list.append(LU)
+                rel_LU_list.append(rel_LU)
+
+                event += 1
+        LE_list = np.array(LE_list)
+
+        sum_of_location_errors = np.sum(LE_list)
+
+        return sum_of_location_errors, LE_list, np.array(LU_list), np.array(rel_LU_list)
+
+    def optimal_velo_alt(self, tolerance):
+        v_new = self.velo_rejecter_alt(tolerance)
+        min_sle = np.inf
+        best_velo = np.mean(v_new)
+        best_label = "average"
+        best_test = "average"
+
+        lowest_uncertainty = np.inf
+        best_velo_LU = np.mean(v_new)
+        best_label_LU = "average"
+        best_test_LU = "average"
+
+
+        count = 0
+        total_sle_list = []
+        total_LU_list = []
+        total_rel_LU_list = []
+        total_mixed_mle_LU_list = []
+        for i in range(len(v_new)):
+            # get the velo, T and label
+            count += 1
+            v = v_new[i, 0]
+
+            label = v_new[i, 1]
+            test = v_new[i, 2]
+
+            # define empty list of summed location errors
+            location_errors = []
+            # define empty list of location errors
+            LE_list = []
+            # define empty list of uncertainties
+            LUs = []
+            rel_LUs = []
+            for j in range(len(self.testlabels)):
+                # calculate the SLE for this label
+                sum_of_location_errors = self.location_errors_one_label_alt(self.testlabels[j], v, label, test)[0]
+                # append sle of this label to total list of sle
+                location_errors.append(sum_of_location_errors)
+                # calculate the location errors for this label
+                location_error_array = self.location_errors_one_label_alt(self.testlabels[j], v, label, test)[1]
+                print(f'shape of LE_array of this label is \n {np.shape(location_error_array)}')
+                # calculate the absolute and relative uncertainties for this label
+                LU_array = self.location_errors_one_label_alt(self.testlabels[j], v, label, test)[2]
+                rel_LU_array = self.location_errors_one_label_alt(self.testlabels[j], v, label, test)[3]
+                # append to the total lists of LUs and rel_LUs
+                for k in range(len(LU_array)):
+                    LUs.append(LU_array[k])
+                    rel_LUs.append(rel_LU_array[k])
+
+                for n in range(len(location_error_array)):
+                    LE_list.append(location_error_array[n])
+                    print(f'location error is \n {location_error_array[n]}')
+
+            # convert location errors to an np array
+            total_sle = np.array(location_errors)
+            # sum this array
+            sum_total_sle = np.sum(total_sle)
+            # append to 6th column of vT array and append to total_sle_list
+            v_new[i, 4] = sum_total_sle
+            total_sle_list.append(sum_total_sle)
+            # calculate mle and append to 9th column of vT_array
+            mle = np.mean(np.array(LE_list))
+            v_new[i, 5] = mle
+
+            if sum_total_sle < min_sle:
+                min_sle = sum_total_sle
+                best_velo = v
+                best_label = self.get_label(label)
+                best_test = test
+
+            # convert uncertainties to a np array
+            LUs = np.array(LUs)
+            rel_LUs = np.array(rel_LUs)
+            LU_average = np.mean(LUs)
+            rel_LU_average = np.mean(rel_LUs)
+            # append to 7th and 8th column of vT_array and to total LU and rel_LU
+            v_new[i, 6] = LU_average
+            v_new[i, 7] = rel_LU_average
+            total_LU_list.append(LU_average)
+            total_rel_LU_list.append(rel_LU_average)
+            # append average of LU_average and mle to 11th column of vT_array and to total mixed mle and LU
+
+            if LU_average < lowest_uncertainty:
+                lowest_uncertainty = LU_average
+                best_velo_LU = v
+                best_label_LU = self.get_label(label)
+                best_test_LU = test
+
+
+        # check if averaged speeds is actually optimal
+        v_mean = np.mean(v_new[:, 0])
+
+        # define empty list of summed location errors
+        location_errors = []
+        # define empty list of location errors
+        LE_list = []
+        # define empty list of uncertainties
+        LUs = []
+        rel_LUs = []
+        # iterate over test labels
+        for l in range(len(self.testlabels)):
+            # calculate sum of LE for the l-th label
+            sum_of_location_errors = self.location_errors_one_label_alt(self.testlabels[l], v_mean, 0, 0)[0]
+            # append sle for the l-th label to the list of summed location errors
+            location_errors.append(sum_of_location_errors)
+            # calculate LE array
+            LE_array = self.location_errors_one_label_alt(self.testlabels[l], v_mean, 0, 0)[1]
+
+            # calculate the absolute en relative uncertainties for this label
+            LU_array = self.location_errors_one_label_alt(self.testlabels[l], v_mean, 0, 0)[2]
+            rel_LU_array = self.location_errors_one_label_alt(self.testlabels[l], v_mean, 0, 0)[3]
+            # append to the total lists of LUs and rel_LUs
+            for m in range(len(LU_array)):
+                LUs.append(LU_array[m])
+                rel_LUs.append(rel_LU_array[m])
+                LE_list.append(LE_array[m])
+        # convert location errors to an np array
+        total_sle = np.array(location_errors)
+        # sum this array
+        sum_total_sle = np.sum(total_sle)
+        # append to total_sle_list
+        total_sle_list.append(sum_total_sle)
+        if sum_total_sle < min_sle:
+            min_sle = sum_total_sle
+            best_velo = v_mean
+            best_label = "average"
+            best_test = "average"
+
+        # convert uncertainties to a np array
+        LUs = np.array(LUs)
+        rel_LUs = np.array(rel_LUs)
+        LU_average = np.mean(LUs)
+        rel_LU_average = np.mean(rel_LUs)
+        # append to total uncertainties
+        total_LU_list.append(LU_average)
+        total_rel_LU_list.append(rel_LU_average)
+        if LU_average < lowest_uncertainty:
+            lowest_uncertainty = LU_average
+            best_velo_LU = v_mean
+            best_label_LU = "average"
+            best_test_LU = "average"
+
+
+        # report data for location error
+        print(f'optimal velocity is \n {best_velo}')
+        print(f'label of optimal velocity is \n {best_label}')
+        print(f'test number of optimal velocity is \n {best_test}')
+
+        print(f'squared residuals is \n {min_sle}')
+        # calculate the mean squared error by dividing the min_sle by the total number of events
+        MLE = min_sle / len(v_new)
+        # report data for localisation uncertainty
+        print(f'optimal velocity for LU is \n {best_velo_LU}')
+        print(f'label of optimal velocity LU is \n {best_label_LU}')
+        print(f'test number of optimal velocity LU is \n {best_test_LU}')
+
+        print(f'average LU is \n {lowest_uncertainty}')
+
+        print(f'minimum MLE is \n {MLE}')
+        return best_velo, best_label, min_sle, MLE, best_test, v_new, \
+               total_sle_list, best_velo_LU, best_label_LU, best_test_LU, lowest_uncertainty, \
+               total_LU_list, total_rel_LU_list
 # write to a csv file
     def write_to_csv(self, vT, count):
         """
@@ -1093,6 +1436,440 @@ class PLBTester(PLBVelo):
         df.to_csv(name)
         # confirm
         print(f'vT_array has successfully been saved as a csv')
+
+    def write_to_csv_alt(self, v, count):
+        """
+        Give it the v array and the method will write it to a csv file
+        """
+        # create a name
+        name = "velocity_performance_backup_alt" + str(count) + ".csv"
+        # convert numpy array to pandas df
+        df = pd.DataFrame(v)
+        # rename the columns
+        df.rename(columns={'0': 'velocity', '1': 'label', '2': 'test number',
+                           '4': 'sum of total LE', '5': 'MLE', '6': 'average LU',
+                           '7': 'relative LU'}, inplace=True)
+        # save df as csv file
+        df.to_csv(name)
+        # confirm
+        print(f'v_array has successfully been saved as a csv')
+
+class PLBTester(PLBVelo):
+    """
+    PLB_tester() class will test the velocities from PLB_velo() to determine the optimal
+    wave speed using MSE and R².
+
+    """
+    # initialise object
+    def __init__(self, relax_factor, vT_init, iterations):
+        """
+        get the required velocities and initial time of flights
+        and assign labels to each pair of velos and times
+        The columns of vT_array are:
+        velocity, 1st sensor time of flight, test label, test number, event number, sum of squared residuals,
+        average uncertainty and average relative uncertainty, mse, root mse and
+        average of average uncertainty and root mse
+        PCLS: 8 events, id 1
+        PCLO: 9 events, id 2
+        PST: 9 events, id 3
+        PT: 9 events, id 4
+        ST: 18 events, id 5
+        T: 18 events, id 6
+        """
+        super().__init__()
+
+        """self.v_list = self.PLB_velo_all_labels(relax_factor, vT_init, iterations)[6]
+        self.T_list = self.PLB_velo_all_labels(relax_factor, vT_init, iterations)[8]
+        self.test_list = self.PLB_velo_all_labels(relax_factor, vT_init, iterations)[9]
+        self.events_list = self.PLB_velo_all_labels(relax_factor, vT_init, iterations)[10]
+        self.labels_list = self.PLB_velo_all_labels(relax_factor, vT_init, iterations)[11]
+        self.labels_int_list = np.zeros(len(self.labels_list))
+        self.vT_array = np.zeros((len(self.v_list), 11))"""
+
+        self.v_list_alt = self.find_PLB_velo_all_labels_all_tests_all_hits(relax_factor, vT_init[0], iterations)[0]
+        self.labels_alt = self.find_PLB_velo_all_labels_all_tests_all_hits(relax_factor, vT_init[0], iterations)[1]
+        self.tests_alt = self.find_PLB_velo_all_labels_all_tests_all_hits(relax_factor, vT_init[0], iterations)[2]
+        self.v_array = np.zeros((len(self.v_list_alt), 7))
+        self.labels_int_alt = np.zeros(len(self.labels_alt))
+
+        for j in range(len(self.v_array)):
+            self.labels_int_alt[j] = self.get_int_label(self.labels_alt[j])
+            self.v_array[j, 0] = self.v_list_alt[j]
+            self.v_array[j, 1] = self.labels_int_alt[j]
+            self.v_array[j, 2] = self.tests_alt[j]
+
+        count = 0
+        """
+        for i in range(len(self.vT_array)):
+            count += 1
+            self.labels_int_list[i] = self.get_int_label(self.labels_list[i])
+            self.vT_array[i, 0] = self.v_list[i]
+            self.vT_array[i, 1] = self.T_list[i]
+            self.vT_array[i, 2] = self.labels_int_list[i]
+            self.vT_array[i, 3] = self.test_list[i]
+            self.vT_array[i, 4] = self.events_list[i]
+            """
+    # measured distance between i-th sensor and estimated emission location
+    def distance_measured(self, x_S, x_pred):
+        """
+        Give sensor location x_S (2 vector) and estimated emission location x_pred (2 vector)
+        Returns measured distance D (scalar)
+        """
+        D = np.sqrt((x_S[0] - x_pred[0])**2 + (x_S[1] - x_pred[1])**2)
+        return D
+
+    # calculated distance between i-th sensor and estimated emission location
+    def distance_calculated(self, x_f, x_pred, v, dT):
+        """
+        Inputs: location of first sensor x_f (2 vector), estimated emission location x_pred (2 vector),
+        estimated wave velocity v (scalar), measured time difference dT (scalar)
+        Returns: calculated distance P (scalar)
+        """
+        P = np.sqrt((x_f[0] - x_pred[0])**2 + (x_f[1] - x_pred[1])**2) + v * dT
+        return P
+
+    # calculate the distance deviation
+    def distance_deviation(self, x_S, x_f, x_pred, v, dT):
+        """
+        Inputs: same as distance_measured() and distance_calculated()
+        Returns: distance deviation delta
+        """
+        delta = self.distance_measured(x_S, x_pred) - self.distance_calculated(x_f, x_pred, v, dT)
+        return delta
+
+    # calculate the localisation uncertainty (LU) of one event
+    def localisation_uncertainty(self, S, x_pred, v, tau):
+        """
+        Inputs: sensor locations (m x 2 matrix), predicted emission location (2 vector), estimated wave speed
+        and time of arrival differences (m vector)
+        Returns: localisation uncertainty LU
+        """
+        # calculate the distance deviations
+        delta_array = np.zeros(len(S))
+        for i in range(len(S)):
+            delta = self.distance_deviation(S[i, :], S[0, :], x_pred, v, tau[i])
+            delta_array[i] = delta
+        delta_squared = (delta_array)**2
+        LU = np.sqrt((np.sum(delta_squared)) / (len(delta_array) - 1))
+        # call max_sensor_spacing() to get L_max
+        L_max = self.max_sensor_spacing(S)
+        relative_LU = LU / L_max
+        return LU, relative_LU
+
+    # calculate the maximum sensor spacing L_max
+    def max_sensor_spacing(self, S):
+        """
+        Input: sensor locations (m x 2 matrix)
+        Returns: maximum sensor spacing L_max
+        """
+        L_max = 0
+        for i in range(len(S)):
+            for j in range(len(S)):
+                sensor_spacing = np.sqrt((S[i, 0] - S[j, 0])**2 + (S[i, 1] - S[j, 1])**2)
+                if sensor_spacing > L_max:
+                    L_max = sensor_spacing
+        return L_max
+    # get the label
+    def get_label(self, label_int: int):
+        """
+        Feed it an integer and get the test label
+        """
+        if label_int == 1:
+            label = "PCLS"
+        elif label_int == 2:
+            label = "PCLO"
+        elif label_int == 3:
+            label = "PST"
+        elif label_int == 4:
+            label = "PT"
+        elif label_int == 5:
+            label = "ST"
+        else:
+            label = "T"
+        return label
+
+    # inverted get label
+    def get_int_label(self, label: str):
+        """
+        Feed it a string and get an integer
+        """
+        if label == "PCLS":
+            label_int = 1
+        elif label == "PCLO":
+            label_int = 2
+        elif label == "PST":
+            label_int = 3
+        elif label == "PT":
+            label_int = 4
+        elif label == "ST":
+            label_int = 5
+        else:
+            label_int = 6
+        return label_int
+
+
+        # reject any nonsense velocities
+    def velo_rejecter_alt(self, tolerance: int):
+        """
+        Feed this function the vT_array and it will get rid of all the nonsensical velocities
+        """
+        # get the mean
+        mean_v = np.mean(self.v_array[:, 0])
+        # calculate std
+        std_v = np.std(self.v_array[:, 0])
+        # create copy
+        v_array_copy = np.copy(self.v_array)
+        # loop over the velocites
+        for i in range(len(v_array_copy)):
+            if np.abs(mean_v - v_array_copy[i, 0]) > tolerance * std_v:
+                v_array_copy[i, 0] = 0
+        # now get rid of all 0s
+        v_new = np.delete(v_array_copy, np.where(v_array_copy[:, 0] == 0), 0)
+        print(f'v_array is \n {self.v_array}')
+        print(f'v_new is \n {v_new}')
+        return v_new
+    def location_errors_one_label_alt(self, test_label: str, v, velo_label: int, velo_test: int):
+        # set x and S and number of events and number of channels
+        if test_label == "PCLS":
+            x = self.x1
+            S = self.S1
+            events = self.events1
+            channels = self.channels1
+        elif test_label == "PCLO":
+            x = self.x2
+            S = self.S2
+            events = self.events2
+            channels = self.channels2
+        elif test_label == "PST":
+            x = self.x3
+            S = self.S3
+            events = self.events3
+            channels = self.channels3
+        elif test_label == "PT":
+            x = self.x4
+            S = self.S4
+            events = self.events4
+            channels = self.channels4
+        elif test_label == "ST":
+            x = self.x5
+            S = self.S5
+            events = self.events5
+            channels = self.channels5
+        elif test_label == "T":
+            x = self.x6
+            S = self.S6
+            events = self.events6
+            channels = self.channels6
+        else:
+            raise Exception('Choose a valid test label.')
+        # define empty list of location errors
+        LE_list = []
+        # define empty list of uncertainties
+        LU_list = []
+        rel_LU_list = []
+        # loop over each test number
+        for i in range(len(self.testno)):
+            # get the ToAs (events x channels) for each label and test number
+            taus = self.tau_sorter(test_label, self.testno[i])
+            ToAs = taus
+            event = 1
+            for j in range(events):
+
+                x_pred = ls.localise_2(S, ToAs[j, :], v)
+                residual = x[j, :] - x_pred
+                LE = np.sqrt((residual[0]) ** 2 + (residual[1]) ** 2)
+                LE_list.append(LE)
+                LU, rel_LU = self.localisation_uncertainty(S, x_pred, v, taus[j, :])
+                LU_list.append(LU)
+                rel_LU_list.append(rel_LU)
+
+                event += 1
+        LE_list = np.array(LE_list)
+
+        sum_of_location_errors = np.sum(LE_list)
+
+        return sum_of_location_errors, LE_list, np.array(LU_list), np.array(rel_LU_list)
+
+    def optimal_velo_alt(self, tolerance):
+        v_new = self.velo_rejecter_alt(tolerance)
+        min_sle = np.inf
+        best_velo = np.mean(v_new)
+        best_label = "average"
+        best_test = "average"
+
+        lowest_uncertainty = np.inf
+        best_velo_LU = np.mean(v_new)
+        best_label_LU = "average"
+        best_test_LU = "average"
+
+
+        count = 0
+        total_sle_list = []
+        total_LU_list = []
+        total_rel_LU_list = []
+        total_mixed_mle_LU_list = []
+        for i in range(len(v_new)):
+            # get the velo, T and label
+            count += 1
+            v = v_new[i, 0]
+
+            label = v_new[i, 1]
+            test = v_new[i, 2]
+
+            # define empty list of summed location errors
+            location_errors = []
+            # define empty list of location errors
+            LE_list = []
+            # define empty list of uncertainties
+            LUs = []
+            rel_LUs = []
+            for j in range(len(self.testlabels)):
+                # calculate the SLE for this label
+                sum_of_location_errors = self.location_errors_one_label_alt(self.testlabels[j], v, label, test)[0]
+                # append sle of this label to total list of sle
+                location_errors.append(sum_of_location_errors)
+                # calculate the location errors for this label
+                location_error_array = self.location_errors_one_label_alt(self.testlabels[j], v, label, test)[1]
+                print(f'shape of LE_array of this label is \n {np.shape(location_error_array)}')
+                # calculate the absolute and relative uncertainties for this label
+                LU_array = self.location_errors_one_label_alt(self.testlabels[j], v, label, test)[2]
+                rel_LU_array = self.location_errors_one_label_alt(self.testlabels[j], v, label, test)[3]
+                # append to the total lists of LUs and rel_LUs
+                for k in range(len(LU_array)):
+                    LUs.append(LU_array[k])
+                    rel_LUs.append(rel_LU_array[k])
+
+                for n in range(len(location_error_array)):
+                    LE_list.append(location_error_array[n])
+                    print(f'location error is \n {location_error_array[n]}')
+
+            # convert location errors to an np array
+            total_sle = np.array(location_errors)
+            # sum this array
+            sum_total_sle = np.sum(total_sle)
+            # append to 6th column of vT array and append to total_sle_list
+            v_new[i, 3] = sum_total_sle
+            total_sle_list.append(sum_total_sle)
+            # calculate mle and append to 9th column of vT_array
+            mle = np.mean(np.array(LE_list))
+            v_new[i, 4] = mle
+
+            if sum_total_sle < min_sle:
+                min_sle = sum_total_sle
+                best_velo = v
+                best_label = self.get_label(label)
+                best_test = test
+
+            # convert uncertainties to a np array
+            LUs = np.array(LUs)
+            rel_LUs = np.array(rel_LUs)
+            LU_average = np.mean(LUs)
+            rel_LU_average = np.mean(rel_LUs)
+            # append to 7th and 8th column of vT_array and to total LU and rel_LU
+            v_new[i, 5] = LU_average
+            v_new[i, 6] = rel_LU_average
+            total_LU_list.append(LU_average)
+            total_rel_LU_list.append(rel_LU_average)
+            # append average of LU_average and mle to 11th column of vT_array and to total mixed mle and LU
+
+            if LU_average < lowest_uncertainty:
+                lowest_uncertainty = LU_average
+                best_velo_LU = v
+                best_label_LU = self.get_label(label)
+                best_test_LU = test
+
+
+        # check if averaged speeds is actually optimal
+        v_mean = np.mean(v_new[:, 0])
+
+        # define empty list of summed location errors
+        location_errors = []
+        # define empty list of location errors
+        LE_list = []
+        # define empty list of uncertainties
+        LUs = []
+        rel_LUs = []
+        # iterate over test labels
+        for l in range(len(self.testlabels)):
+            # calculate sum of LE for the l-th label
+            sum_of_location_errors = self.location_errors_one_label_alt(self.testlabels[l], v_mean, 0, 0)[0]
+            # append sle for the l-th label to the list of summed location errors
+            location_errors.append(sum_of_location_errors)
+            # calculate LE array
+            LE_array = self.location_errors_one_label_alt(self.testlabels[l], v_mean, 0, 0)[1]
+
+            # calculate the absolute en relative uncertainties for this label
+            LU_array = self.location_errors_one_label_alt(self.testlabels[l], v_mean, 0, 0)[2]
+            rel_LU_array = self.location_errors_one_label_alt(self.testlabels[l], v_mean, 0, 0)[3]
+            # append to the total lists of LUs and rel_LUs
+            for m in range(len(LU_array)):
+                LUs.append(LU_array[m])
+                rel_LUs.append(rel_LU_array[m])
+                LE_list.append(LE_array[m])
+        # convert location errors to an np array
+        total_sle = np.array(location_errors)
+        # sum this array
+        sum_total_sle = np.sum(total_sle)
+        # append to total_sle_list
+        total_sle_list.append(sum_total_sle)
+        if sum_total_sle < min_sle:
+            min_sle = sum_total_sle
+            best_velo = v_mean
+            best_label = "average"
+            best_test = "average"
+
+        # convert uncertainties to a np array
+        LUs = np.array(LUs)
+        rel_LUs = np.array(rel_LUs)
+        LU_average = np.mean(LUs)
+        rel_LU_average = np.mean(rel_LUs)
+        # append to total uncertainties
+        total_LU_list.append(LU_average)
+        total_rel_LU_list.append(rel_LU_average)
+        if LU_average < lowest_uncertainty:
+            lowest_uncertainty = LU_average
+            best_velo_LU = v_mean
+            best_label_LU = "average"
+            best_test_LU = "average"
+
+
+        # report data for location error
+        print(f'optimal velocity is \n {best_velo}')
+        print(f'label of optimal velocity is \n {best_label}')
+        print(f'test number of optimal velocity is \n {best_test}')
+
+        print(f'squared residuals is \n {min_sle}')
+        # calculate the mean squared error by dividing the min_sle by the total number of events
+        MLE = min_sle / len(v_new)
+        # report data for localisation uncertainty
+        print(f'optimal velocity for LU is \n {best_velo_LU}')
+        print(f'label of optimal velocity LU is \n {best_label_LU}')
+        print(f'test number of optimal velocity LU is \n {best_test_LU}')
+
+        print(f'average LU is \n {lowest_uncertainty}')
+
+        print(f'minimum MLE is \n {MLE}')
+        return best_velo, best_label, min_sle, MLE, best_test, v_new, \
+               total_sle_list, best_velo_LU, best_label_LU, best_test_LU, lowest_uncertainty, \
+               total_LU_list, total_rel_LU_list
+
+
+    def write_to_csv_alt(self, v, count):
+        """
+        Give it the v array and the method will write it to a csv file
+        """
+        # create a name
+        name = "velocity_performance_backup_alt" + str(count) + ".csv"
+        # convert numpy array to pandas df
+        df = pd.DataFrame(v)
+        # rename the columns
+        df.rename(columns={'0': 'velocity', '1': 'label', '2': 'test number',
+                           '4': 'sum of total LE', '5': 'MLE', '6': 'average LU',
+                           '7': 'relative LU'}, inplace=True)
+        # save df as csv file
+        df.to_csv(name)
+        # confirm
+        print(f'v_array has successfully been saved as a csv')
 
 if __name__ == '__main__':
     """
@@ -1119,16 +1896,28 @@ if __name__ == '__main__':
     # ToA differences per AE location
     tau = np.array([0, -0.0000033361194415, 0.00000395852087374, 0.00000820232866552])
 """
-    toa = get_toa_filtered("T", 'hc', True, 1)
+
+    toa = get_toa_filtered("T", 'hc', False, 1)
     print(f'toa list is \n : {toa}')
     relax_factor = 1.
     vT_init = np.array([np.random.uniform(-100000., 100000.), np.random.uniform(-100000., 100000.)])
     #vT_init = np.array([-10000., -10.])
     print(f'initial guess is: \n {vT_init}')
     iterations = 50
+    v_init = 3000.
+    print(f'initial guess is \n {v_init}')
 
     # define object
     PLB = PLBVelo()
+    # get velo for all experiments
+    v, labels, testnos = PLB.find_PLB_velo_all_labels_all_tests_all_hits(relax_factor, v_init, iterations)
+    print(f'v array is: \n {v}')
+    v_post = PLB.velo_post_processing(v, 1)
+    print(f'post processing v array is \n {v_post}')
+    v_avg = PLB.PLB_velo_average(v_post)
+    print(f'post processing average velocity is \n {v_avg}')
+
+    """
     # get velocity of one experiment
     v, v_blob, v_avg, T_array, T_blob, test_no_blob, events_blob = \
         PLB.find_PLB_velo_all_tests("ST", relax_factor, np.copy(vT_init), iterations)
@@ -1172,7 +1961,8 @@ if __name__ == '__main__':
     print(f'average post velo is: \n {v_avg_post}')
     print(f'median post velo is: \n {v_median_post}')
     print(f'post velo IQR is: \n {v_post_iqr}, {v_post_iqr_rel}, {v_post_q3}, {v_post_q1}')
-
+    """
+    """
     # toa, n_sensors, n_values = get_toa_filtered("T", 1, "hc")
     # print(f'toa list is \n : {toa}')
     # find the optimal velocity
@@ -1193,7 +1983,7 @@ if __name__ == '__main__':
     print(f'vT_array is \n {vT_array}')
     # save vT_array to a csv file
     PLBEval.write_to_csv(vT_array, 6)
-
+"""
     """
     # get velocity of all experiments 
     v1, v2, v3, v4, v5, v6, v_avg = PLB.PLB_velo_all_labels(relax_factor, vT_init, iterations)
@@ -1205,3 +1995,21 @@ if __name__ == '__main__':
     print(f'v_list of T is: \n {v6}')
     print(f'average velocity of all experiments is: \n {v_avg}')
 """
+
+# find the optimal velocity
+    # initialise object
+    PLBEval = PLBTester(relax_factor, [3000., 0], iterations)
+    # print list of velocities post processing
+    v_new = PLBEval.velo_rejecter_alt(1)
+    v_post = v_new[:, 0]
+    print(f'list of post processed velocities is \n {v_post}')
+    # find the optimal velocity
+    v_optimal, best_label, residuals_squared, mle, best_test, v_array, total_sle, \
+    best_velo_LU, best_label_LU, best_test_LU, lowest_uncertainty, total_LU_list, \
+    total_rel_LU_list = PLBEval.optimal_velo_alt(1)
+    # print list of sle
+    print(f'array of total sle is \n {total_sle}')
+    # print vT_array
+    print(f'v_array is \n {v_array}')
+    # save vT_array to a csv file
+    PLBEval.write_to_csv_alt(v_array, 2)

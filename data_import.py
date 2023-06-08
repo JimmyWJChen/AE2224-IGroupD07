@@ -64,49 +64,27 @@ def filterWaveform(y, t, trai=1):
 
     # ToA
     hc_index = vae.timepicker.hinkley(y, alpha=5)[1]
+    # plt.plot(t, y)
     y = y[hc_index:]
     t = t[hc_index:]
-    # print(hc_index)
-    # original_y = y[:]
-    # original_t = t[:]
-    # y = [0 for i in range(hc_index)] + y[hc_index:]
-    # noise_y = y[:hc_index] + [0 for i in range(n - hc_index)]
-
-    # fft_y = fft(np.concatenate((np.zeros(hc_index), y)))
-    # fft_noise_y = fft(np.concatenate((noise_y, np.zeros(n - hc_index))))
-
-    # filtered_signal = ifft(fft_y - fft_noise_y)[hc_index:]
-
-    # Create the Butterworth low-pass filter
     b, a = signal.butter(order, cutoff_freq, fs=fs, btype='high')
 
     # Apply the filter to the signal
     filtered_signal = signal.lfilter(b, a, y)
 
-
-    wavelet = 'db32'
-    level = 4
+    # wavelet = 'db32'
+    # level = 4
 
     # Perform wavelet packet decomposition
-    wp = pywt.WaveletPacket(data=filtered_signal, wavelet=wavelet, mode='symmetric', maxlevel=level)
+    # wp = pywt.WaveletPacket(data=filtered_signal, wavelet=wavelet, mode='symmetric', maxlevel=level)
 
-    # Apply thresholding to coefficients
-    threshold = 0.1 * np.max(np.abs([node.data for node in wp.get_level(level, 'natural')]))
-    for node in wp.get_level(level, 'natural'):
-        node.data[np.abs(node.data) < threshold] = 0
-    reconstructed_data = wp.reconstruct(update=False)
-    # getPeakFrequency(y, t, trai)
-    # plt.figure()
-    # plt.plot(t, y, label='Original Signal')
-    # plt.plot(t, filtered_signal, label='Highpassed Signal')
-    # plt.plot(t, reconstructed_data, label='Filtered Signal')
-    # plt.title(f'Trai: {trai}')
-    # plt.xlabel('Time (s)')
-    # plt.ylabel('Amplitude')
-    # plt.legend()
-    # plt.show()
-    # getPeakFrequency(reconstructed_data, t, trai)
-    return reconstructed_data, t
+    # # Apply thresholding to coefficients
+    # threshold = 0.1 * np.max(np.abs([node.data for node in wp.get_level(level, 'natural')]))
+    # for node in wp.get_level(level, 'natural'):
+    #     node.data[np.abs(node.data) < threshold] = 0
+    # reconstructed_data = wp.reconstruct(update=False)
+
+    return filtered_signal, t
 
 def mergeSignals(signals, process_noise_variance=1, measurement_noise_variance=1):
     l = len(signals)
@@ -223,10 +201,11 @@ def addRA(pridb):
 
 def createHitDataframe(pridb, label, testno=1):
     hitdb = pd.DataFrame(columns=["hit_id", "time", "wpfrequency", "frequency", "freqcentroid", "amplitude", "rise_time"])
-    hits_total = int(pridb.max()['hit_id'])
+    hits_total = int(pridb.max()['hit_id']) + 1
+    print(hits_total)
     tradb = getTransientDatabase(label, testno)
     for hit in range(hits_total):
-        if hit%10==0:
+        if hit%100==0:
             print(hit)
         hit_points = pridb.loc[pridb['hit_id'] == hit].copy()
         time = hit_points['time'].mean()
@@ -271,6 +250,8 @@ def filterPrimaryDatabase(pridb, label, testno=1, sortby="energy", epsilon=0.2, 
 
     if actualData:
         pridb = addPeakFreq(pridb, label)
+        pridb = addDecibels(pridb)
+        pridb = addRA(pridb)
 
     if actualData and legacyCode:
         pridb_channels = []
@@ -287,7 +268,7 @@ def filterPrimaryDatabase(pridb, label, testno=1, sortby="energy", epsilon=0.2, 
             if i%100==0: print(f'{i} out of {len(pridb_channels[0])}')
             indices = [i] + [0 for m in range(int(pridb.max()['channel']-1))]
             cur_time = pridb_channels[0].loc[i, 'time']
-            cur_freqs = np.array([pridb_channels[0].loc[i, 'frequency'], pridb_channels[0].loc[i, 'wpfrequency'], pridb_channels[0].loc[i, 'freqcentroid']])
+            # cur_freqs = np.array([pridb_channels[0].loc[i, 'frequency'], pridb_channels[0].loc[i, 'wpfrequency'], pridb_channels[0].loc[i, 'freqcentroid']])
             for channel in range(2, int(pridb.max()['channel']+1)):
                 stop = False
                 try:
@@ -297,7 +278,7 @@ def filterPrimaryDatabase(pridb, label, testno=1, sortby="energy", epsilon=0.2, 
                 # print(channel)
                 try:
                     tested_time = pridb_channels[channel-1].loc[j, 'time']
-                    tested_freqs = np.array([pridb_channels[channel-1].loc[j, 'frequency'], pridb_channels[channel-1].loc[j, 'wpfrequency'], pridb_channels[channel-1].loc[j, 'freqcentroid']])
+                    # tested_freqs = np.array([pridb_channels[channel-1].loc[j, 'frequency'], pridb_channels[channel-1].loc[j, 'wpfrequency'], pridb_channels[channel-1].loc[j, 'freqcentroid']])
                     while cur_time - tested_time > 0 and (not stop):
                         if cur_time - tested_time < epsilon_mc:
                             #  and np.all((np.abs(tested_freqs - cur_freqs)/cur_freqs) < freqmargin)
@@ -307,7 +288,7 @@ def filterPrimaryDatabase(pridb, label, testno=1, sortby="energy", epsilon=0.2, 
                         else:
                             j += 1
                             tested_time = pridb_channels[channel-1].loc[j, 'time']
-                            tested_freqs = np.array([pridb_channels[channel-1].loc[j, 'frequency'], pridb_channels[channel-1].loc[j, 'wpfrequency'], pridb_channels[channel-1].loc[j, 'freqcentroid']])
+                            # tested_freqs = np.array([pridb_channels[channel-1].loc[j, 'frequency'], pridb_channels[channel-1].loc[j, 'wpfrequency'], pridb_channels[channel-1].loc[j, 'freqcentroid']])
                     if tested_time - cur_time < epsilon_mc:
                         indices[channel-1] = j
                         stop = True
@@ -398,22 +379,42 @@ def getHitDatabase(label, created=True):
         return hitdb
     else:
         hitdb = createHitDataframe(getPrimaryDatabase(label, filtered=True), label)
-        hitdb = addRA(hitdb)
         hitdb = addDecibels(hitdb)
-        hitdb.to_csv("testing_data/4-channels/HITS_" + label + ".csv", index=False)
+        hitdb = addRA(hitdb)
+        # hitdb.to_csv("testing_data/4-channels/HITS_" + label + ".csv", index=False)
         return hitdb
 
 
 if __name__ == "__main__":
     testlabel = "PD_PCLO_QI090"
     testno = 1
-    pridb = getPrimaryDatabase(testlabel, testno, filtered=True)
+    # pridb = getPrimaryDatabase(testlabel, testno, filtered=True)
+    # pridb = pridb.read_hits()
+    # print(pridb[4:])
+    # for i in range(13, 13+4):
+    #     plt.subplot(220 + i - 12)
+    #     y, t = getWaveform(testlabel, trai=i)
+    #     y *= 10e3
+    #     N = len(y)
+    #     T = t[1] - t[0]
+    #     yf = np.abs(fft(y))[:N//2]
+    #     xf = fftfreq(N, T)[:N // 2]
+    #     plt.plot(xf, yf)
+    #     # plt.plot(tf, yf, label="Filtered signal")
+    #     plt.grid()
+    #     plt.xlabel('f [Hz]')
+    #     plt.ylabel('Amplitude [mV]')
+    #     if i==10: plt.legend()
+    # plt.tight_layout()
+    # plt.show()
     # pridb = addPeakFreq(pridb, testlabel)
     # pridb = addRA(pridb)
-    hitdb = createHitDataframe(pridb, testlabel)
-    hitdb = addRA(hitdb)
-    hitdb = addDecibels(hitdb)
+    hitdb = getHitDatabase(testlabel, created=False)
     print(hitdb)
+    # hitdb = createHitDataframe(pridb, testlabel)
+    # hitdb = addRA(hitdb)
+    # hitdb = addDecibels(hitdb)
+    # print(hitdb)
     hitdb.to_csv("testing_data/4-channels/HITS_" + testlabel + ".csv", index=False)
     
     # print(pridb[:15])
