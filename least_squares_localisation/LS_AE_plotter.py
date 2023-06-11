@@ -19,10 +19,15 @@ class Plotter:
         path = "source_locations_backup" + self.label + ".csv"
         df = pd.read_csv(path)
         # convert to numpy array
-        data_array = df.iloc[:, 1::].to_numpy()
-        return data_array
+        data = df.iloc[:, 1::].to_numpy()
+        self.cluster_1 = data[np.where(data[:, -1] == 0)]
+        self.cluster_2 = data[np.where(data[:, -1] == 1)]
+        self.cluster_3 = data[np.where(data[:, -1] == 2)]
+        return data
 
-    def draw(self):
+
+
+    def draw(self, clustering=True):
         self.map = plt.figure()
         self.ax = self.map.add_subplot(111)
         self.map.canvas.mpl_connect('button_press_event', self.press)
@@ -33,11 +38,26 @@ class Plotter:
         self.damages = self.read_csv()
         self.X_coordinates = self.damages[:, 0]
         self.Y_coordinates = self.damages[:, 1]
+        self.cluster_labels = self.damages[:, -1]
         print(self.X_coordinates)
         print(self.Y_coordinates)
         print(np.shape(self.X_coordinates))
-        self.ax.scatter(self.X_coordinates, self.Y_coordinates, marker='.')
-
+        self.X_1 = self.cluster_1[:, 0]
+        self.Y_1 = self.cluster_1[:, 1]
+        self.X_2 = self.cluster_2[:, 0]
+        self.Y_2 = self.cluster_2[:, 1]
+        self.X_3 = self.cluster_3[:, 0]
+        self.Y_3 = self.cluster_3[:, 0]
+        if clustering:
+            self.ax.scatter(self.X_1, self.Y_1, label='cluster 0', marker='.')
+            self.ax.scatter(self.X_2, self.Y_2, label='cluster 1', marker='.')
+            self.ax.scatter(self.X_3, self.Y_3, label='cluster 2', marker='.')
+        else:
+            self.ax.scatter(self.X_coordinates, self.Y_coordinates, marker='.')
+        """
+        for i in range(len(self.X_coordinates)):
+            self.ax.scatter(self.X_coordinates[i], self.Y_coordinates[i], label=str(self.cluster_labels[i]), marker='.')
+        """
         self.ax.legend()
         self.ax.grid()
         self.ax.set_aspect('equal')
@@ -87,5 +107,5 @@ class Plotter:
 
 
 if __name__ == "__main__":
-    map = Plotter("PD_PCLSR_QI090LU1")
+    map = Plotter("PD_PCLSR_QI090LU5")
     map.draw()
