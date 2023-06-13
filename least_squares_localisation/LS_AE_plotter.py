@@ -21,6 +21,13 @@ class Plotter:
         df = pd.read_csv(path)
         # convert to numpy array
         data = df.iloc[:, 1::].to_numpy()
+        # get rid of negative points
+        data = data[np.where(data[:, 0] >= 0.0)]
+        data = data[np.where(data[:, 1] >= 0.0)]
+        data = data[np.where(data[:, 0] <= self.size[0])]
+        data = data[np.where(data[:, 1] <= self.size[1])]
+        fake_data = np.array([1.0, 1.0, 0.30, 0])
+        data = np.vstack((data, fake_data))
         self.cluster_1 = data[np.where(data[:, -1] == 0)]
         self.cluster_2 = data[np.where(data[:, -1] == 1)]
         self.cluster_3 = data[np.where(data[:, -1] == 2)]
@@ -74,8 +81,9 @@ class Plotter:
         ax_2.axis(xmin=0, xmax=self.size[0], ymin=0, ymax=self.size[1])
         ax_2.set_xlabel("x [m]")
         ax_2.set_ylabel("y [m]")
-        a = ax_2.scatter(self.X_coordinates, self.Y_coordinates, c=self.cluster_labels, marker='.')
-        cbar = map_2.colorbar(a)
+        self.LU = self.damages[:, 2]
+        a = ax_2.scatter(self.X_coordinates, self.Y_coordinates, c=self.LU, marker='.')
+        cbar = map_2.colorbar(a, ticks=np.arange(0, 0.35, 0.05))
         cbar.set_label('localisation uncertainty [-]')
         ax_2.grid()
         ax_2.set_aspect('equal')
@@ -126,5 +134,5 @@ class Plotter:
 
 
 if __name__ == "__main__":
-    map = Plotter("PD_PCLSR_QI00LU5")
+    map = Plotter("PD_PCLSR_QI090LU5")
     map.draw()
