@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib.colorbar as color
 import numpy as np
 import pandas as pd
 import vallenae as vae
@@ -67,6 +68,24 @@ class Plotter:
         fig.savefig(name_eps)
         fig.savefig(name_pdf)
         plt.show()
+        # heatmaps
+        map_2 = plt.figure()
+        ax_2 = map_2.add_subplot(111)
+        ax_2.axis(xmin=0, xmax=self.size[0], ymin=0, ymax=self.size[1])
+        ax_2.set_xlabel("x [m]")
+        ax_2.set_ylabel("y [m]")
+        a = ax_2.scatter(self.X_coordinates, self.Y_coordinates, c=self.cluster_labels, marker='.')
+        cbar = map_2.colorbar(a)
+        cbar.set_label('localisation uncertainty [-]')
+        ax_2.grid()
+        ax_2.set_aspect('equal')
+        fig_2 = plt.gcf()
+        name_eps_2 = 'AE_LU_heatmap_' + self.label + '.eps'
+        name_pdf_2 = 'AE_LU_heatmap_' + self.label + '.pdf'
+        fig_2.savefig(name_eps_2)
+        fig_2.savefig(name_pdf_2)
+        plt.show()
+
 
 
     def press(self, event):
@@ -107,5 +126,5 @@ class Plotter:
 
 
 if __name__ == "__main__":
-    map = Plotter("PD_PCLSR_QI090LU5")
+    map = Plotter("PD_PCLSR_QI00LU5")
     map.draw()
