@@ -69,6 +69,7 @@ class Plotter:
         self.ax.legend()
         self.ax.grid()
         self.ax.set_aspect('equal')
+        plt.tight_layout()
         fig = plt.gcf()
         name_eps = 'AE_source_plot_' + self.label + '.eps'
         name_pdf = 'AE_source_plot_' + self.label + '.pdf'
@@ -87,6 +88,7 @@ class Plotter:
         cbar.set_label('localisation uncertainty [-]')
         ax_2.grid()
         ax_2.set_aspect('equal')
+        plt.tight_layout()
         fig_2 = plt.gcf()
         name_eps_2 = 'AE_LU_heatmap_' + self.label + '.eps'
         name_pdf_2 = 'AE_LU_heatmap_' + self.label + '.pdf'
