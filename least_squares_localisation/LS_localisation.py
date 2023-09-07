@@ -63,11 +63,12 @@ class LS_localiser():
                 testlabel) + ".csv"
             pridb = pd.read_csv(path)
             # filtered_pridb = di.getPrimaryDatabase(testlabel, 1, True)
-            trai_lst = pridb.iloc[:, -2:-1].to_numpy()
+            trai_lst = pridb.iloc[:, -4:-3].to_numpy()
 
             time_lst = pridb.iloc[:, 1:3].to_numpy()
             print(time_lst)
             for i, trai in enumerate(trai_lst):
+                #print(f'trai is {trai}')
                 y, t = getWaveform(testlabel, 1, int(trai))
 
                 try:
@@ -86,6 +87,10 @@ class LS_localiser():
             n_values = np.shape(trai_lst)[0]
             new_times = np.reshape(time_array, (int(n_values / n_sensors), n_sensors))
             print(new_times)
+            # adding cluster numbers
+            cluster_numbers = pd.read_csv(f"C:/Users/Jimmy Chen/OneDrive - Delft University of Technology/Documents/GitHub/AE2224-IGroupD07"
+                                          f"/testing_data/4-channels/HITS_{testlabel}.csv").to_numpy()[:, -1]
+            clusters = cluster_numbers
             self.events = int(n_values / n_sensors)
             dToAs = np.zeros((self.events, self.channels))
             # get the ToA differences
@@ -99,6 +104,8 @@ class LS_localiser():
             ToAs = reshape(testlabel, 'hc', True, testno)
             # find number of events
             self.events = len(ToAs)
+            # get cluster numbers
+            clusters = ToAs[:, -1]
             # this is a 1D list, need to split it into different channels for the rest of the class
             dToAs = np.zeros((self.events, self.channels))
             """
@@ -114,7 +121,7 @@ class LS_localiser():
                 dToA_channel_i = ToA_channel_i - ToA_channel_1
                 dToAs[:, i] = dToA_channel_i
 
-        return dToAs
+        return dToAs, clusters
 
     # localise emission source for one test
     def localise(self, testlabel: str, testno: int, v_type: str, X_init, iterations, user):
@@ -149,14 +156,16 @@ class LS_localiser():
         else:
             raise Exception('Invalid velocity type.')
         # call dToAs
-        dToAs = self.tau_finder(testlabel, testno, user)
+        dToAs = self.tau_finder(testlabel, testno, user)[0]
+        # call clusters
+        clusters = self.tau_finder(testlabel, testno, user)[1]
         # calculate location prediction for each event
         X_pred = np.zeros((self.events, 2))
         for i in range(self.events):
             x_pred = ls.localise_2(S, dToAs[i, :], v, X_init, iterations)
             X_pred[i, :] = x_pred
 
-        return X_pred, S, dToAs, v
+        return X_pred, S, dToAs, v, clusters
 
     # calculate the maximum sensor spacing L_max
     def max_sensor_spacing(self, S):
@@ -236,7 +245,7 @@ class LS_localiser():
         X_pred (n * 2 matrix)
         """
         # call X_pred, S, dToAs, v
-        X_pred, S, dToAs, v = self.localise(testlabel, testno, v_type, X_init, iterations, user)
+        X_pred, S, dToAs, v, clusters = self.localise(testlabel, testno, v_type, X_init, iterations, user)
         LU_array = np.zeros(self.events)
         rel_LU_array = np.zeros(self.events)
         for i in range(self.events):
@@ -244,9 +253,9 @@ class LS_localiser():
             LU_array[i] = LU
             rel_LU_array[i] = relative_LU
 
-        return LU_array, rel_LU_array, X_pred, v
+        return LU_array, rel_LU_array, X_pred, v, clusters
 # write to a csv file
-    def write_to_csv(self, X, LU, count, version, number):
+    def write_to_csv(self, X, LU, clusters, count, version, number):
         """
         Feed it the X array and the function will write it to a csv file
         """
@@ -263,8 +272,12 @@ class LS_localiser():
         # convert LU to a matrix and transpose it
         LU_mat = np.matrix(LU)
         LU_T = LU_mat.T
+        # convert cluster tags to matrix and transpose it
+        clusters_mat = np.matrix(clusters)
+        clusters_T = clusters_mat.T
         # concatenate to X
         X = np.hstack((X, LU_T))
+        X = np.hstack((X, clusters_T))
         # convert numpy array to pandas dataframe
         df = pd.DataFrame(X)
 
@@ -342,16 +355,18 @@ if __name__ == "__main__":
         testlabel = testlabels[i]
         count = i + 1
         # LU
-        LU_array, rel_LU_array, X_pred, v = localiser.LU_one_test(testlabel, 1, "LU", X_init, iterations)
+        LU_array, rel_LU_array, X_pred, v, clusters = localiser.LU_one_test(testlabel, 1, "LU", X_init, iterations)
         print(f'array of LU is \n {LU_array}')
         print(f'array of relative LU is \n {rel_LU_array}')
         print(f'wave speed \n {v}')
         print(f'predicted locations \n {X_pred}')
-        localiser.write_to_csv(X_pred, LU_array, count, "LU", 2)
+        print(f'cluster tags \n {clusters}')
+        localiser.write_to_csv(X_pred, LU_array, clusters, count, "LU", 5)
         # average
-        LU_array_ave, rel_LU_array_ave, X_pred_ave, v_ave = localiser.LU_one_test(testlabel, 1, "ave", X_init, iterations)
+        LU_array_ave, rel_LU_array_ave, X_pred_ave, v_ave, clusters = localiser.LU_one_test(testlabel, 1, "ave", X_init, iterations)
         print(f'array of LU is \n {LU_array_ave}')
         print(f'array of relative LU is \n {rel_LU_array_ave}')
         print(f'wave speed \n {v_ave}')
         print(f'predicted locations \n {X_pred_ave}')
-        localiser.write_to_csv(X_pred_ave, LU_array_ave, count, "ave", 2)
+        print(f'cluster tags \n {clusters}')
+        localiser.write_to_csv(X_pred_ave, LU_array_ave, clusters, count, "ave", 5)

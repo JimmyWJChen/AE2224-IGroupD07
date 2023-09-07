@@ -68,19 +68,19 @@ if __name__=="__main__":
     params = ['frequency', 'wpfrequency', 'amplitude_db', 'RA', 'rise_time']
     l = 0
     labels = ['PD_PCLO_QI090', 'PD_PCLSR_QI00', 'PD_PCLSR_QI090', 'PD_PCLO_QI00']
-    orders = np.array([[2, 3, 1], [2, 3, 1], [1, 3, 2], [2, 3, 1]])
+    orders = np.array([[2, -1, -1], [0, 1, -1], [2, -1, -1], [2, -1, -1]])
     orders = orders
     for label in labels:
         # pridb = di.getPrimaryDatabase(label)
         # pridb = di.filterPrimaryDatabase(pridb, label)
-        datapoints = di.getHitDatabase(label, created=False)
-        # datapoints['cluster'] = datapoints['cluster'] + 3
-        # for i in range(n_clusters):
-        #     datapoints.loc[datapoints['cluster'] == i+3, ['cluster']] = datapoints.loc[datapoints['cluster'] == i+3, ['cluster']] - 3 - orders[l, i]
+        datapoints = di.getHitDatabase(label, created=True)
+        datapoints['cluster'] = datapoints['cluster'] + 3
+        for i in range(n_clusters):
+            datapoints.loc[datapoints['cluster'] == i+3, ['cluster']] = datapoints.loc[datapoints['cluster'] == i+3, ['cluster']] - 3 + orders[l, i]
 
         # hits_total = int(datapoints.max()['hit_id'])
         # datapoints['cluster'] = np.zeros(len(datapoints.index))
-        datapoints = clustering_kmeans(datapoints, n_clusters, params=params)
+        # datapoints = clustering_kmeans(datapoints, n_clusters, params=params)
         print(datapoints)
         # pridb.to_csv("testing_data/4-channels/" + label + ".csv", index=False)
         datapoints.to_csv("testing_data/4-channels/HITS_" + label + ".csv", index=False)
@@ -89,11 +89,11 @@ if __name__=="__main__":
         # print(f'Delamination percentage: {datapoints.loc[datapoints["cluster"] == delam_cluster - 1].shape[0] / datapoints.shape[0] * 100}%')
 
         # for i in range(n_clusters):
-        #     pridb_cluster = datapoints.loc[datapoints['cluster'] == i + 3]
+        #     pridb_cluster = datapoints.loc[datapoints['cluster'] == i]
         #     plt.scatter(pridb_cluster['amplitude_db'], pridb_cluster['frequency']/1000, label='Cluster '+str(i+1))
         # plt.xlabel('Amplitude [dB]')
         # plt.ylabel('Peak Frequency [kHz]')
         # plt.legend()
         # plt.savefig(f'figures/{label}.png', format='png')
         # plt.show()
-        # l+=1
+        l+=1
